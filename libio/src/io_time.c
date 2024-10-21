@@ -58,7 +58,7 @@ static struct timespec previous_monotonic;
  * This variable maintains the current real-time and monotonic time values, updated by
  * the io_time_set function. It provides the latest time values to the io_time_get function.
  */
-static io_time current_time_data;
+static io_time_t current_time_data;
 
 /**
  * @var initialized
@@ -172,7 +172,7 @@ io_time_get_error(void)
 int
 io_time_init(void)
 {
-  const io_time *const iotime = io_time_set();
+  const io_time_t *const iotime = io_time_set();
   if (iotime == NULL)
   {
     if (io_time_error_callback)
@@ -258,10 +258,10 @@ io_time_sanity_check(const struct timespec *new_time, const struct timespec *old
  * values are valid. If the values pass the sanity checks, they are stored in a static structure
  * and returned to the caller. If any error occurs, the error callback is invoked.
  *
- * @return const io_time* Pointer to the io_time structure containing the updated time values.
+ * @return const io_time* Pointer to the io_time_t structure containing the updated time values.
  *                        Returns NULL on failure.
  */
-const io_time *
+const io_time_t *
 io_time_set(void)
 {
   struct timespec current_realtime, current_monotonic;
@@ -329,7 +329,7 @@ io_time_set(void)
   previous_realtime = current_realtime;
   previous_monotonic = current_monotonic;
 
-  /* Update the public io_time structure. */
+  /* Update the public io_time_t structure. */
   current_time_data.sec_real = current_realtime.tv_sec;
   current_time_data.nsec_real = current_realtime.tv_nsec;
   current_time_data.sec_monotonic = current_monotonic.tv_sec;
@@ -343,13 +343,13 @@ io_time_set(void)
  * @brief Retrieves a specific part of the current time values.
  *
  * This function retrieves a specific part of the current time values (seconds or nanoseconds,
- * real-time or monotonic) as specified by the io_time_type enumeration.
+ * real-time or monotonic) as specified by the io_time_type_t enumeration.
  *
- * @param type The type of time value to retrieve, specified as an io_time_type enumeration.
+ * @param type The type of time value to retrieve, specified as an io_time_type_t enumeration.
  * @return uintmax_t The requested time value. Aborts if an invalid type is specified.
  */
 uintmax_t
-io_time_get(io_time_type type)
+io_time_get(io_time_type_t type)
 {
   switch (type)
   {

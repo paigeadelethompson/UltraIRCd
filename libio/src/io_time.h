@@ -67,7 +67,7 @@ enum io_time_error_code
 };
 
 /**
- * @enum io_time_type
+ * @enum io_time_type_t
  * @brief Enumeration for specifying the type of time value to retrieve.
  *
  * This enumeration defines constants for selecting which part of the time data
@@ -81,10 +81,10 @@ typedef enum
   IO_TIME_REALTIME_NSEC,  /**< Real-time clock, nanoseconds part. */
   IO_TIME_MONOTONIC_SEC,  /**< Monotonic clock, seconds part. */
   IO_TIME_MONOTONIC_NSEC,  /**< Monotonic clock, nanoseconds part. */
-} io_time_type;
+} io_time_type_t;
 
 /**
- * @struct io_time
+ * @struct io_time_t
  * @brief Structure holding real-time and monotonic time values.
  *
  * This structure stores both real-time and monotonic time values in seconds and nanoseconds.
@@ -96,12 +96,12 @@ typedef struct
   uintmax_t nsec_real;  /**< Nanoseconds part of the real-time clock. */
   uintmax_t sec_monotonic;  /**< Seconds part of the monotonic clock. */
   uintmax_t nsec_monotonic;  /**< Nanoseconds part of the monotonic clock. */
-} io_time;
+} io_time_t;
 
 extern void io_time_set_error_callback(void (*)(enum io_time_error_code, const char *));
 extern const char *io_time_get_error(void);
 extern int io_time_init(void);
-extern const io_time *io_time_set(void);
-extern uintmax_t io_time_get(io_time_type);
+extern const io_time_t *io_time_set(void);
+extern uintmax_t io_time_get(io_time_type_t);
 #endif  /* INCLUDED_io_time_h */
 
