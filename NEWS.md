@@ -1,4 +1,7 @@
 #### Noteworthy changes in version 8.2.46 (2024-??-??)
+* The user mode subsystem now supports dynamic registration and unregistration of user
+  modes. This allows modules to register and unregister their own user modes, making the
+  system more flexible and modular.
 * The `INFO` command output now includes namespaces, organizing configuration entries
   according to their respective configuration blocks for better clarity and structure
 * The `INFO` command output now shows entries from the admin {} config block
