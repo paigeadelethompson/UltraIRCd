@@ -91,7 +91,7 @@ ircd_signal_handler(int sig)
       /* Reap all zombie child processes. */
       while (waitpid(-1, &status, WNOHANG) > 0)
         ;
-      errno = saved_errno; /* Restore errno. */
+      errno = saved_errno;  /* Restore errno. */
       break;
     }
     default:
