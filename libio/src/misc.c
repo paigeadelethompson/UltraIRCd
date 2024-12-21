@@ -160,27 +160,11 @@ const char *
 time_format_duration(uintmax_t duration)
 {
   static char buf[32];  /* 32 = sizeof("9999999999999999 days, 23:59:59") */
-  unsigned int days = 0, hours = 0, minutes = 0, seconds = 0;
 
-  while (duration >= 60 * 60 * 24)
-  {
-    duration -= 60 * 60 * 24;
-    ++days;
-  }
-
-  while (duration >= 60 * 60)
-  {
-    duration -= 60 * 60;
-    ++hours;
-  }
-
-  while (duration >= 60)
-  {
-    duration -= 60;
-    ++minutes;
-  }
-
-  seconds = duration;
+  const unsigned int days = duration / (60 * 60 * 24);
+  const unsigned int hours = (duration % (60 * 60 * 24)) / (60 * 60);
+  const unsigned int minutes = (duration % (60 * 60)) / 60;
+  const unsigned int seconds = duration % 60;
 
   snprintf(buf, sizeof(buf), "%u day%s, %02u:%02u:%02u",
            days, days == 1 ? "" : "s", hours, minutes, seconds);
