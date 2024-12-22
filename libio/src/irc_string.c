@@ -75,6 +75,9 @@ stripws(char *str)
   while (*str == '\t' || *str == ' ')
     ++str;
 
+  if (*str == '\0')
+    return str;
+
   char *end = str + strlen(str) - 1;
   while (end >= str && (*end == '\t' || *end == ' '))
     --end;
