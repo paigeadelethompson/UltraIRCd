@@ -57,7 +57,7 @@ static const char *const command[] =
   [true] = "NOTICE"
 };
 
-static struct
+static struct Target
 {
   void *ptr;
   unsigned int type;
@@ -84,6 +84,24 @@ duplicate_ptr(const void *const ptr)
       return true;
 
   return false;
+}
+
+static bool
+target_check_limit_exceeded(struct Client *source, const char *name)
+{
+  if (ntargets >= ConfigGeneral.max_targets)
+  {
+    sendto_one_numeric(source, &me, ERR_TOOMANYTARGETS, name, ConfigGeneral.max_targets);
+    return true;
+  }
+
+  return false;
+}
+
+static void
+target_add_to_list(void *target_ptr, int target_type, unsigned int access_rank)
+{
+  targets[ntargets++] = (struct Target){ .ptr = target_ptr, .type = target_type, .rank = access_rank };
 }
 
 /* flood_attack_client()
@@ -208,7 +226,7 @@ msg_channel(bool notice, struct Client *source, struct Channel *channel,
   const char *error = NULL;
 
   /* Chanops and voiced can flood their own channel with impunity */
-  channel_send_perm_t perm = channel_send_qualifies(channel, source, NULL, text, notice, &error);
+  channel_send_perm_t perm = channel_send_qualifies(channel, source, NULL, rank, text, notice, &error);
   if (perm != CHANNEL_SEND_PERM_FORBIDDEN)
   {
     if (perm == CHANNEL_SEND_PERM_ELEVATED || flood_attack_channel(notice, source, channel) == false)
@@ -274,201 +292,133 @@ msg_client(bool notice, struct Client *source, struct Client *target, const char
  *		  This disambiguates the syntax.
  */
 static void
-handle_special(bool notice, struct Client *source, const char *nick, const char *text)
+target_handle_masked(struct Client *source, const char *nick, const char *text, bool notice)
 {
-  /*
-   * nick@server addressed?
-   */
-  const char *server = strchr(nick, '@');
-  if (server)
+  if (user_mode_has_flag(source, UMODE_OPER) == false)
   {
-    struct Client *target = hash_find_server(server + 1);
-    if (target == NULL)
-    {
-      sendto_one_numeric(source, &me, ERR_NOSUCHSERVER, server + 1);
-      return;
-    }
-
-    if (!IsMe(target))
-    {
-      sendto_one(target, ":%s %s %s :%s", source->id, command[notice], nick, text);
-      return;
-    }
-
-    sendto_one_numeric(source, &me, ERR_NOSUCHNICK, nick);
+    sendto_one_numeric(source, &me, ERR_NOPRIVILEGES);
     return;
   }
 
-  /*
-   * The following two cases allow masks in NOTICEs
-   * (for OPERs only)
-   *
-   * Armin, 8Jun90 (gruner@informatik.tu-muenchen.de)
-   */
-  if (*nick == '$')
+  if (MyClient(source) && !HasOFlag(source, OPER_FLAG_MESSAGE_MASS))
   {
-    if (user_mode_has_flag(source, UMODE_OPER) == false)
-    {
-      sendto_one_numeric(source, &me, ERR_NOPRIVILEGES);
-      return;
-    }
-
-    if (MyClient(source) && !HasOFlag(source, OPER_FLAG_MESSAGE_MASS))
-    {
-      sendto_one_numeric(source, &me, ERR_NOPRIVS, "message:mass");
-      return;
-    }
-
-    if (*(nick + 1) == '$' || *(nick + 1) == '#')
-      ++nick;
-    else if (MyClient(source))
-    {
-      sendto_one_notice(source, &me, ":The command %s %s is no longer supported, please use $%s",
-                        command[notice], nick, nick);
-      return;
-    }
-
-    sendto_match_butone(IsServer(source->from) ? source->from : NULL, source, nick + 1,
-                        (*nick == '#') ? SEND_MATCH_HOST : SEND_MATCH_SERVER, "%s $%s :%s", command[notice], nick, text);
+    sendto_one_numeric(source, &me, ERR_NOPRIVS, "message:mass");
+    return;
   }
+
+  if (*(nick + 1) == '$' || *(nick + 1) == '#')
+    ++nick;
+  else if (MyClient(source))
+  {
+    sendto_one_notice(source, &me, ":The command %s %s is no longer supported, please use $%s",
+                      command[notice], nick, nick);
+    return;
+  }
+
+  sendto_match_butone(IsServer(source->from) ? source->from : NULL, source, nick + 1,
+                      (*nick == '#') ? SEND_MATCH_HOST : SEND_MATCH_SERVER, "%s $%s :%s", command[notice], nick, text);
 }
 
-/* build_target_list()
- *
- * inputs	- pointer to given source (oper/client etc.)
- *		- pointer to list of nicks/channels
- *		- pointer to table to place results
- *		- pointer to text (only used if source is an oper)
- * output	- number of valid entities
- * side effects	- target_table is modified to contain a list of
- *		  pointers to channels or clients
- *		  if source client is an oper
- *		  all the classic old bizzare oper privmsg tricks
- *		  are parsed and sent as is, if prefixed with $
- *		  to disambiguate.
- *
- */
 static void
-build_target_list(bool notice, struct Client *source, char *list, const char *text)
+target_handle_directed(struct Client *source, const char *nick, const char *text, bool notice)
 {
+  const char *server = strchr(nick, '@');
+  if (server == NULL)
+    return;
+
+  struct Client *target = hash_find_server(server + 1);
+  if (target == NULL)
+  {
+    sendto_one_numeric(source, &me, ERR_NOSUCHSERVER, server + 1);
+    return;
+  }
+
+  if (!IsMe(target))
+  {
+    sendto_one(target, ":%s %s %s :%s", source->id, command[notice], nick, text);
+    return;
+  }
+
+  sendto_one_numeric(source, &me, ERR_NOSUCHNICK, nick);
+}
+
+static void
+target_handle_channel(struct Client *source, void *target, unsigned int access_rank)
+{
+  if (duplicate_ptr(target) == false)
+    target_add_to_list(target, ENTITY_CHANNEL, access_rank);
+}
+
+static void
+target_handle_client(struct Client *source, void *target)
+{
+  if (duplicate_ptr(target) == false)
+    target_add_to_list(target, ENTITY_CLIENT, 0);
+}
+
+static void
+target_process(struct Client *source, const char *name, const char *text, bool notice)
+{
+  unsigned int access_rank = 0;
+
+  for (; *name; ++name)
+  {
+    unsigned int prefix_rank = channel_prefix_to_rank(*name);
+    if (prefix_rank == CHACCESS_PEON)
+      break;
+    if (access_rank == 0 || prefix_rank < access_rank)
+      access_rank = prefix_rank;
+  }
+
+  if (EmptyString(name))
+  {
+    sendto_one_numeric(source, &me, ERR_NORECIPIENT, command[notice]);
+    return;
+  }
+
+  void *target;
+  if (IsChanPrefix(*name))
+  {
+    target = hash_find_channel(name);
+    if (target)
+    {
+      target_handle_channel(source, target, access_rank);
+      return;
+    }
+  }
+  else if ((target = find_person(source, name)))
+  {
+    target_handle_client(source, target);
+    return;
+  }
+  else if (*name == '$')
+  {
+    target_handle_masked(source, name, text, notice);
+    return;
+  }
+  else if (strchr(name, '@'))
+  {
+    target_handle_directed(source, name, text, notice);
+    return;
+  }
+
+  if (notice == false && (!IsDigit(*name) || MyClient(source)))
+    sendto_one_numeric(source, &me, ERR_NOSUCHNICK, name);
+}
+
+static void
+build_target_list(struct Client *source, char *list, const char *text, bool notice)
+{
+  char *p = NULL;
+
   ntargets = 0;
 
-  char *p = NULL;
   for (const char *name = strtok_r(list, ",", &p); name;
                    name = strtok_r(NULL, ",", &p))
   {
-    void *target;
-
-    /*
-     * Channels are privmsg'd a lot more than other clients, moved up
-     * here plain old channel msg?
-     */
-    if (IsChanPrefix(*name))
-    {
-      if ((target = hash_find_channel(name)))
-      {
-        if (duplicate_ptr(target) == false)
-        {
-          if (ntargets >= ConfigGeneral.max_targets)
-          {
-            sendto_one_numeric(source, &me, ERR_TOOMANYTARGETS,
-                               name, ConfigGeneral.max_targets);
-            return;
-          }
-
-          targets[ntargets].ptr = target;
-          targets[ntargets].type = ENTITY_CHANNEL;
-          targets[ntargets++].rank = 0;
-        }
-      }
-      else if (notice == false)
-        sendto_one_numeric(source, &me, ERR_NOSUCHNICK, name);
-
-      continue;
-    }
-
-    /* Look for a PRIVMSG/NOTICE to another client */
-    if ((target = find_person(source, name)))
-    {
-      if (duplicate_ptr(target) == false)
-      {
-        if (ntargets >= ConfigGeneral.max_targets)
-        {
-          sendto_one_numeric(source, &me, ERR_TOOMANYTARGETS,
-                             name, ConfigGeneral.max_targets);
-          return;
-        }
-
-        targets[ntargets].ptr = target;
-        targets[ntargets].type = ENTITY_CLIENT;
-        targets[ntargets++].rank = 0;
-      }
-
-      continue;
-    }
-
-    /* @#channel or +#channel message ? */
-    unsigned int rank = CHACCESS_REMOTE;
-    const char *with_prefix = name;
-
-    /* Allow %+@ if someone wants to do that */
-    unsigned int ret;
-    while ((ret = channel_prefix_to_rank(*name)) != CHACCESS_PEON)
-    {
-      rank = IO_MIN(rank, ret);
-      ++name;
-    }
-
-    if (rank != CHACCESS_REMOTE)
-    {
-      if (EmptyString(name))  /* If it's a '\0' dump it, there is no recipient */
-      {
-        sendto_one_numeric(source, &me, ERR_NORECIPIENT, command[notice]);
-        continue;
-      }
-
-      /*
-       * At this point, name should be a channel name i.e. #foo. If the channel
-       * is found, fine, if not report an error.
-       */
-      if ((target = hash_find_channel(name)))
-      {
-        if (IsClient(source) && !HasFlag(source, FLAGS_SERVICE))
-        {
-          if (member_highest_rank(member_find_link(source, target)) < CHACCESS_VOICE)
-          {
-            sendto_one_numeric(source, &me, ERR_CHANOPRIVSNEEDED, with_prefix);
-            continue;
-          }
-        }
-
-        if (duplicate_ptr(target) == false)
-        {
-          if (ntargets >= ConfigGeneral.max_targets)
-          {
-            sendto_one_numeric(source, &me, ERR_TOOMANYTARGETS,
-                               name, ConfigGeneral.max_targets);
-            return;
-          }
-
-          targets[ntargets].ptr = target;
-          targets[ntargets].type = ENTITY_CHANNEL;
-          targets[ntargets++].rank = rank;
-        }
-      }
-      else if (notice == false)
-        sendto_one_numeric(source, &me, ERR_NOSUCHNICK, name);
-
-      continue;
-    }
-
-    if (*name == '$' || strchr(name, '@'))
-      handle_special(notice, source, name, text);
-    else if (notice == false)
-    {
-      if (!IsDigit(*name) || MyClient(source))
-        sendto_one_numeric(source, &me, ERR_NOSUCHNICK, name);
-    }
+    if (target_check_limit_exceeded(source, name))
+      break;
+    target_process(source, name, text, notice);
   }
 }
 
@@ -478,7 +428,7 @@ build_target_list(bool notice, struct Client *source, char *list, const char *te
  *              - pointer to channel
  */
 static void
-m_message(bool notice, struct Client *source, int parc, char *parv[])
+m_message(struct Client *source, int parc, char *parv[], bool notice)
 {
   if (EmptyString(parv[1]))
   {
@@ -494,7 +444,7 @@ m_message(bool notice, struct Client *source, int parc, char *parv[])
     return;
   }
 
-  build_target_list(notice, source, parv[1], parv[2]);
+  build_target_list(source, parv[1], parv[2], notice);
 
   for (unsigned int i = 0; i < ntargets; ++i)
   {
@@ -524,13 +474,13 @@ m_privmsg(struct Client *source, int parc, char *parv[])
   if (MyConnect(source))
     source->connection->last_privmsg = io_time_get(IO_TIME_MONOTONIC_SEC);
 
-  m_message(false, source, parc, parv);
+  m_message(source, parc, parv, false);
 }
 
 static void
 m_notice(struct Client *source, int parc, char *parv[])
 {
-  m_message(true, source, parc, parv);
+  m_message(source, parc, parv, true);
 }
 
 static struct Command command_table[] =

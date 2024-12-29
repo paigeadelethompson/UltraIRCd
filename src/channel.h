@@ -143,7 +143,7 @@ extern int channel_prefix_to_rank(const char);
 extern int member_highest_rank(const struct ChannelMember *);
 extern unsigned int channel_prefix_to_flag(const char);
 extern size_t member_get_prefix_len(const struct ChannelMember *, bool);
-extern channel_send_perm_t channel_send_qualifies(struct Channel *, struct Client *, struct ChannelMember *, const char *, bool, const char **);
+extern channel_send_perm_t channel_send_qualifies(struct Channel *, struct Client *, struct ChannelMember *, unsigned int, const char *, bool, const char **);
 extern struct Channel *channel_make(const char *);
 extern struct ChannelMember *member_find_link(const struct Client *, const struct Channel *);
 extern const list_t *channel_get_list(void);

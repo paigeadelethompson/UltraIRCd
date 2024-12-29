@@ -806,7 +806,7 @@ msg_has_ctrls(const char *message)
  */
 channel_send_perm_t
 channel_send_qualifies(struct Channel *channel, struct Client *client, struct ChannelMember *member,
-                       const char *message, bool notice, const char **error)
+                       unsigned int statusmsg, const char *message, bool notice, const char **error)
 {
   if (IsServer(client) || HasFlag(client, FLAGS_SERVICE))
     return CHANNEL_SEND_PERM_ELEVATED;
@@ -842,6 +842,12 @@ channel_send_qualifies(struct Channel *channel, struct Client *client, struct Ch
   if (member || (member = member_find_link(client, channel)))
     if (member_highest_rank(member) > CHACCESS_PEON)
       return CHANNEL_SEND_PERM_ELEVATED;
+
+  if (statusmsg)
+  {
+    *error = "STATUSMSG requires elevated privileges";
+    return CHANNEL_SEND_PERM_FORBIDDEN;
+  }
 
   if (member == NULL && HasCMode(channel, MODE_NOPRIVMSGS))
   {
@@ -1137,7 +1143,7 @@ channel_part_one(struct Client *client, const char *name, const char *reason)
     if ((client->connection->created_monotonic + ConfigGeneral.anti_spam_exit_message_time)
           >= io_time_get(IO_TIME_MONOTONIC_SEC))
       show_reason = false;
-    else if (channel_send_qualifies(channel, client, member, reason, false, &error) == CHANNEL_SEND_PERM_FORBIDDEN)
+    else if (channel_send_qualifies(channel, client, member, 0, reason, false, &error) == CHANNEL_SEND_PERM_FORBIDDEN)
       show_reason = false;
   }
 
