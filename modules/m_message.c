@@ -44,27 +44,28 @@
 #include "accept.h"
 #include "ircd_hook.h"
 
-enum
-{
-  ENTITY_NONE,
-  ENTITY_CHANNEL,
-  ENTITY_CLIENT
-};
-
 static const char *const command[] =
 {
   [false] = "PRIVMSG",
   [true] = "NOTICE"
 };
 
-static struct Target
+typedef enum
+{
+  TARGET_ENTITY_NONE,
+  TARGET_ENTITY_CHANNEL,
+  TARGET_ENTITY_CLIENT,
+} target_entity_t;
+
+struct Target
 {
   void *ptr;
-  unsigned int type;
+  target_entity_t type;
   unsigned int rank;
-} targets[IRCD_BUFSIZE];
+};
 
-static unsigned int ntargets;
+static struct Target target_list[IRCD_BUFSIZE / 2];
+static unsigned int target_count;
 
 
 /* duplicate_ptr()
@@ -77,10 +78,10 @@ static unsigned int ntargets;
  * side effects - NONE
  */
 static bool
-duplicate_ptr(const void *const ptr)
+target_is_duplicate(const void *const ptr)
 {
-  for (unsigned int i = 0; i < ntargets; ++i)
-    if (targets[i].ptr == ptr)
+  for (unsigned int i = 0; i < target_count; ++i)
+    if (target_list[i].ptr == ptr)
       return true;
 
   return false;
@@ -89,7 +90,7 @@ duplicate_ptr(const void *const ptr)
 static bool
 target_check_limit_exceeded(struct Client *source, const char *name)
 {
-  if (ntargets >= ConfigGeneral.max_targets)
+  if (target_count >= ConfigGeneral.max_targets)
   {
     sendto_one_numeric(source, &me, ERR_TOOMANYTARGETS, name, ConfigGeneral.max_targets);
     return true;
@@ -101,7 +102,11 @@ target_check_limit_exceeded(struct Client *source, const char *name)
 static void
 target_add_to_list(void *target_ptr, int target_type, unsigned int access_rank)
 {
-  targets[ntargets++] = (struct Target){ .ptr = target_ptr, .type = target_type, .rank = access_rank };
+  if (target_count >= IO_ARRAY_LENGTH(target_list))
+    return;
+
+  target_list[target_count++] =
+    (struct Target){ .ptr = target_ptr, .type = target_type, .rank = access_rank };
 }
 
 /* flood_attack_client()
@@ -345,15 +350,15 @@ target_handle_directed(struct Client *source, const char *nick, const char *text
 static void
 target_handle_channel(struct Client *source, void *target, unsigned int access_rank)
 {
-  if (duplicate_ptr(target) == false)
-    target_add_to_list(target, ENTITY_CHANNEL, access_rank);
+  if (target_is_duplicate(target) == false)
+    target_add_to_list(target, TARGET_ENTITY_CHANNEL, access_rank);
 }
 
 static void
 target_handle_client(struct Client *source, void *target)
 {
-  if (duplicate_ptr(target) == false)
-    target_add_to_list(target, ENTITY_CLIENT, 0);
+  if (target_is_duplicate(target) == false)
+    target_add_to_list(target, TARGET_ENTITY_CLIENT, 0);
 }
 
 static void
@@ -411,7 +416,7 @@ build_target_list(struct Client *source, char *list, const char *text, bool noti
 {
   char *p = NULL;
 
-  ntargets = 0;
+  target_count = 0;
 
   for (const char *name = strtok_r(list, ",", &p); name;
                    name = strtok_r(NULL, ",", &p))
@@ -446,17 +451,19 @@ m_message(struct Client *source, int parc, char *parv[], bool notice)
 
   build_target_list(source, parv[1], parv[2], notice);
 
-  for (unsigned int i = 0; i < ntargets; ++i)
+  for (unsigned int i = 0; i < target_count; ++i)
   {
-    switch (targets[i].type)
+    struct Target *target = &target_list[i];
+    switch (target->type)
     {
-      case ENTITY_CLIENT:
-        msg_client(notice, source, targets[i].ptr, parv[2]);
+      case TARGET_ENTITY_CLIENT:
+        msg_client(notice, source, target->ptr, parv[2]);
         break;
-
-      case ENTITY_CHANNEL:
-        msg_channel(notice, source, targets[i].ptr, targets[i].rank, parv[2]);
+      case TARGET_ENTITY_CHANNEL:
+        msg_channel(notice, source, target->ptr, target->rank, parv[2]);
         break;
+      default:
+        abort();  /* Invalid entity, abort the program. */
     }
   }
 }
