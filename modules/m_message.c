@@ -412,7 +412,7 @@ target_process(struct Client *source, const char *name, const char *text, bool n
 }
 
 static void
-build_target_list(struct Client *source, char *list, const char *text, bool notice)
+target_process_list(struct Client *source, char *list, const char *text, bool notice)
 {
   char *p = NULL;
 
@@ -449,7 +449,7 @@ m_message(struct Client *source, int parc, char *parv[], bool notice)
     return;
   }
 
-  build_target_list(source, parv[1], parv[2], notice);
+  target_process_list(source, parv[1], parv[2], notice);
 
   for (unsigned int i = 0; i < target_count; ++i)
   {
