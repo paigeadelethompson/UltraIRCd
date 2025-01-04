@@ -95,8 +95,6 @@ enum
 
 struct split_nuh_item
 {
-  list_node_t node;
-
   char *nuhmask;
   char *nickptr;
   char *userptr;
