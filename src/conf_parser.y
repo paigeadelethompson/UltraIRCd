@@ -45,6 +45,7 @@
 #include "irc_string.h"
 #include "memory.h"
 #include "module.h"
+#include "nuh.h"
 #include "server.h"
 #include "address.h"
 #include "listener.h"
@@ -808,7 +809,7 @@ pseudo_target: T_TARGET '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
   {
-    struct split_nuh_item nuh =
+    struct nuh_split nuh =
     {
       .nuhmask = yylval.string,
       .nickptr = NULL,
@@ -819,7 +820,7 @@ pseudo_target: T_TARGET '=' QSTRING ';'
       .hostsize = sizeof(block_state.host.buf)
     };
 
-    split_nuh(&nuh);
+    nuh_split(&nuh);
   }
 };
 
@@ -946,7 +947,7 @@ oper_entry: OPERATOR
     if (EmptyString(s))
       continue;
 
-    struct split_nuh_item nuh =
+    struct nuh_split nuh =
     {
       .nuhmask = s,
       .nickptr = NULL,
@@ -957,7 +958,7 @@ oper_entry: OPERATOR
       .hostsize = sizeof(block_state.host.buf)
     };
 
-    split_nuh(&nuh);
+    nuh_split(&nuh);
 
     struct MaskItem *conf = conf_make(CONF_OPER);
     conf->addr = io_calloc(sizeof(*conf->addr));
@@ -1482,7 +1483,7 @@ auth_entry: IRCD_AUTH
     if (EmptyString(s))
       continue;
 
-    struct split_nuh_item nuh =
+    struct nuh_split nuh =
     {
       .nuhmask = s,
       .nickptr = NULL,
@@ -1493,7 +1494,7 @@ auth_entry: IRCD_AUTH
       .hostsize = sizeof(block_state.host.buf)
     };
 
-    split_nuh(&nuh);
+    nuh_split(&nuh);
 
     struct MaskItem *conf = conf_make(CONF_CLIENT);
     conf->user = io_strdup(block_state.user.buf);
@@ -1730,7 +1731,7 @@ shared_user: USER '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
   {
-    struct split_nuh_item nuh =
+    struct nuh_split nuh =
     {
       .nuhmask = yylval.string,
       .nickptr = NULL,
@@ -1741,7 +1742,7 @@ shared_user: USER '=' QSTRING ';'
       .hostsize = sizeof(block_state.host.buf)
     };
 
-    split_nuh(&nuh);
+    nuh_split(&nuh);
   }
 };
 
@@ -2139,7 +2140,7 @@ kill_user: USER '=' QSTRING ';'
 
   if (conf_parser_ctx.pass == 2)
   {
-    struct split_nuh_item nuh =
+    struct nuh_split nuh =
     {
       .nuhmask = yylval.string,
       .nickptr = NULL,
@@ -2150,7 +2151,7 @@ kill_user: USER '=' QSTRING ';'
       .hostsize = sizeof(block_state.host.buf)
     };
 
-    split_nuh(&nuh);
+    nuh_split(&nuh);
   }
 };
 

@@ -138,10 +138,11 @@ am_ircd_OBJECTS = accept.$(OBJEXT) aline.$(OBJEXT) auth.$(OBJEXT) \
 	hash.$(OBJEXT) id.$(OBJEXT) info.$(OBJEXT) ipcache.$(OBJEXT) \
 	ircd.$(OBJEXT) ircd_exit.$(OBJEXT) ircd_hook.$(OBJEXT) \
 	ircd_signal.$(OBJEXT) isupport.$(OBJEXT) listener.$(OBJEXT) \
-	monitor.$(OBJEXT) motd.$(OBJEXT) numeric.$(OBJEXT) \
-	packet.$(OBJEXT) parse.$(OBJEXT) stats.$(OBJEXT) \
-	send.$(OBJEXT) server.$(OBJEXT) server_capab.$(OBJEXT) \
-	user.$(OBJEXT) user_mode.$(OBJEXT) whowas.$(OBJEXT)
+	monitor.$(OBJEXT) motd.$(OBJEXT) nuh.$(OBJEXT) \
+	numeric.$(OBJEXT) packet.$(OBJEXT) parse.$(OBJEXT) \
+	stats.$(OBJEXT) send.$(OBJEXT) server.$(OBJEXT) \
+	server_capab.$(OBJEXT) user.$(OBJEXT) user_mode.$(OBJEXT) \
+	whowas.$(OBJEXT)
 ircd_OBJECTS = $(am_ircd_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -187,7 +188,7 @@ am__depfiles_remade = ./$(DEPDIR)/accept.Po ./$(DEPDIR)/aline.Po \
 	./$(DEPDIR)/ircd.Po ./$(DEPDIR)/ircd_exit.Po \
 	./$(DEPDIR)/ircd_hook.Po ./$(DEPDIR)/ircd_signal.Po \
 	./$(DEPDIR)/isupport.Po ./$(DEPDIR)/listener.Po \
-	./$(DEPDIR)/monitor.Po ./$(DEPDIR)/motd.Po \
+	./$(DEPDIR)/monitor.Po ./$(DEPDIR)/motd.Po ./$(DEPDIR)/nuh.Po \
 	./$(DEPDIR)/numeric.Po ./$(DEPDIR)/packet.Po \
 	./$(DEPDIR)/parse.Po ./$(DEPDIR)/send.Po ./$(DEPDIR)/server.Po \
 	./$(DEPDIR)/server_capab.Po ./$(DEPDIR)/stats.Po \
@@ -496,6 +497,8 @@ ircd_SOURCES = accept.c          \
                monitor.h         \
                motd.c            \
                motd.h            \
+               nuh.c             \
+               nuh.h             \
                numeric.c         \
                numeric.h         \
                packet.c          \
@@ -657,6 +660,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/listener.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/monitor.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/motd.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/nuh.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/numeric.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/packet.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/parse.Po@am__quote@ # am--include-marker
@@ -887,6 +891,7 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/listener.Po
 	-rm -f ./$(DEPDIR)/monitor.Po
 	-rm -f ./$(DEPDIR)/motd.Po
+	-rm -f ./$(DEPDIR)/nuh.Po
 	-rm -f ./$(DEPDIR)/numeric.Po
 	-rm -f ./$(DEPDIR)/packet.Po
 	-rm -f ./$(DEPDIR)/parse.Po
@@ -991,6 +996,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/listener.Po
 	-rm -f ./$(DEPDIR)/monitor.Po
 	-rm -f ./$(DEPDIR)/motd.Po
+	-rm -f ./$(DEPDIR)/nuh.Po
 	-rm -f ./$(DEPDIR)/numeric.Po
 	-rm -f ./$(DEPDIR)/packet.Po
 	-rm -f ./$(DEPDIR)/parse.Po

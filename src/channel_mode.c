@@ -33,6 +33,7 @@
 #include "address.h"
 #include "irc_string.h"
 #include "ircd.h"
+#include "nuh.h"
 #include "numeric.h"
 #include "server.h"
 #include "send.h"
@@ -186,7 +187,7 @@ add_id(struct Client *client, struct Channel *channel, const char *banid, list_t
     strlcpy(ban->host, maskptr, sizeof(ban->host));
   else
   {
-    struct split_nuh_item nuh =
+    struct nuh_split nuh =
     {
       .nuhmask = maskptr,
       .nickptr = ban->name,
@@ -197,7 +198,7 @@ add_id(struct Client *client, struct Channel *channel, const char *banid, list_t
       .hostsize = sizeof(ban->host)
     };
 
-    split_nuh(&nuh);
+    nuh_split(&nuh);
 
     ban->type = parse_netmask(ban->host, &ban->addr, &ban->bits);
   }

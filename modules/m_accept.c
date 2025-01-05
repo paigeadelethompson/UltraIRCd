@@ -28,6 +28,7 @@
 #include "irc_string.h"
 #include "ircd.h"
 #include "list.h"
+#include "nuh.h"
 #include "numeric.h"
 #include "conf.h"
 #include "send.h"
@@ -90,7 +91,7 @@ accept_list(struct Client *source)
 static void
 m_accept(struct Client *source, int parc, char *parv[])
 {
-  struct split_nuh_item nuh;
+  struct nuh_split nuh;
   char nick[NICKLEN + 1];
   char user[USERLEN + 1];
   char host[HOSTLEN + 1];
@@ -117,7 +118,7 @@ m_accept(struct Client *source, int parc, char *parv[])
       nuh.usersize = sizeof(user);
       nuh.hostsize = sizeof(host);
 
-      split_nuh(&nuh);
+      nuh_split(&nuh);
 
       struct AcceptItem *accept =
         accept_find(nick, user, host, &source->connection->acceptlist, irccmp);
@@ -146,7 +147,7 @@ m_accept(struct Client *source, int parc, char *parv[])
       nuh.usersize = sizeof(user);
       nuh.hostsize = sizeof(host);
 
-      split_nuh(&nuh);
+      nuh_split(&nuh);
 
       struct AcceptItem *accept =
         accept_find(nick, user, host, &source->connection->acceptlist, irccmp);

@@ -21,6 +21,7 @@
 
 #include "stdinc.h"
 #include "irc_string.h"
+#include "nuh.h"
 #include "numeric.h"
 #include "conf.h"
 #include "client.h"
@@ -201,7 +202,7 @@ aline_parse(const char *cmd, struct Client *client, int parc, char *parv[], stru
   }
   else
   {
-    struct split_nuh_item nuh =
+    struct nuh_split nuh =
     {
       .nuhmask = *parv,
       .nickptr = NULL,
@@ -212,7 +213,7 @@ aline_parse(const char *cmd, struct Client *client, int parc, char *parv[], stru
       .hostsize = sizeof(host)
     };
 
-    split_nuh(&nuh);
+    nuh_split(&nuh);
 
     aline->mask = NULL;
     aline->user = user;

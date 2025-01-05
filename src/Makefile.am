@@ -92,6 +92,8 @@ ircd_SOURCES = accept.c          \
                monitor.h         \
                motd.c            \
                motd.h            \
+               nuh.c             \
+               nuh.h             \
                numeric.c         \
                numeric.h         \
                packet.c          \

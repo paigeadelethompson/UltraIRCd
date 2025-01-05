@@ -33,6 +33,7 @@
 #include "ircd.h"
 #include "ircd_defs.h"
 #include "misc.h"
+#include "nuh.h"
 #include "conf.h"
 #include "conf_resv.h"
 #include "address.h"
@@ -109,7 +110,7 @@ resv_make(const char *mask, const char *reason, const list_t *elist)
       char nick[NICKLEN + 1];
       char user[USERLEN + 1];
       char host[HOSTLEN + 1];
-      struct split_nuh_item nuh =
+      struct nuh_split nuh =
       {
         .nuhmask = s,
         .nickptr = nick,
@@ -120,7 +121,7 @@ resv_make(const char *mask, const char *reason, const list_t *elist)
         .hostsize = sizeof(host)
       };
 
-      split_nuh(&nuh);
+      nuh_split(&nuh);
 
       struct ResvExemptItem *exempt = io_calloc(sizeof(*exempt));
       exempt->name = io_strdup(nick);

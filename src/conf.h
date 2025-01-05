@@ -93,18 +93,6 @@ enum
 #define IsConfKill(x)           ((x)->type == CONF_KLINE)
 #define IsConfClient(x)         ((x)->type == CONF_CLIENT)
 
-struct split_nuh_item
-{
-  char *nuhmask;
-  char *nickptr;
-  char *userptr;
-  char *hostptr;
-
-  size_t nicksize;
-  size_t usersize;
-  size_t hostsize;
-};
-
 struct MaskItem
 {
   list_node_t         node;
@@ -324,7 +312,6 @@ extern void conf_free(struct MaskItem *);
 extern void conf_read_files(bool);
 extern void conf_rehash(bool);
 extern void delete_one_address_conf(const char *, struct MaskItem *);
-extern void split_nuh(struct split_nuh_item *);
 extern void yyerror(const char *);
 extern bool conf_check_client(struct Client *);
 extern bool match_conf_password(const char *, const struct MaskItem *);
