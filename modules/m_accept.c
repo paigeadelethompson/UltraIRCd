@@ -91,10 +91,6 @@ accept_list(struct Client *source)
 static void
 m_accept(struct Client *source, int parc, char *parv[])
 {
-  struct nuh_split nuh;
-  char nick[NICKLEN + 1];
-  char user[USERLEN + 1];
-  char host[HOSTLEN + 1];
   char *mask = collapse(parv[1]);
 
   if (EmptyString(mask) || strcmp(mask, "*") == 0)
@@ -103,21 +99,26 @@ m_accept(struct Client *source, int parc, char *parv[])
     return;
   }
 
+  char nick[NICKLEN + 1];
+  char user[USERLEN + 1];
+  char host[HOSTLEN + 1];
+  struct nuh_split nuh =
+  {
+    .nickptr  = nick,
+    .userptr  = user,
+    .hostptr  = host,
+    .nicksize = sizeof(nick),
+    .usersize = sizeof(user),
+    .hostsize = sizeof(host)
+  };
+
   char *p = NULL;
   for (mask = strtok_r(mask, ",", &p); mask;
        mask = strtok_r(NULL, ",", &p))
   {
     if (*mask == '-' && *++mask)
     {
-      nuh.nuhmask  = mask;
-      nuh.nickptr  = nick;
-      nuh.userptr  = user;
-      nuh.hostptr  = host;
-
-      nuh.nicksize = sizeof(nick);
-      nuh.usersize = sizeof(user);
-      nuh.hostsize = sizeof(host);
-
+      nuh.nuhmask = mask;
       nuh_split(&nuh);
 
       struct AcceptItem *accept =
@@ -138,15 +139,7 @@ m_accept(struct Client *source, int parc, char *parv[])
         return;
       }
 
-      nuh.nuhmask  = mask;
-      nuh.nickptr  = nick;
-      nuh.userptr  = user;
-      nuh.hostptr  = host;
-
-      nuh.nicksize = sizeof(nick);
-      nuh.usersize = sizeof(user);
-      nuh.hostsize = sizeof(host);
-
+      nuh.nuhmask = mask;
       nuh_split(&nuh);
 
       struct AcceptItem *accept =
