@@ -87,16 +87,16 @@ nuh_split(struct nuh_split *const iptr)
     {
       *q++ = '\0';
 
-      if (*p)
+      if (iptr->userptr && *p)
         strlcpy(iptr->userptr, p, iptr->usersize);
 
-      if (*q)
+      if (iptr->hostptr && *q)
         strlcpy(iptr->hostptr, q, iptr->hostsize);
     }
     else
     {
       /* No `@` found; only `user` exists after `!`. */
-      if (*p)
+      if (iptr->userptr && *p)
         strlcpy(iptr->userptr, p, iptr->usersize);
     }
   }
@@ -107,19 +107,25 @@ nuh_split(struct nuh_split *const iptr)
     {
       *p++ = '\0';
 
-      if (*iptr->nuhmask)
+      if (iptr->userptr && *iptr->nuhmask)
         strlcpy(iptr->userptr, iptr->nuhmask, iptr->usersize);
 
-      if (*p)
+      if (iptr->hostptr && *p)
         strlcpy(iptr->hostptr, p, iptr->hostsize);
     }
     else
     {
       /* No `!` or `@` found; determine if it's a `nick` or `host`. */
       if (iptr->nickptr == NULL || strpbrk(iptr->nuhmask, ".:"))
-        strlcpy(iptr->hostptr, iptr->nuhmask, iptr->hostsize);
+      {
+        if (iptr->hostptr)
+          strlcpy(iptr->hostptr, iptr->nuhmask, iptr->hostsize);
+      }
       else
-        strlcpy(iptr->nickptr, iptr->nuhmask, iptr->nicksize);
+      {
+        if (iptr->nickptr)
+          strlcpy(iptr->nickptr, iptr->nuhmask, iptr->nicksize);
+      }
     }
   }
 }
