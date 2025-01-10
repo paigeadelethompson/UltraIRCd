@@ -28,6 +28,7 @@
 #include "command.h"
 #include "ircd.h"
 #include "numeric.h"
+#include "ircd_hook.h"
 #include "user_mode.h"
 
 static bool
@@ -73,6 +74,20 @@ unset_callback(struct Client *client, user_mode_source_t source)
   return true;
 }
 
+static hook_flow_t
+who_send_hook(void *ctx_)
+{
+  ircd_hook_who_send_ctx *ctx = ctx_;
+
+  if (user_mode_has_flag(ctx->target, UMODE_OPER))
+    if (user_mode_has_flag(ctx->source, UMODE_OPER) ||
+        user_mode_has_flag(ctx->target, UMODE_HIDDEN) == false)
+      if (ctx->modes_len < sizeof(ctx->modes) - 1)
+        ctx->modes[ctx->modes_len++] = '*';
+
+  return HOOK_FLOW_CONTINUE;
+}
+
 static struct UserMode oper_mode =
 { 
   .mode_char = 'o',
@@ -86,12 +101,14 @@ static void
 init_handler(void)
 {
   user_mode_register(&oper_mode);
+  hook_install(ircd_hook_who_send, who_send_hook, HOOK_PRIORITY_NORMAL);
 }
 
 static void
 exit_handler(void)
 {
   user_mode_unregister(&oper_mode);
+  hook_uninstall(ircd_hook_who_send, who_send_hook);
 }
 
 struct Module module_entry =

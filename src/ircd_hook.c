@@ -32,6 +32,7 @@ struct HookContainer *ircd_hook_nick_change_local;
 struct HookContainer *ircd_hook_nick_change_remote;
 struct HookContainer *ircd_hook_user_register_local;
 struct HookContainer *ircd_hook_user_register_remote;
+struct HookContainer *ircd_hook_who_send;
 struct HookContainer *ircd_hook_whois_send;
 
 void
@@ -45,5 +46,6 @@ ircd_hook_init(void)
   ircd_hook_nick_change_remote = hook_container_register("nick_change_remote");
   ircd_hook_user_register_local = hook_container_register("user_register_local");
   ircd_hook_user_register_remote = hook_container_register("user_register_remote");
+  ircd_hook_who_send = hook_container_register("who_send");
   ircd_hook_whois_send = hook_container_register("whois_send");
 }

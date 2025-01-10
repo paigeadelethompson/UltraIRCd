@@ -35,6 +35,18 @@ static struct UserMode bot_mode =
 };
 
 static hook_flow_t
+who_send_hook(void *ctx_)
+{
+  ircd_hook_who_send_ctx *ctx = ctx_;
+
+  if (user_mode_has_flag(ctx->target, UMODE_BOT))
+    if (ctx->modes_len < sizeof(ctx->modes) - 1)
+      ctx->modes[ctx->modes_len++] = bot_mode.mode_char;
+
+  return HOOK_FLOW_CONTINUE;
+}
+
+static hook_flow_t
 whois_send_hook(void *ctx_)
 {
   ircd_hook_whois_send_ctx *ctx = ctx_;
@@ -49,6 +61,7 @@ static void
 init_handler(void)
 {
   user_mode_register(&bot_mode);
+  hook_install(ircd_hook_who_send, who_send_hook, HOOK_PRIORITY_NORMAL);
   hook_install(ircd_hook_whois_send, whois_send_hook, HOOK_PRIORITY_NORMAL);
   isupport_add("BOT", "B", -1);
 }
@@ -57,6 +70,7 @@ static void
 exit_handler(void)
 {
   user_mode_unregister(&bot_mode);
+  hook_uninstall(ircd_hook_who_send, who_send_hook);
   hook_uninstall(ircd_hook_whois_send, whois_send_hook);
   isupport_delete("BOT");
 }

@@ -38,6 +38,7 @@
 #include "send.h"
 #include "user_mode.h"
 #include "irc_string.h"
+#include "ircd_hook.h"
 #include "conf.h"
 #include "parse.h"
 #include "module.h"
@@ -163,24 +164,21 @@ who_send(struct Client *source, const struct Client *target,
 
   if (who->fields == 0 || (who->fields & WHO_FIELD_FLA))
   {
-    char status[16];
+    char status[32] = { [0] = target->away[0] ? 'G' : 'H' };
 
-    if (user_mode_has_flag(source, UMODE_OPER))
-      snprintf(status, sizeof(status), "%c%s%s%s%s%s", target->away[0] ? 'G' : 'H',
-               user_mode_has_flag(target, UMODE_BOT) ? "B" : "",
-               user_mode_has_flag(target, UMODE_SECURE) ? "z" : "",
-               user_mode_has_flag(target, UMODE_REGISTERED) ? "r" : "",
-               user_mode_has_flag(target, UMODE_OPER) ? "*" : "",
-               member ? member_get_prefix(member, who->fields || !!HasCap(source, CAP_MULTI_PREFIX)) : "");
+    ircd_hook_who_send_ctx ctx = { .source = source, .target = target };
+    hook_dispatch(ircd_hook_who_send, &ctx);
+    ctx.modes[ctx.modes_len] = '\0';
 
-    else
-      snprintf(status, sizeof(status), "%c%s%s%s%s%s", target->away[0] ? 'G' : 'H',
-               user_mode_has_flag(target, UMODE_BOT) ? "B" : "",
-               user_mode_has_flag(target, UMODE_SECURE) ? "z" : "",
-               user_mode_has_flag(target, UMODE_REGISTERED) ? "r" : "",
-               user_mode_has_flag(target, UMODE_OPER) &&
-               user_mode_has_flag(target, UMODE_HIDDEN) == false ? "*" : "",
-               member ? member_get_prefix(member, who->fields || !!HasCap(source, CAP_MULTI_PREFIX)) : "");
+    strlcat(status, ctx.modes, sizeof(status));
+
+    if (member)
+    {
+      const char *prefix = member_get_prefix(member, who->fields || !!HasCap(source, CAP_MULTI_PREFIX));
+      if (!EmptyString(prefix))
+        strlcat(status, prefix, sizeof(status));
+    }
+
     p += snprintf(p, sizeof(buf) - (p - buf), " %s", status);
   }
 
