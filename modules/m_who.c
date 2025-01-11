@@ -168,9 +168,12 @@ who_send(struct Client *source, const struct Client *target,
 
     ircd_hook_who_send_ctx ctx = { .source = source, .target = target };
     hook_dispatch(ircd_hook_who_send, &ctx);
-    ctx.modes[ctx.modes_len] = '\0';
 
-    strlcat(status, ctx.modes, sizeof(status));
+    if (ctx.modes_len)
+    {
+      ctx.modes[ctx.modes_len] = '\0';
+      strlcat(status, ctx.modes, sizeof(status));
+    }
 
     if (member)
     {
