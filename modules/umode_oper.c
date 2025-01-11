@@ -89,7 +89,7 @@ who_send_hook(void *ctx_)
 }
 
 static struct UserMode oper_mode =
-{ 
+{
   .mode_char = 'o',
   .mode_flag = &UMODE_OPER,
   .policy = USER_MODE_POLICY_OPER_ONLY,
