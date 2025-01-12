@@ -29,12 +29,9 @@
  * when the events occur.
  */
 
-#include <stdint.h>
 #include <stddef.h>
 #include <string.h>
-#include <stdarg.h>
 
-#include "io_time.h"
 #include "list.h"
 #include "memory.h"
 #include "hook.h"
@@ -49,19 +46,6 @@
  * and manage their execution when triggered by events.
  */
 static list_t hook_container_list;
-
-/**
- * @brief Retrieves the list of hook containers.
- *
- * This function returns a pointer to the list of hook containers.
- *
- * @return Pointer to the list of hook containers.
- */
-const list_t *
-hook_container_get_list(void)
-{
-  return &hook_container_list;
-}
 
 /**
  * @brief Registers a new HookContainer by name.
@@ -126,8 +110,6 @@ hook_container_unregister(const char *name)
  * This function iterates over and executes each hook in the chain associated with the
  * specified HookContainer. The dispatcher processes the flow control signals returned
  * by each hook, allowing the chain to continue or stop based on the hooks' outcomes.
- * The function increments the usage statistics for the container, including the count of
- * how many times the chain has been executed.
  *
  * @param container Pointer to the HookContainer structure.
  * @param ... Variable arguments passed to the hook functions.
@@ -136,9 +118,6 @@ hook_container_unregister(const char *name)
 hook_flow_t
 hook_dispatch(struct HookContainer *container, void *data)
 {
-  container->called++;
-  container->last = io_time_get(IO_TIME_MONOTONIC_SEC);
-
   list_node_t *node = container->chain.head;
   while (node)
   {

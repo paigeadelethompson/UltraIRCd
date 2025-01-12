@@ -81,18 +81,15 @@ typedef hook_flow_t (*HCFUNC)(void *);
  * @brief Represents a container for hooks.
  *
  * The HookContainer structure holds information about a specific hook,
- * including its name, the chain of hook functions, and usage statistics.
+ * including its name and the chain of hook functions.
  */
 struct HookContainer
 {
   list_node_t node;  /**< Doubly-linked list node for container management. */
   char *name;  /**< Name used to identify the callback. */
   list_t chain;  /**< Doubly-linked list to store hook functions. */
-  unsigned int called;  /**< Number of times the hook has been called. */
-  uintmax_t last;  /**< Timestamp of the last time the hook was called. */
 };
 
-extern const list_t *hook_container_get_list(void);
 extern struct HookContainer *hook_container_register(const char *);
 extern hook_flow_t hook_dispatch(struct HookContainer *, void *);
 extern struct HookContainer *hook_container_find(const char *);
