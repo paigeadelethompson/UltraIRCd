@@ -190,6 +190,14 @@ isupport_init(void)
   isupport_add("INVEX", NULL);
 }
 
+static int
+isupport_cmp(const void *const a_, const void *const b_)
+{
+  const char *const a = ((const struct Isupport *)a_)->name;
+  const char *const b = ((const struct Isupport *)b_)->name;
+  return strcmp(a, b);
+}
+
 /**
  * @brief Creates a new ISUPPORT option.
  *
@@ -206,7 +214,7 @@ isupport_create(const char *name, const char *options)
   struct Isupport *support = io_calloc(sizeof(*support));
   support->name = io_strdup(name);
   support->options = (options) ? io_strdup(options) : NULL;
-  list_add_tail(support, &support->node, &isupport_list);
+  list_add_sorted(support, &support->node, &isupport_list, isupport_cmp);
 
   return support;
 }
