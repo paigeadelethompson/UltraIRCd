@@ -63,7 +63,7 @@ init_handler(void)
   user_mode_register(&bot_mode);
   hook_install(ircd_hook_who_send, who_send_hook, HOOK_PRIORITY_NORMAL);
   hook_install(ircd_hook_whois_send, whois_send_hook, HOOK_PRIORITY_NORMAL);
-  isupport_add("BOT", "B", -1);
+  isupport_add("BOT", "%c", bot_mode.mode_char);
 }
 
 static void

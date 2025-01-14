@@ -136,7 +136,7 @@ init_handler(void)
 {
   command_add(&command_table);
   capab_add("KNOCK", CAPAB_KNOCK, true);
-  isupport_add("KNOCK", NULL, -1);
+  isupport_add("KNOCK", NULL);
 }
 
 static void

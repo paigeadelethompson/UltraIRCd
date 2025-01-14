@@ -27,8 +27,10 @@
 #ifndef INCLUDED_isupport_h
 #define INCLUDED_isupport_h
 
+#include "io.h"
+
 extern void isupport_init(void);
-extern void isupport_add(const char *, const char *, int);
+extern void isupport_add(const char *, const char *, ...) IO_AFP(2,3);
 extern void isupport_delete(const char *);
 extern void isupport_show(struct Client *);
 #endif  /* INCLUDED_isupport_h */

@@ -71,7 +71,7 @@ extban_init(void)
 
   const char *ptr = extban_get_isupport();
   if (ptr)
-    isupport_add("EXTBAN", ptr, -1);
+    isupport_add("EXTBAN", "%s", ptr);
 }
 
 void

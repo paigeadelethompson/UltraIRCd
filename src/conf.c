@@ -1320,21 +1320,14 @@ conf_read_files(bool cold)
 
   motd_init();
 
-  isupport_add("NICKLEN", NULL, ConfigServerInfo.max_nick_length);
-  isupport_add("NETWORK", ConfigServerInfo.network_name, -1);
-
-  char buf[IRCD_BUFSIZE];
-  snprintf(buf, sizeof(buf), "beI:%u", ConfigChannel.max_bans);
-  isupport_add("MAXLIST", buf, -1);
-
-  isupport_add("MAXTARGETS", NULL, ConfigGeneral.max_targets);
-  isupport_add("CHANTYPES", "#", -1);
-
-  snprintf(buf, sizeof(buf), "#:%u", ConfigChannel.max_channels);
-  isupport_add("CHANLIMIT", buf, -1);
-
-  isupport_add("CHANNELLEN", NULL, CHANNELLEN);
-  isupport_add("TOPICLEN", NULL, ConfigServerInfo.max_topic_length);
+  isupport_add("NICKLEN", "%d", ConfigServerInfo.max_nick_length);
+  isupport_add("NETWORK", "%s", ConfigServerInfo.network_name);
+  isupport_add("MAXLIST", "beI:%u", ConfigChannel.max_bans);
+  isupport_add("MAXTARGETS", "%d", ConfigGeneral.max_targets);
+  isupport_add("CHANTYPES", "%s", "#");
+  isupport_add("CHANLIMIT", "#:%u", ConfigChannel.max_channels);
+  isupport_add("CHANNELLEN", "%d", CHANNELLEN);
+  isupport_add("TOPICLEN", "%d", ConfigServerInfo.max_topic_length);
 }
 
 /* conf_add_class_to_conf()

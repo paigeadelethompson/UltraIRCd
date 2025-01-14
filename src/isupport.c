@@ -53,7 +53,6 @@ struct Isupport
   list_node_t node;  /**< Node for linking Isupport structures in a list. */
   char *name;  /**< Name of the ISUPPORT option. */
   char *options;  /**< Options associated with the ISUPPORT option. */
-  int number;  /**< Numerical value associated with the ISUPPORT option. */
 };
 
 /**
@@ -126,8 +125,6 @@ isupport_build_lines(void)
 
     if (support->options)
       len += snprintf(bufptr + len, sizeof(buf) - len, "=%s", support->options);
-    if (support->number > 0)
-      len += snprintf(bufptr + len, sizeof(buf) - len, "=%d", support->number);
 
     len += snprintf(bufptr + len, sizeof(buf) - len, " ");
 
@@ -185,12 +182,12 @@ isupport_find(const char *name)
 void
 isupport_init(void)
 {
-  isupport_add("CALLERID", NULL, -1);
-  isupport_add("CASEMAPPING", "ascii", -1);
-  isupport_add("KICKLEN", NULL, KICKLEN);
-  isupport_add("MODES", NULL, MAXMODEPARAMS);
-  isupport_add("EXCEPTS", NULL, -1);
-  isupport_add("INVEX", NULL, -1);
+  isupport_add("CALLERID", NULL);
+  isupport_add("CASEMAPPING", "%s", "ascii");
+  isupport_add("KICKLEN", "%d", KICKLEN);
+  isupport_add("MODES", "%d", MAXMODEPARAMS);
+  isupport_add("EXCEPTS", NULL);
+  isupport_add("INVEX", NULL);
 }
 
 /**
@@ -204,12 +201,11 @@ isupport_init(void)
  * @return A pointer to the newly created Isupport structure.
  */
 static struct Isupport *
-isupport_create(const char *name, const char *options, int number)
+isupport_create(const char *name, const char *options)
 {
   struct Isupport *support = io_calloc(sizeof(*support));
   support->name = io_strdup(name);
   support->options = (options) ? io_strdup(options) : NULL;
-  support->number = number;
   list_add_tail(support, &support->node, &isupport_list);
 
   return support;
@@ -243,13 +239,24 @@ isupport_destroy(struct Isupport *support)
  * @param number The numerical value associated with the ISUPPORT option.
  */
 void
-isupport_add(const char *name, const char *options, int number)
+isupport_add(const char *name, const char *format, ...)
 {
+  char buf[IRCD_BUFSIZE];
+
+  if (format)
+  {
+    va_list args;
+
+    va_start(args, format);
+    vsnprintf(buf, sizeof(buf), format, args);
+    va_end(args);
+  }
+
   struct Isupport *support = isupport_find(name);
   if (support)
     isupport_destroy(support);
 
-  isupport_create(name, options, number);
+  isupport_create(name, format ? buf : NULL);
 
   /* Rebuild ISUPPORT lines after modification. */
   isupport_build_lines();

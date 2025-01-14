@@ -972,16 +972,12 @@ channel_mode_init(void)
       strlcat(cmode_class[cmode->class], str, sizeof(cmode_class[cmode->class]));
   }
 
-  char buf[IRCD_BUFSIZE];
-  snprintf(buf, sizeof(buf), "%s,%s,%s,%s",
-           cmode_class[MODE_CLASS_A], cmode_class[MODE_CLASS_B],
-           cmode_class[MODE_CLASS_C], cmode_class[MODE_CLASS_D]);
-  isupport_add("CHANMODES", buf, -1);
+  isupport_add("CHANMODES", "%s,%s,%s,%s",
+               cmode_class[MODE_CLASS_A], cmode_class[MODE_CLASS_B],
+               cmode_class[MODE_CLASS_C], cmode_class[MODE_CLASS_D]);
 
-
-  snprintf(buf, sizeof(buf), "(%s)%s", letter, prefix);
-  isupport_add("PREFIX", buf, -1);
-  isupport_add("STATUSMSG", prefix, -1);
+  isupport_add("PREFIX", "(%s)%s", letter, prefix);
+  isupport_add("STATUSMSG", "%s", prefix);
 
   capab_add("QOP", CAPAB_QOP, ConfigChannel.enable_owner != 0);
   capab_add("AOP", CAPAB_AOP, ConfigChannel.enable_admin != 0);

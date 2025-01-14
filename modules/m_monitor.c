@@ -272,7 +272,7 @@ static void
 init_handler(void)
 {
   command_add(&command_table);
-  isupport_add("MONITOR", NULL, ConfigGeneral.max_monitor);
+  isupport_add("MONITOR", "%d", ConfigGeneral.max_monitor);
 }
 
 static void

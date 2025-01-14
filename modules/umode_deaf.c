@@ -35,7 +35,7 @@ static void
 init_handler(void)
 {
   user_mode_register(&deaf_mode);
-  isupport_add("DEAF", "D", -1);
+  isupport_add("DEAF", "%c", deaf_mode.mode_char);
 }
 
 static void

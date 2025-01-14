@@ -124,7 +124,7 @@ static void
 init_handler(void)
 {
   command_add(&command_table);
-  isupport_add("AWAYLEN", NULL, AWAYLEN);
+  isupport_add("AWAYLEN", "%d", AWAYLEN);
 }
 
 static void

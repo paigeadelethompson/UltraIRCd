@@ -193,8 +193,8 @@ static void
 init_handler(void)
 {
   command_add(&command_table);
-  isupport_add("ELIST", "CMNTU", -1);
-  isupport_add("SAFELIST", NULL, -1);
+  isupport_add("ELIST", "%s", "CMNTU");
+  isupport_add("SAFELIST", NULL);
 }
 
 static void
