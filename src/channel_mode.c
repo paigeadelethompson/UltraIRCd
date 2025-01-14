@@ -978,6 +978,9 @@ channel_mode_init(void)
 
   isupport_add("PREFIX", "(%s)%s", letter, prefix);
   isupport_add("STATUSMSG", "%s", prefix);
+  isupport_add("MODES", "%d", MAXMODEPARAMS);
+  isupport_add("EXCEPTS", NULL);
+  isupport_add("INVEX", NULL);
 
   capab_add("QOP", CAPAB_QOP, ConfigChannel.enable_owner != 0);
   capab_add("AOP", CAPAB_AOP, ConfigChannel.enable_admin != 0);

@@ -184,9 +184,6 @@ isupport_init(void)
 {
   isupport_add("CASEMAPPING", "%s", "ascii");
   isupport_add("KICKLEN", "%d", KICKLEN);
-  isupport_add("MODES", "%d", MAXMODEPARAMS);
-  isupport_add("EXCEPTS", NULL);
-  isupport_add("INVEX", NULL);
 }
 
 static int
