@@ -182,7 +182,6 @@ isupport_find(const char *name)
 void
 isupport_init(void)
 {
-  isupport_add("CALLERID", NULL);
   isupport_add("CASEMAPPING", "%s", "ascii");
   isupport_add("KICKLEN", "%d", KICKLEN);
   isupport_add("MODES", "%d", MAXMODEPARAMS);

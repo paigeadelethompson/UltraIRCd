@@ -28,6 +28,7 @@
 #include "accept.h"
 #include "conf.h"
 #include "ircd_hook.h"
+#include "isupport.h"
 #include "user_mode.h"
 
 static struct UserMode callerid_mode =
@@ -84,6 +85,7 @@ init_handler(void)
   user_mode_register(&callerid_mode);
   hook_install(ircd_hook_msg_client_target_local, msg_client_target_local_hook, HOOK_PRIORITY_DEFAULT);
   hook_install(ircd_hook_whois_send, whois_send_hook, HOOK_PRIORITY_NORMAL);
+  isupport_add("CALLERID", NULL);
 }
 
 static void
@@ -92,6 +94,7 @@ exit_handler(void)
   user_mode_unregister(&callerid_mode);
   hook_uninstall(ircd_hook_msg_client_target_local, msg_client_target_local_hook);
   hook_uninstall(ircd_hook_whois_send, whois_send_hook);
+  isupport_delete("CALLERID");
 }
 
 struct Module module_entry =
