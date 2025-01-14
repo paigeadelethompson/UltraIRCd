@@ -120,19 +120,13 @@ isupport_build_lines(void)
   LIST_FOREACH(node, isupport_list.head)
   {
     const struct Isupport *support = node->data;
-
-    len += snprintf(bufptr + len, sizeof(buf) - len, "%s", support->name);
+    len += snprintf(bufptr + len, sizeof(buf) - len, len ? " %s" : "%s", support->name);
 
     if (support->options)
       len += snprintf(bufptr + len, sizeof(buf) - len, "=%s", support->options);
 
-    len += snprintf(bufptr + len, sizeof(buf) - len, " ");
-
     if (++tokens == (MAXPARA - 2) || len >= (sizeof(buf) - reserve))
     {
-      if (bufptr[len - 1] == ' ')
-        bufptr[--len] = '\0';
-
       list_add_tail(io_strdup(buf), list_make_node(), &isupport_list_lines);
       bufptr = buf;
       len = 0;
@@ -141,12 +135,7 @@ isupport_build_lines(void)
   }
 
   if (len > 0)
-  {
-    if (bufptr[len - 1] == ' ')
-      bufptr[--len] = '\0';
-
     list_add_tail(io_strdup(buf), list_make_node(), &isupport_list_lines);
-  }
 }
 
 /**
