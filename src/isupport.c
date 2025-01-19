@@ -30,15 +30,14 @@
  */
 
 #include "stdinc.h"
+#include "irc_string.h"
 #include "list.h"
+#include "memory.h"
 #include "send.h"
 #include "numeric.h"
 #include "client.h"
-#include "irc_string.h"
-#include "memory.h"
+#include "ircd_defs.h"
 #include "isupport.h"
-#include "channel.h"
-#include "channel_mode.h"
 
 /**
  * @enum ISUPPORT_TOKENS_PER_LINE
