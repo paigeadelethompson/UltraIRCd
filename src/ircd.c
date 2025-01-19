@@ -62,7 +62,6 @@
 #include "conf_db.h"
 #include "conf_class.h"
 #include "ipcache.h"
-#include "isupport.h"
 #include "extban.h"
 #include "ircd_exit.h"
 #include "ircd_hook.h"
@@ -444,7 +443,6 @@ main(int argc, char *argv[])
     exit(EXIT_FAILURE);
 
   ircd_hook_init();
-  isupport_init();
   ipcache_init();
   client_init();
   class_init();

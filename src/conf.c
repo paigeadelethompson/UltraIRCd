@@ -1320,6 +1320,8 @@ conf_read_files(bool cold)
 
   motd_init();
 
+  isupport_add("CASEMAPPING", "%s", "ascii");
+  isupport_add("KICKLEN", "%d", KICKLEN);
   isupport_add("NICKLEN", "%d", ConfigServerInfo.max_nick_length);
   isupport_add("NETWORK", "%s", ConfigServerInfo.network_name);
   isupport_add("MAXLIST", "beI:%u", ConfigChannel.max_bans);

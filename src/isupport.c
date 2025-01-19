@@ -174,20 +174,6 @@ isupport_find(const char *name)
   return NULL;
 }
 
-/**
- * @brief Initializes the ISUPPORT system with default options.
- *
- * This function initializes the ISUPPORT system with default options. The default
- * options include, but are not limited to, BOT, CALLERID, CASEMAPPING, DEAF,
- * KICKLEN, MODES, EXCEPTS, and INVEX.
- */
-void
-isupport_init(void)
-{
-  isupport_add("CASEMAPPING", "%s", "ascii");
-  isupport_add("KICKLEN", "%d", KICKLEN);
-}
-
 static int
 isupport_cmp(const void *const a_, const void *const b_)
 {
