@@ -233,6 +233,7 @@ reset_block_state(void)
 %token  MAX_CHANNELS
 %token  MAX_IDLE
 %token  MAX_INVITES
+%token  MAX_KICK_LENGTH
 %token  MAX_MONITOR
 %token  MAX_NICK_CHANGES
 %token  MAX_NICK_LENGTH
@@ -2629,6 +2630,7 @@ channel_item:       channel_max_bans |
                     channel_knock_delay_channel |
                     channel_max_channels |
                     channel_max_invites |
+                    channel_max_kick_length |
                     channel_default_join_flood_count |
                     channel_default_join_flood_time |
                     channel_disable_fake_channels |
@@ -2712,6 +2714,29 @@ channel_max_bans: MAX_BANS '=' NUMBER ';'
 channel_max_bans_large: MAX_BANS_LARGE '=' NUMBER ';'
 {
   ConfigChannel.max_bans_large = $3;
+};
+
+channel_max_kick_length: MAX_KICK_LENGTH '=' NUMBER ';'
+{
+  if (conf_parser_ctx.pass != 2)
+    break;
+
+  if ($3 < 1)
+  {
+    conf_error_report("max_kick_length too low, setting to 9");
+    ConfigChannel.max_kick_length = KICKLEN;
+  }
+  else if ($3 > KICKLEN)
+  {
+    char buf[IRCD_BUFSIZE];
+
+    snprintf(buf, sizeof(buf), "max_kick_length too high, setting to %d", KICKLEN);
+    conf_error_report(buf);
+
+    ConfigChannel.max_kick_length = KICKLEN;
+  }
+  else
+    ConfigChannel.max_kick_length = $3;
 };
 
 channel_default_join_flood_count: DEFAULT_JOIN_FLOOD_COUNT '=' NUMBER ';'

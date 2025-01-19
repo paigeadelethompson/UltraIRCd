@@ -919,6 +919,7 @@ conf_set_defaults(void)
   ConfigChannel.max_invites = 20;
   ConfigChannel.max_bans = 100;
   ConfigChannel.max_bans_large = 500;
+  ConfigChannel.max_kick_length = KICKLEN;
   ConfigChannel.default_join_flood_count = 18;
   ConfigChannel.default_join_flood_time = 6;
 
@@ -1321,7 +1322,7 @@ conf_read_files(bool cold)
   motd_init();
 
   isupport_add("CASEMAPPING", "%s", "ascii");
-  isupport_add("KICKLEN", "%d", KICKLEN);
+  isupport_add("KICKLEN", "%d", ConfigChannel.max_kick_length);
   isupport_add("NICKLEN", "%d", ConfigServerInfo.max_nick_length);
   isupport_add("NETWORK", "%s", ConfigServerInfo.network_name);
   isupport_add("MAXLIST", "beI:%u", ConfigChannel.max_bans);

@@ -212,6 +212,7 @@ struct config_channel_entry
   unsigned int max_bans;
   unsigned int max_bans_large;
   unsigned int max_channels;
+  unsigned int max_kick_length;
   unsigned int default_join_flood_count;
   unsigned int default_join_flood_time;
 };
