@@ -119,7 +119,7 @@ isupport_build_lines(void)
   char *bufptr = buf;
   int tokens = 0;
   size_t len = 0;
-  size_t reserve = strlen(me.name) + HOSTLEN + strlen(numeric_form(RPL_ISUPPORT));
+  size_t reserve = HOSTLEN + NICKLEN + strlen(numeric_form(RPL_ISUPPORT)) + 3;  /* +3 for \r\n\0 */
 
   isupport_clear_lines();
 
@@ -127,18 +127,24 @@ isupport_build_lines(void)
   LIST_FOREACH(node, isupport_list.head)
   {
     const struct Isupport *support = node->data;
-    len += snprintf(bufptr + len, sizeof(buf) - len, len ? " %s" : "%s", support->name);
-
+    size_t token_len = snprintf(NULL, 0, len ? " %s" : "%s", support->name);
     if (support->options)
-      len += snprintf(bufptr + len, sizeof(buf) - len, "=%s", support->options);
+      token_len += snprintf(NULL, 0, "=%s", support->options);
 
-    if (++tokens == ISUPPORT_TOKENS_PER_LINE || len >= (sizeof(buf) - reserve))
+    if (tokens == ISUPPORT_TOKENS_PER_LINE || (len + token_len >= sizeof(buf) - reserve))
     {
       list_add_tail(io_strdup(buf), list_make_node(), &isupport_list_lines);
       bufptr = buf;
       len = 0;
       tokens = 0;
     }
+
+    ++tokens;
+
+    len += snprintf(bufptr + len, sizeof(buf) - len, len ? " %s" : "%s", support->name);
+    if (support->options)
+      len += snprintf(bufptr + len, sizeof(buf) - len, "=%s", support->options);
+
   }
 
   if (len > 0)
