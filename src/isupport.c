@@ -39,7 +39,15 @@
 #include "isupport.h"
 #include "channel.h"
 #include "channel_mode.h"
-#include "parse.h"
+
+/**
+ * @enum ISUPPORT_TOKENS_PER_LINE
+ * @brief Maximum number of tokens allowed in a single ISUPPORT response line.
+ */
+enum
+{
+  ISUPPORT_TOKENS_PER_LINE = 13
+};
 
 /**
  * @struct Isupport
@@ -125,7 +133,7 @@ isupport_build_lines(void)
     if (support->options)
       len += snprintf(bufptr + len, sizeof(buf) - len, "=%s", support->options);
 
-    if (++tokens == (MAXPARA - 2) || len >= (sizeof(buf) - reserve))
+    if (++tokens == ISUPPORT_TOKENS_PER_LINE || len >= (sizeof(buf) - reserve))
     {
       list_add_tail(io_strdup(buf), list_make_node(), &isupport_list_lines);
       bufptr = buf;
