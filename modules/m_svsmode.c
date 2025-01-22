@@ -54,8 +54,6 @@
 static void
 ms_svsmode(struct Client *source, int parc, char *parv[])
 {
-  const char *const modes = parv[3];
-
   if (!HasFlag(source, FLAGS_SERVICE) && !IsServer(source))
     return;
 
@@ -70,6 +68,7 @@ ms_svsmode(struct Client *source, int parc, char *parv[])
   const uint64_t mode_flags_old = target->umodes;
   user_mode_action_t action = USER_MODE_ACTION_ADD;
 
+  const char *const modes = parv[3];
   for (const char *m = modes; *m; ++m)
   {
     switch (*m)
