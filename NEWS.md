@@ -1,3 +1,6 @@
+#### Noteworthy changes in version 8.2.47 (2025-??-??)
+
+
 #### Noteworthy changes in version 8.2.46 (2025-01-22)
 * The user mode subsystem now supports dynamic registration and unregistration of user
   modes. This allows modules to register and unregister their own user modes, making the
