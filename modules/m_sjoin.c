@@ -386,7 +386,7 @@ ms_sjoin(struct Client *source, int parc, char *parv[])
       sendto_channel_local(NULL, channel, 0, 0, CAP_EXTENDED_JOIN, ":%s!%s@%s JOIN :%s",
                            target->name, target->username, target->host, channel->name);
 
-      if (target->away[0])
+      if (target->away)
         sendto_channel_local(target, channel, 0, CAP_AWAY_NOTIFY, 0, ":%s!%s@%s AWAY :%s",
                              target->name, target->username, target->host, target->away);
     }

@@ -24,6 +24,7 @@
  */
 
 #include "stdinc.h"
+#include "memory.h"
 #include "io_time.h"
 #include "cap.h"
 #include "client.h"
@@ -50,9 +51,10 @@ do_away(struct Client *source, const char *message)
   if (EmptyString(message))
   {
     /* Marking as not away */
-    if (source->away[0])
+    if (source->away)
     {
-      source->away[0] = '\0';
+      io_free(source->away);
+      source->away = NULL;
 
       /* We now send this only if they were away before --is */
       sendto_servers(source, 0, 0, ":%s AWAY", source->id);
@@ -80,11 +82,13 @@ do_away(struct Client *source, const char *message)
     source->connection->away.count++;
     sendto_one_numeric(source, &me, RPL_NOWAWAY);
 
-    if (strncmp(source->away, message, sizeof(source->away) - 1) == 0)
+    if (source->away && strncmp(source->away, message, ConfigGeneral.max_away_length) == 0)
       return;
   }
 
-  strlcpy(source->away, message, sizeof(source->away));
+  io_free(source->away);
+  source->away = io_strndup(message, ConfigGeneral.max_away_length);
+
   sendto_common_channels_local(source, true, CAP_AWAY_NOTIFY, 0, ":%s!%s@%s AWAY :%s",
                                source->name, source->username, source->host, source->away);
   sendto_servers(source, 0, 0, ":%s AWAY :%s",
@@ -124,14 +128,12 @@ static void
 init_handler(void)
 {
   command_add(&command_table);
-  isupport_add("AWAYLEN", "%d", AWAYLEN);
 }
 
 static void
 exit_handler(void)
 {
   command_del(&command_table);
-  isupport_delete("AWAYLEN");
 }
 
 struct Module module_entry =

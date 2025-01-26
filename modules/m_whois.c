@@ -163,7 +163,7 @@ whois_send(struct Client *source, struct Client *target)
     sendto_one_numeric(source, &me, RPL_WHOISSERVER,
                        target->name, target->servptr->name, target->servptr->info);
 
-  if (target->away[0])
+  if (target->away)
     sendto_one_numeric(source, &me, RPL_AWAY, target->name, target->away);
 
   if (user_mode_has_flag(target, UMODE_OPER) || HasFlag(target, FLAGS_SERVICE))

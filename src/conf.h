@@ -177,6 +177,7 @@ struct config_general_entry
   unsigned int opers_bypass_callerid;
   unsigned int pace_wait;
   unsigned int pace_wait_simple;
+  unsigned int max_away_length;
   unsigned int max_targets;
   unsigned int caller_id_wait;
   unsigned int min_nonwildcard;

@@ -79,7 +79,7 @@ m_userhost(struct Client *source, int parc, char *parv[])
       masklen = snprintf(response, sizeof(response), "%s%s=%c%s@%s",
                          target->name,
                          user_mode_has_flag(target, UMODE_OPER) ? "*" : "",
-                         (target->away[0]) ? '-' : '+',
+                         target->away ? '-' : '+',
                          target->username,
                          target->sockhost);
     else
@@ -87,7 +87,7 @@ m_userhost(struct Client *source, int parc, char *parv[])
                          target->name, (user_mode_has_flag(target, UMODE_OPER) &&
                                         (user_mode_has_flag(target, UMODE_HIDDEN) == false ||
                                          user_mode_has_flag(source, UMODE_OPER))) ? "*" : "",
-                         (target->away[0]) ? '-' : '+',
+                         target->away ? '-' : '+',
                          target->username,
                          target->host);
 

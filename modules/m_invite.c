@@ -159,7 +159,7 @@ m_invite(struct Client *source, int parc, char *parv[])
 
   sendto_one_numeric(source, &me, RPL_INVITING, target->name, channel->name);
 
-  if (target->away[0])
+  if (target->away)
     sendto_one_numeric(source, &me, RPL_AWAY, target->name, target->away);
 
   send_invite(source, target, channel);

@@ -164,7 +164,7 @@ who_send(struct Client *source, const struct Client *target,
 
   if (who->fields == 0 || (who->fields & WHO_FIELD_FLA))
   {
-    char status[32] = { [0] = target->away[0] ? 'G' : 'H' };
+    char status[32] = { [0] = target->away ? 'G' : 'H' };
 
     ircd_hook_who_send_ctx ctx = { .source = source, .target = target };
     hook_dispatch(ircd_hook_who_send, &ctx);

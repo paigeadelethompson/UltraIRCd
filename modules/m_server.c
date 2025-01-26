@@ -101,7 +101,7 @@ server_send_client(struct Client *client_p, struct Client *target)
     sendto_one(client_p, ":%s METADATA client %s cipher :%s",
                target->servptr->id, target->id, target->tls_cipher);
 
-  if (target->away[0])
+  if (target->away)
     sendto_one(client_p, ":%s AWAY :%s", target->id, target->away);
 
   list_node_t *node;

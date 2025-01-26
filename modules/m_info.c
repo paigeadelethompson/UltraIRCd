@@ -92,6 +92,7 @@ static const struct InfoEntry info_table[] =
   INFO_ENTRY_INIT("general", "kline_min_cidr", INFO_OUTPUT_UNSIGNED_INT, &ConfigGeneral.kline_min_cidr, "Minimum required length of a CIDR bitmask for IPv4 K-Lines"),
   INFO_ENTRY_INIT("general", "kline_min_cidr6", INFO_OUTPUT_UNSIGNED_INT, &ConfigGeneral.kline_min_cidr6, "Minimum required length of a CIDR bitmask for IPv6 K-Lines"),
   INFO_ENTRY_INIT("general", "max_accept", INFO_OUTPUT_UNSIGNED_INT, &ConfigGeneral.max_accept, "Maximum nicknames on accept list"),
+  INFO_ENTRY_INIT("general", "max_away_length", INFO_OUTPUT_UNSIGNED_INT, &ConfigGeneral.max_away_length, "Maximum length of a AWAY message that the server will accept from a client"),
   INFO_ENTRY_INIT("general", "max_monitor", INFO_OUTPUT_UNSIGNED_INT, &ConfigGeneral.max_monitor, "Maximum nicknames on monitor list"),
   INFO_ENTRY_INIT("general", "max_nick_changes", INFO_OUTPUT_UNSIGNED_INT, &ConfigGeneral.max_nick_changes, "NICK change threshhold setting"),
   INFO_ENTRY_INIT("general", "max_nick_time", INFO_OUTPUT_UNSIGNED_INT, &ConfigGeneral.max_nick_time, "NICK flood protection time interval"),

@@ -951,6 +951,7 @@ conf_set_defaults(void)
   ConfigGeneral.min_nonwildcard = 4;
   ConfigGeneral.min_nonwildcard_simple = 3;
   ConfigGeneral.max_accept = 50;
+  ConfigGeneral.max_away_length = AWAYLEN;
   ConfigGeneral.anti_nick_flood = 0;
   ConfigGeneral.max_nick_time = 20;
   ConfigGeneral.max_nick_changes = 5;
@@ -1322,6 +1323,7 @@ conf_read_files(bool cold)
   motd_init();
 
   isupport_add("CASEMAPPING", "%s", "ascii");
+  isupport_add("AWAYLEN", "%d", ConfigGeneral.max_away_length);
   isupport_add("KICKLEN", "%d", ConfigChannel.max_kick_length);
   isupport_add("NICKLEN", "%d", ConfigServerInfo.max_nick_length);
   isupport_add("NETWORK", "%s", ConfigServerInfo.network_name);

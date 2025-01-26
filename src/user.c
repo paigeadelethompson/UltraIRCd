@@ -566,7 +566,7 @@ user_set_hostmask(struct Client *client, const char *hostname, bool svshost)
                            client->servptr->name, member->channel->name, modebuf, nickbuf);
   }
 
-  if (client->away[0])
+  if (client->away)
     sendto_common_channels_local(client, false, CAP_AWAY_NOTIFY, CAP_CHGHOST, ":%s!%s@%s AWAY :%s",
                                  client->name, client->username, client->host, client->away);
 }

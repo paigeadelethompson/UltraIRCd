@@ -1087,7 +1087,7 @@ channel_join_list(struct Client *client, char *chan_list, char *key_list)
                            client->name, client->username, client->host, channel->name);
     }
 
-    if (client->away[0])
+    if (client->away)
       sendto_channel_local(client, channel, 0, CAP_AWAY_NOTIFY, 0, ":%s!%s@%s AWAY :%s",
                            client->name, client->username, client->host, client->away);
 

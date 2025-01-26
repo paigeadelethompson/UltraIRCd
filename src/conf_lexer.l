@@ -239,6 +239,7 @@ log                         { return T_LOG; }
 mask                        { return MASK; }
 mass                        { return MASS; }
 max_accept                  { return MAX_ACCEPT; }
+max_away_length             { return MAX_AWAY_LENGTH; }
 max_bans                    { return MAX_BANS; }
 max_bans_large              { return MAX_BANS_LARGE; }
 max_channels                { return MAX_CHANNELS; }

@@ -174,6 +174,7 @@ client_free(struct Client *client)
   io_free(client->serv);
   io_free(client->tls_certfp);
   io_free(client->tls_cipher);
+  io_free(client->away);
 
   if (MyConnect(client))
   {

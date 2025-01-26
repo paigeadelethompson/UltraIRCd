@@ -228,6 +228,7 @@ reset_block_state(void)
 %token  MASK
 %token  MASS
 %token  MAX_ACCEPT
+%token  MAX_AWAY_LENGTH
 %token  MAX_BANS
 %token  MAX_BANS_LARGE
 %token  MAX_CHANNELS
@@ -2301,6 +2302,7 @@ general_item:       general_away_count |
                     general_short_motd |
                     general_no_oper_flood |
                     general_max_targets |
+                    general_max_away_length |
                     general_oper_umodes |
                     general_caller_id_wait |
                     general_opers_bypass_callerid |
@@ -2401,6 +2403,14 @@ general_max_nick_changes: MAX_NICK_CHANGES '=' NUMBER ';'
 general_max_accept: MAX_ACCEPT '=' NUMBER ';'
 {
   ConfigGeneral.max_accept = $3;
+};
+
+general_max_away_length: MAX_AWAY_LENGTH '=' NUMBER ';'
+{
+  if ($3 < 1 || $3 > AWAYLEN)
+    ConfigGeneral.max_away_length = AWAYLEN;
+  else
+    ConfigGeneral.max_away_length = $3;
 };
 
 general_anti_spam_exit_message_time: ANTI_SPAM_EXIT_MESSAGE_TIME '=' timespec ';'
