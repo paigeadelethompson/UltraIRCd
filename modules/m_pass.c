@@ -51,7 +51,7 @@ mr_pass(struct Client *source, int parc, char *parv[])
   assert(MyConnect(source));
 
   if (source->connection->password == NULL)
-    source->connection->password = io_strndup(password, IO_MIN(strlen(password), PASSWDLEN));
+    source->connection->password = io_strndup(password, PASSWDLEN);
 }
 
 static struct Command command_table =

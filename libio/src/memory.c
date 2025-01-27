@@ -32,7 +32,6 @@
 #include <string.h>
 
 #include "memory.h"
-#include "irc_string.h"
 
 /**
  * @brief Custom handler for out-of-memory conditions.
@@ -132,10 +131,10 @@ io_free(void *x)
  * @param s The string to duplicate.
  * @return A pointer to the duplicated string.
  */
-void *
+char *
 io_strdup(const char *s)
 {
-  void *ret = malloc(strlen(s) + 1);
+  char *ret = malloc(strlen(s) + 1);
 
   if (ret == NULL)
   {
@@ -158,18 +157,20 @@ io_strdup(const char *s)
  * @param len The maximum length of the duplicated string.
  * @return A pointer to the duplicated string.
  */
-void *
+char *
 io_strndup(const char *s, size_t len)
 {
-  void *ret = malloc(len + 1);
+  size_t len_copy = strnlen(s, len);
 
+  char *ret = malloc(len_copy + 1);
   if (ret == NULL)
   {
     outofmemory();
     return NULL;
   }
 
-  strlcpy(ret, s, len + 1);
+  memcpy(ret, s, len_copy);
+  ret[len_copy] = '\0';
 
   return ret;
 }
