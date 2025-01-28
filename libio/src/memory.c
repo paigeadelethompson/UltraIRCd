@@ -125,7 +125,7 @@ io_free(void *x)
 /**
  * @brief Duplicates a string and handles out-of-memory conditions.
  *
- * This function duplicates the specified string using malloc and strcpy.
+ * This function duplicates the specified string using strdup.
  * If memory allocation fails, it calls the outofmemory() function.
  *
  * @param s The string to duplicate.
@@ -134,7 +134,7 @@ io_free(void *x)
 char *
 io_strdup(const char *s)
 {
-  char *ret = malloc(strlen(s) + 1);
+  char *ret = strdup(s);
 
   if (ret == NULL)
   {
@@ -142,15 +142,13 @@ io_strdup(const char *s)
     return NULL;
   }
 
-  strcpy(ret, s);
-
   return ret;
 }
 
 /**
- * @brief Duplicates a string up to a specified length using malloc and strlcpy.
+ * @brief Duplicates a string up to a specified length and handles out-of-memory conditions.
  *
- * This function duplicates the specified string up to the specified length using malloc and strlcpy.
+ * This function duplicates the specified string up to the specified length using strndup.
  * If memory allocation fails, it calls the outofmemory() function.
  *
  * @param s The string to duplicate.
@@ -160,17 +158,13 @@ io_strdup(const char *s)
 char *
 io_strndup(const char *s, size_t len)
 {
-  size_t len_copy = strnlen(s, len);
+  char *ret = strndup(s, len);
 
-  char *ret = malloc(len_copy + 1);
   if (ret == NULL)
   {
     outofmemory();
     return NULL;
   }
-
-  memcpy(ret, s, len_copy);
-  ret[len_copy] = '\0';
 
   return ret;
 }
