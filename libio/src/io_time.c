@@ -30,7 +30,9 @@
 #include <time.h>
 #include <errno.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include <stdlib.h>
+
 #include "io_time.h"
 
 /**

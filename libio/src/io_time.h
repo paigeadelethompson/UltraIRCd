@@ -33,7 +33,6 @@
 #define INCLUDED_io_time_h
 
 #include <stdint.h>
-#include <stdbool.h>
 
 /**
  * @def IO_TIME_ERROR_BUFFER_SIZE
