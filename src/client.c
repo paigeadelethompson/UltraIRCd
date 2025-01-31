@@ -170,7 +170,7 @@ client_free(struct Client *client)
   assert(client->svstags.head == NULL);
   assert(client->svstags.tail == NULL);
 
-
+  io_free(client->serv->initiator_name);
   io_free(client->serv);
   io_free(client->tls_certfp);
   io_free(client->tls_cipher);

@@ -956,7 +956,7 @@ stats_servers(struct Client *client, int parc, char *parv[])
   {
     const struct Client *target = node->data;
     sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "v :%s (%s!%s@%s) Idle: %s",
-                       target->name, (target->serv->by[0] ? target->serv->by : "Remote."),
+                       target->name, target->serv->initiator_name ? target->serv->initiator_name : "Remote.",
                        "*", "*", time_format_duration(io_time_get(IO_TIME_MONOTONIC_SEC) - target->connection->last_data));
   }
 

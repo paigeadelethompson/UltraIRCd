@@ -106,7 +106,7 @@ trace_send_status(struct Client *source, const struct Client *target)
 
       sendto_one_numeric(source, &me, RPL_TRACESERVER,
                          class_name, servers, clients, name,
-                         *(target->serv->by) ? target->serv->by : "*", "*",
+                         target->serv->initiator_name ? target->serv->initiator_name : "*", "*",
                          me.name, io_time_get(IO_TIME_MONOTONIC_SEC) - target->connection->last_data);
       break;
     }

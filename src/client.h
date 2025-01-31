@@ -222,7 +222,7 @@ struct Server
 {
   list_t server_list;  /**< Servers on this server */
   list_t client_list;  /**< Clients on this server */
-  char by[NICKLEN + 1];  /**< Who activated this connection */
+  char *initiator_name;  /**< Who activated this connection */
 };
 
 /** ListTask structure */

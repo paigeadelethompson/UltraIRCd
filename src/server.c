@@ -372,7 +372,7 @@ server_connect_callback(fde_t *F, int status, void *data_)
  * it suceeded or not, and 0 if it fails in here somewhere.
  */
 bool
-server_connect(struct MaskItem *conf, struct Client *by)
+server_connect(struct MaskItem *conf, struct Client *initiator)
 {
   assert(conf);
   assert(conf->type == CONF_SERVER);
@@ -434,10 +434,8 @@ server_connect(struct MaskItem *conf, struct Client *by)
 
   server_make(client);
 
-  if (by && IsClient(by))
-    strlcpy(client->serv->by, by->name, sizeof(client->serv->by));
-  else
-    strlcpy(client->serv->by, "AutoConn.", sizeof(client->serv->by));
+  const char *initiator_name = initiator ? initiator->name : "AutoConn.";
+  client->serv->initiator_name = io_strdup(initiator_name);
 
   SetConnecting(client);
 
