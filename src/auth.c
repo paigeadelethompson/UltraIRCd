@@ -39,20 +39,20 @@
  */
 
 #include "stdinc.h"
+#include "address.h"
+#include "comm.h"
+#include "irc_string.h"
 #include "io_time.h"
 #include "fdlist.h"
+#include "log.h"
+#include "memory.h"
+#include "res.h"
 #include "auth.h"
 #include "conf.h"
 #include "client.h"
-#include "irc_string.h"
 #include "ircd.h"
 #include "packet.h"
-#include "res.h"
-#include "comm.h"
-#include "log.h"
 #include "send.h"
-#include "memory.h"
-#include "address.h"
 
 /**
  * @var AUTH_BUFSIZE

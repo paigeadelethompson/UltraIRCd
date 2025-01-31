@@ -33,6 +33,7 @@
 #define INCLUDED_log_h
 
 #include "io.h"
+#include "list.h"
 
 /**
  * @enum log_type

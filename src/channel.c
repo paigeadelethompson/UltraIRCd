@@ -24,9 +24,13 @@
  */
 
 #include "stdinc.h"
+#include "address.h"
 #include "io_time.h"
-#include "defaults.h"
+#include "irc_string.h"
 #include "list.h"
+#include "memory.h"
+#include "misc.h"
+#include "defaults.h"
 #include "channel.h"
 #include "channel_invite.h"
 #include "channel_mode.h"
@@ -35,16 +39,12 @@
 #include "cap.h"
 #include "conf.h"
 #include "conf_resv.h"
-#include "address.h"
-#include "irc_string.h"
 #include "ircd.h"
 #include "numeric.h"
 #include "server.h"
 #include "server_capab.h"
 #include "send.h"
 #include "user_mode.h"
-#include "memory.h"
-#include "misc.h"
 #include "extban.h"
 
 /** Doubly linked list containing a list of all channels. */
