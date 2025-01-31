@@ -60,6 +60,7 @@ do_list(struct Client *source, char *arg)
   {
     list_t *list;
     char *opt, *save = NULL;
+    const char *topic;
     bool error = false;
     int i;
 
@@ -119,7 +120,10 @@ do_list(struct Client *source, char *arg)
                 error = true;
               break;
             case ':':
-              if (strlcpy(lt->topic, opt + 1, sizeof(lt->topic)) == 0)
+              topic = opt + 1;
+              if (!EmptyString(topic))
+                lt->topic = io_strndup(topic, TOPICLEN + 1);
+              else
                 error = true;
               break;
             default:

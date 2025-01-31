@@ -239,7 +239,7 @@ struct ListTask
   unsigned int created_max;  /**< Real time */
   unsigned int topicts_min;  /**< Real time */
   unsigned int topicts_max;  /**< Real time */
-  char topic[TOPICLEN + 1];
+  char *topic;
 };
 
 /** Connection structure

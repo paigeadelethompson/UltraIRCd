@@ -496,6 +496,7 @@ free_list_task(struct Client *client)
     list_free_node(node);
   }
 
+  io_free(lt->topic);
   io_free(lt);
   client->connection->list_task = NULL;
 }
@@ -559,7 +560,7 @@ list_one_channel(struct Client *client, struct Channel *channel)
       (channel->topic_time ? (unsigned int)channel->topic_time : UINT_MAX) > lt->topicts_max)
     return;
 
-  if (lt->topic[0] && match(lt->topic, channel->topic))
+  if (lt->topic && match(lt->topic, channel->topic))
     return;
 
   if (list_allow_channel(channel->name, lt) == false)
