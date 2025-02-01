@@ -317,7 +317,7 @@ ms_sjoin(struct Client *source, int parc, char *parv[])
 
     channel_set_mode_lock(source, channel, NULL);
 
-    if (channel->topic[0])
+    if (channel->topic)
     {
       channel_set_topic(channel, "", "", 0, false);
       sendto_channel_local(NULL, channel, 0, 0, 0, ":%s TOPIC %s :",

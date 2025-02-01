@@ -83,9 +83,9 @@ m_topic(struct Client *source, int parc, char *parv[])
     channel_set_topic(channel, parv[2], topic_info, io_time_get(IO_TIME_REALTIME_SEC), true);
 
     sendto_servers(source, 0, 0, ":%s TOPIC %s :%s",
-                   source->id, channel->name, channel->topic);
+                   source->id, channel->name, channel->topic ? channel->topic : "");
     sendto_channel_local(NULL, channel, 0, 0, 0, ":%s!%s@%s TOPIC %s :%s",
-                         source->name, source->username, source->host, channel->name, channel->topic);
+                         source->name, source->username, source->host, channel->name, channel->topic ? channel->topic : "");
   }
   else  /* Only asking for topic */
   {
@@ -95,7 +95,7 @@ m_topic(struct Client *source, int parc, char *parv[])
       return;
     }
 
-    if (channel->topic[0] == '\0')
+    if (channel->topic == NULL)
       sendto_one_numeric(source, &me, RPL_NOTOPIC, channel->name);
     else
     {
@@ -139,15 +139,15 @@ ms_topic(struct Client *source, int parc, char *parv[])
   channel_set_topic(channel, parv[2], topic_info, io_time_get(IO_TIME_REALTIME_SEC), false);
 
   sendto_servers(source, 0, 0, ":%s TOPIC %s :%s",
-                 source->id, channel->name, channel->topic);
+                 source->id, channel->name, channel->topic ? channel->topic : "");
 
   if (IsClient(source))
     sendto_channel_local(NULL, channel, 0, 0, 0, ":%s!%s@%s TOPIC %s :%s",
-                         source->name, source->username, source->host, channel->name, channel->topic);
+                         source->name, source->username, source->host, channel->name, channel->topic ? channel->topic : "");
   else
     sendto_channel_local(NULL, channel, 0, 0, 0, ":%s TOPIC %s :%s",
                          (IsHidden(source) || ConfigServerHide.hide_servers) ? me.name : source->name,
-                         channel->name, channel->topic);
+                         channel->name, channel->topic ? channel->topic : "");
 }
 
 static struct Command command_table =

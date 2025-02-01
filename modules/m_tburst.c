@@ -94,7 +94,7 @@ ms_tburst(struct Client *source, int parc, char *parv[])
 
   if (accept_remote)
   {
-    bool topic_differs = strncmp(channel->topic, topic, sizeof(channel->topic) - 1);
+    bool topic_differs = strncmp(channel->topic ? channel->topic : "", topic, TOPICLEN);
     bool hidden_server = (ConfigServerHide.hide_servers || IsHidden(source));
 
     channel_set_topic(channel, topic, setby, remote_topic_ts, false);
@@ -107,10 +107,10 @@ ms_tburst(struct Client *source, int parc, char *parv[])
     {
       if (IsClient(source))
         sendto_channel_local(NULL, channel, 0, 0, 0, ":%s!%s@%s TOPIC %s :%s",
-                             source->name, source->username, source->host, channel->name, channel->topic);
+                             source->name, source->username, source->host, channel->name, channel->topic ? channel->topic : "");
       else
         sendto_channel_local(NULL, channel, 0, 0, 0, ":%s TOPIC %s :%s",
-                             hidden_server ? me.name : source->name, channel->name, channel->topic);
+                             hidden_server ? me.name : source->name, channel->name, channel->topic ? channel->topic : "");
     }
   }
 }

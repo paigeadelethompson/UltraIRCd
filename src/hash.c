@@ -567,11 +567,11 @@ list_one_channel(struct Client *client, struct Channel *channel)
     return;
 
   char buf[MODEBUFLEN];
-  snprintf(buf, sizeof(buf), channel->topic[0] == '\0' ? "[%s]" : "[%s] ",
+  snprintf(buf, sizeof(buf), channel->topic ? "[%s] " : "[%s]",
            channel_modes(channel, client, false));
 
   sendto_one_numeric(client, &me, RPL_LIST,
-                     channel->name, list_length(&channel->members), buf, channel->topic);
+                     channel->name, list_length(&channel->members), buf, channel->topic ? channel->topic : "");
 }
 
 /**

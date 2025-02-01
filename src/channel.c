@@ -290,7 +290,7 @@ channel_send_modes(struct Client *client, const struct Channel *channel)
   if (channel->topic_time)
     sendto_one(client, ":%s TBURST %ju %s %ju %s :%s",
                me.id, channel->creation_time, channel->name, channel->topic_time,
-               channel->topic_info, channel->topic);
+               channel->topic_info, channel->topic ? channel->topic : "");
 
   if (IsCapable(client, CAPAB_MLOCK))
     sendto_one(client, ":%s MLOCK %ju %s %ju :%s",
@@ -424,6 +424,8 @@ channel_free(struct Channel *channel)
   assert(channel->invexlist.head == NULL);
   assert(channel->invexlist.tail == NULL);
 
+  io_free(channel->topic);
+  io_free(channel->topic_info);
   io_free(channel->mode_lock);
   io_free(channel);
 }
@@ -959,12 +961,17 @@ channel_check_spambot_warning(struct Client *client, const char *name)
 void
 channel_set_topic(struct Channel *channel, const char *topic, const char *topic_info, uintmax_t topicts, bool local)
 {
-  if (local)
-    strlcpy(channel->topic, topic, IO_MIN(sizeof(channel->topic), ConfigServerInfo.max_topic_length + 1));
-  else
-    strlcpy(channel->topic, topic, sizeof(channel->topic));
+  io_free(channel->topic);
+  channel->topic = NULL;
 
-  strlcpy(channel->topic_info, topic_info, sizeof(channel->topic_info));
+  if (!EmptyString(topic))
+  {
+    size_t max_length = local ? ConfigServerInfo.max_topic_length : TOPICLEN;
+    channel->topic = io_strndup(topic, max_length);
+  }
+
+  io_free(channel->topic_info);
+  channel->topic_info = io_strdup(topic_info);
   channel->topic_time = topicts;
 }
 
@@ -1095,7 +1102,7 @@ channel_join_list(struct Client *client, char *chan_list, char *key_list)
     if (invite)
       invite_del(invite);
 
-    if (channel->topic[0])
+    if (channel->topic)
     {
       sendto_one_numeric(client, &me, RPL_TOPIC, channel->name, channel->topic);
       sendto_one_numeric(client, &me, RPL_TOPICWHOTIME,

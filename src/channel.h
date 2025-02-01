@@ -65,8 +65,8 @@ struct Channel
   struct Channel *hnextch;  /**< Pointer to the next Channel with the same hash value */
   struct Mode mode;
 
-  char topic[TOPICLEN + 1];
-  char topic_info[NICKLEN + USERLEN + HOSTLEN + 3];
+  char *topic;
+  char *topic_info;
 
   uintmax_t creation_time;  /**< Time the channel has been created; real time */
   uintmax_t topic_time;  /**< Modification time of the topic; real time */
