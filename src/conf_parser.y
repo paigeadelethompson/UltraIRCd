@@ -651,23 +651,8 @@ serverinfo_max_nick_length: MAX_NICK_LENGTH '=' NUMBER ';'
 
 serverinfo_max_topic_length: MAX_TOPIC_LENGTH '=' NUMBER ';'
 {
-  if (conf_parser_ctx.pass != 2)
-    break;
-
-  if ($3 < 80)
-  {
-    conf_error_report("max_topic_length too low, setting to 80");
-    ConfigServerInfo.max_topic_length = 80;
-  }
-  else if ($3 > TOPICLEN)
-  {
-    char buf[IRCD_BUFSIZE];
-
-    snprintf(buf, sizeof(buf), "max_topic_length too high, setting to %d", TOPICLEN);
-    conf_error_report(buf);
-
+  if ($3 < 1 || $3 > TOPICLEN)
     ConfigServerInfo.max_topic_length = TOPICLEN;
-  }
   else
     ConfigServerInfo.max_topic_length = $3;
 };

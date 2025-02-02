@@ -901,7 +901,7 @@ conf_set_defaults(void)
   ConfigServerInfo.network_description = io_strdup(NETWORK_DESCRIPTION_DEFAULT);
   ConfigServerInfo.default_max_clients = MAXCLIENTS_MAX;
   ConfigServerInfo.max_nick_length = 9;
-  ConfigServerInfo.max_topic_length = 80;
+  ConfigServerInfo.max_topic_length = TOPICLEN;
   ConfigServerInfo.hub = 0;
 
   ConfigLog.use_logging = 1;
