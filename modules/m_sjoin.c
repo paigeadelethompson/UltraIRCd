@@ -319,7 +319,7 @@ ms_sjoin(struct Client *source, int parc, char *parv[])
 
     if (channel->topic)
     {
-      channel_set_topic(channel, "", "", 0, false);
+      channel_set_topic(channel, NULL, NULL, 0, false);
       sendto_channel_local(NULL, channel, 0, 0, 0, ":%s TOPIC %s :",
                            origin->name, channel->name);
     }

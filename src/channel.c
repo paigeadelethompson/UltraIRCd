@@ -963,6 +963,8 @@ channel_set_topic(struct Channel *channel, const char *topic, const char *topic_
 {
   io_free(channel->topic);
   channel->topic = NULL;
+  io_free(channel->topic_info);
+  channel->topic_info = NULL;
 
   if (!EmptyString(topic))
   {
@@ -970,8 +972,9 @@ channel_set_topic(struct Channel *channel, const char *topic, const char *topic_
     channel->topic = io_strndup(topic, max_length);
   }
 
-  io_free(channel->topic_info);
-  channel->topic_info = io_strdup(topic_info);
+  if (!EmptyString(topic_info))
+    channel->topic_info = io_strdup(topic_info);
+
   channel->topic_time = topicts;
 }
 
