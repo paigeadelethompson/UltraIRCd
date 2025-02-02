@@ -122,7 +122,7 @@ do_list(struct Client *source, char *arg)
             case ':':
               topic = opt + 1;
               if (!EmptyString(topic))
-                lt->topic = io_strndup(topic, TOPICLEN + 1);
+                lt->topic = io_strndup(topic, TOPICLEN);
               else
                 error = true;
               break;
