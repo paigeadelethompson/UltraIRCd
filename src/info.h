@@ -33,8 +33,6 @@
 #ifndef INCLUDED_info_h
 #define INCLUDED_info_h
 
-#include "list.h"
-
 /**
  * @def INFO_ENTRY_INIT
  * @brief Macro to simplify the initialization of InfoEntry entries.

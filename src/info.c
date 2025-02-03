@@ -31,6 +31,7 @@
  */
 
 #include "stdinc.h"
+#include "list.h"
 #include "memory.h"
 #include "send.h"
 #include "client.h"
