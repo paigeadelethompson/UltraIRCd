@@ -53,7 +53,7 @@ dbuf_alloc(void)
 {
   struct dbuf_block *block = io_calloc(sizeof(*block));
 
-  ++block->ref_count;
+  block->ref_count = 1;
   return block;
 }
 
