@@ -360,11 +360,8 @@ address_mask(struct io_addr *addr, int bits)
  * @return True if addresses match based on the specified criteria, false otherwise.
  */
 bool
-address_compare(const void *p1, const void *p2, bool exact, bool port, int bits)
+address_compare(const struct io_addr *addr, const struct io_addr *mask, bool exact, bool port, int bits)
 {
-  const struct io_addr *const addr = p1;
-  const struct io_addr *const mask = p2;
-
   /* Check if address families are the same */
   if (addr->ss.ss_family != mask->ss.ss_family)
     return false;
@@ -388,10 +385,8 @@ address_compare(const void *p1, const void *p2, bool exact, bool port, int bits)
 
     if (port && (sin1->sin6_port != sin2->sin6_port))
       return false;
-
     if (exact)
-      return memcmp(sin1->sin6_addr.s6_addr,
-                    sin2->sin6_addr.s6_addr, sizeof(struct in6_addr)) == 0;
+      return memcmp(sin1->sin6_addr.s6_addr, sin2->sin6_addr.s6_addr, sizeof(struct in6_addr)) == 0;
     return match_ipv6(addr, mask, bits);
   }
 

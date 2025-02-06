@@ -50,7 +50,7 @@ struct io_addr
 
 extern void address_strip_ipv4(struct io_addr *);
 extern void address_mask(struct io_addr *, int);
-extern bool address_compare(const void *, const void *, bool, bool, int);
+extern bool address_compare(const struct io_addr *, const struct io_addr *, bool, bool, int);
 extern bool match_ipv6(const struct io_addr *, const struct io_addr *, int);
 extern bool match_ipv4(const struct io_addr *, const struct io_addr *, int);
 extern int parse_netmask(const char *, struct io_addr *, int *);
