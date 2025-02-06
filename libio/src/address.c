@@ -351,8 +351,8 @@ address_mask(struct io_addr *addr, int bits)
  * This function compares two network addresses for equality or matching based on
  * specified criteria such as exact match, port match, and subnet match.
  *
- * @param p1    Pointer to the first network address (struct io_addr).
- * @param p2    Pointer to the second network address (struct io_addr).
+ * @param addr  Pointer to the first network address.
+ * @param mask  Pointer to the second network address.
  * @param exact If true, performs an exact address match (ignores bits parameter).
  * @param port  If true, compares port numbers for equality.
  * @param bits  Number of bits to consider for subnet matching (ignored if exact is true).
