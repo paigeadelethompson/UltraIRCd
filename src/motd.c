@@ -64,7 +64,7 @@ motd_create(const char *mask, const char *path)
     motd->type = MOTD_CLASS;
   else
   {
-    switch (parse_netmask(mask, &motd->address, &motd->addrbits))
+    switch (address_parse_netmask(mask, &motd->address, &motd->addrbits))
     {
       case HM_IPV4:
         motd->type = MOTD_IPMASKV4;
@@ -252,7 +252,7 @@ motd_lookup(const struct Client *client)
         break;
       case MOTD_IPMASKV6:
       case MOTD_IPMASKV4:
-        if (address_compare(&client->addr, &motd->address, false, false, motd->addrbits))
+        if (address_match(&client->addr, &motd->address, false, false, motd->addrbits))
           return motd;
         break;
       default: break;

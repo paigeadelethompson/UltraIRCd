@@ -127,7 +127,7 @@ resv_make(const char *mask, const char *reason, const list_t *elist)
       exempt->name = io_strdup(nick);
       exempt->user = io_strdup(user);
       exempt->host = io_strdup(host);
-      exempt->type = parse_netmask(host, &exempt->addr, &exempt->bits);
+      exempt->type = address_parse_netmask(host, &exempt->addr, &exempt->bits);
       list_add(exempt, &exempt->node, &resv->exempt_list);
     }
   }
@@ -178,7 +178,7 @@ resv_exempt_find(const struct Client *client, const struct ResvItem *resv)
           break;
         case HM_IPV6:
         case HM_IPV4:
-          if (address_compare(&client->addr, &exempt->addr, false, false, exempt->bits))
+          if (address_match(&client->addr, &exempt->addr, false, false, exempt->bits))
             return true;
           break;
         default:

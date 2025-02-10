@@ -139,7 +139,7 @@ static bool
 res_ourserver(const struct io_addr *inp)
 {
   for (unsigned int i = 0; i < reslib_nscount; ++i)
-    if (address_compare(inp, &reslib_nsaddr_list[i], true, true, 0))
+    if (address_match(inp, &reslib_nsaddr_list[i], true, true, 0))
       return true;
 
   return false;

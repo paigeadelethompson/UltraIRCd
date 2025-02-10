@@ -967,7 +967,7 @@ oper_entry: OPERATOR
 
     conf->flags = block_state.flags.value;
     conf->port  = block_state.port.value;
-    conf->htype = parse_netmask(conf->host, conf->addr, &conf->bits);
+    conf->htype = address_parse_netmask(conf->host, conf->addr, &conf->bits);
 
     conf_add_class_to_conf(conf, block_state.class.buf);
   }
@@ -2164,7 +2164,7 @@ deny_entry: DENY
   if (!block_state.addr.buf[0])
     break;
 
-  if (parse_netmask(block_state.addr.buf, NULL, NULL) != HM_HOST)
+  if (address_parse_netmask(block_state.addr.buf, NULL, NULL) != HM_HOST)
   {
     struct MaskItem *conf = conf_make(CONF_DLINE);
     conf->host = io_strdup(block_state.addr.buf);
@@ -2205,7 +2205,7 @@ exempt_ip: IP '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
   {
-    if (*yylval.string && parse_netmask(yylval.string, NULL, NULL) != HM_HOST)
+    if (*yylval.string && address_parse_netmask(yylval.string, NULL, NULL) != HM_HOST)
     {
       struct MaskItem *conf = conf_make(CONF_EXEMPT);
       conf->host = io_strdup(yylval.string);

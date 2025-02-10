@@ -452,10 +452,10 @@ sendto_match_butone_qualifies(const struct Client *one, const char *mask, send_m
   {
     struct io_addr addr;
     int bits = 0;
-    const int ret = parse_netmask(mask, &addr, &bits);
+    const int ret = address_parse_netmask(mask, &addr, &bits);
 
     if (ret == HM_IPV4 || ret == HM_IPV6)
-      if (address_compare(&one->addr, &addr, false, false, bits))
+      if (address_match(&one->addr, &addr, false, false, bits))
         return true;
     return match(mask, one->realhost) == 0;
   }

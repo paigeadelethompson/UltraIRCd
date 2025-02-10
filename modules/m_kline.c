@@ -68,7 +68,7 @@ kline_check(const struct AddressRec *arec)
         break;
       case HM_IPV6:
       case HM_IPV4:
-        if (address_compare(&client->addr, &arec->Mask.ipa.addr, false, false, arec->Mask.ipa.bits))
+        if (address_match(&client->addr, &arec->Mask.ipa.addr, false, false, arec->Mask.ipa.bits))
           conf_try_ban(client, CLIENT_BAN_KLINE, arec->conf->reason);
         break;
       default:
@@ -100,7 +100,7 @@ kline_handle(struct Client *source, const struct aline_ctx *aline)
     return;
   }
 
-  switch (parse_netmask(aline->host, &iphost, &bits))
+  switch (address_parse_netmask(aline->host, &iphost, &bits))
   {
     case HM_IPV4:
       min_cidr = ConfigGeneral.kline_min_cidr;

@@ -253,7 +253,7 @@ auth_dns_callback(void *vptr, const struct io_addr *addr, const char *name, size
     report_type = REPORT_FAIL_DNS;
   else if (namelength > HOSTLEN)
     report_type = REPORT_HOST_TOOLONG;
-  else if (address_compare(addr, &auth->client->addr, true, false, 0) == false)
+  else if (address_match(addr, &auth->client->addr, true, false, 0) == false)
     report_type = REPORT_IP_MISMATCH;
   else if (auth_verify_hostname(name) == false)
     report_type = REPORT_HOST_INVALID;

@@ -200,7 +200,7 @@ add_id(struct Client *client, struct Channel *channel, const char *banid, list_t
 
     nuh_split(&nuh);
 
-    ban->type = parse_netmask(ban->host, &ban->addr, &ban->bits);
+    ban->type = address_parse_netmask(ban->host, &ban->addr, &ban->bits);
   }
 
   if (MyClient(client))

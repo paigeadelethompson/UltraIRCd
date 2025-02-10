@@ -116,7 +116,7 @@ find_conf_by_address(const char *name, const struct io_addr *addr, unsigned int 
           if ((arec->type == type) &&
               arec->precedence > hprecv &&
               arec->masktype == HM_IPV6 &&
-              match_ipv6(addr, &arec->Mask.ipa.addr,
+              address_match_ipv6(addr, &arec->Mask.ipa.addr,
                          arec->Mask.ipa.bits) &&
               (!username || !cmpfunc(arec->username, username)) &&
               (IsNeedPassword(arec->conf) || arec->conf->passwd == NULL ||
@@ -139,7 +139,7 @@ find_conf_by_address(const char *name, const struct io_addr *addr, unsigned int 
           if ((arec->type == type) &&
               arec->precedence > hprecv &&
               arec->masktype == HM_IPV4 &&
-              match_ipv4(addr, &arec->Mask.ipa.addr,
+              address_match_ipv4(addr, &arec->Mask.ipa.addr,
                          arec->Mask.ipa.bits) &&
               (!username || !cmpfunc(arec->username, username)) &&
               (IsNeedPassword(arec->conf) || arec->conf->passwd == NULL ||
@@ -267,7 +267,7 @@ add_conf_by_address(const unsigned int type, struct MaskItem *conf)
   assert(type && !EmptyString(hostname));
 
   struct AddressRec *arec = io_calloc(sizeof(*arec));
-  arec->masktype = parse_netmask(hostname, &arec->Mask.ipa.addr, &bits);
+  arec->masktype = address_parse_netmask(hostname, &arec->Mask.ipa.addr, &bits);
   arec->Mask.ipa.bits = bits;
   arec->username = username;
   arec->conf = conf;
@@ -309,7 +309,7 @@ delete_one_address_conf(const char *address, struct MaskItem *conf)
   list_node_t *node;
   struct io_addr addr;
 
-  switch (parse_netmask(address, &addr, &bits))
+  switch (address_parse_netmask(address, &addr, &bits))
   {
     case HM_IPV4:
       /* We have to do this, since we do not re-hash for every bit -A1kmm. */
@@ -866,7 +866,7 @@ operator_find(const struct Client *client, const char *name)
             break;
           case HM_IPV6:
           case HM_IPV4:
-            if (address_compare(&client->addr, conf->addr, false, false, conf->bits))
+            if (address_match(&client->addr, conf->addr, false, false, conf->bits))
               return conf;
             break;
           default:

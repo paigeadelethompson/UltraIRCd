@@ -50,10 +50,10 @@ struct io_addr
 
 extern void address_strip_ipv4(struct io_addr *);
 extern void address_mask(struct io_addr *, int);
-extern bool address_compare(const struct io_addr *, const struct io_addr *, bool, bool, int);
-extern bool match_ipv6(const struct io_addr *, const struct io_addr *, int);
-extern bool match_ipv4(const struct io_addr *, const struct io_addr *, int);
-extern int parse_netmask(const char *, struct io_addr *, int *);
+extern bool address_match(const struct io_addr *, const struct io_addr *, bool, bool, int);
+extern bool address_match_ipv6(const struct io_addr *, const struct io_addr *, int);
+extern bool address_match_ipv4(const struct io_addr *, const struct io_addr *, int);
+extern int address_parse_netmask(const char *, struct io_addr *, int *);
 extern uint32_t hash_ipv4(const struct io_addr *, int);
 extern uint32_t hash_ipv6(const struct io_addr *, int);
 extern uint32_t hash_text(const char *);

@@ -53,7 +53,7 @@ kline_remove(struct Client *source, const struct aline_ctx *aline)
   struct io_addr iphost, *piphost;
   struct MaskItem *conf;
 
-  if (parse_netmask(aline->host, &iphost, NULL) != HM_HOST)
+  if (address_parse_netmask(aline->host, &iphost, NULL) != HM_HOST)
     piphost = &iphost;
   else
     piphost = NULL;

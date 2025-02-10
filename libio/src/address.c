@@ -41,10 +41,10 @@
  * Output: An integer describing whether it is an IPV6 or hostmask,
  *         an address(if it is IPV6), a bitlength(if it is IPV6).
  * Side effects: None
- * Comments: Called from parse_netmask
+ * Comments: Called from address_parse_netmask
  */
 static int
-try_parse_v6_netmask(const char *text, struct io_addr *addr, int *b)
+address_parse_ipv6_netmask(const char *text, struct io_addr *addr, int *b)
 {
   char c;
   int d[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
@@ -158,10 +158,10 @@ try_parse_v6_netmask(const char *text, struct io_addr *addr, int *b)
  * Output: An integer describing whether it is an IPV4 or hostmask,
  *         an address(if it is IPV4), a bitlength(if it is IPV4).
  * Side effects: None
- * Comments: Called from parse_netmask
+ * Comments: Called from address_parse_netmask
  */
 static int
-try_parse_v4_netmask(const char *text, struct io_addr *addr, int *b)
+address_parse_ipv4_netmask(const char *text, struct io_addr *addr, int *b)
 {
   const char *digits[4];
   uint8_t addb[4];
@@ -238,7 +238,7 @@ try_parse_v4_netmask(const char *text, struct io_addr *addr, int *b)
   return HM_IPV4;
 }
 
-/* int parse_netmask(const char *, struct io_addr *, int *);
+/* int address_parse_netmask(const char *, struct io_addr *, int *);
  * Input: A hostmask, or an IPV4/6 address.
  * Output: An integer describing whether it is an IPV4, IPV6 address or a
  *         hostmask, an address(if it is an IP mask),
@@ -246,15 +246,15 @@ try_parse_v4_netmask(const char *text, struct io_addr *addr, int *b)
  * Side effects: None
  */
 int
-parse_netmask(const char *text, struct io_addr *addr, int *b)
+address_parse_netmask(const char *text, struct io_addr *addr, int *b)
 {
   if (addr)
     memset(addr, 0, sizeof(*addr));
 
   if (strchr(text, '.'))
-    return try_parse_v4_netmask(text, addr, b);
+    return address_parse_ipv4_netmask(text, addr, b);
   if (strchr(text, ':'))
-    return try_parse_v6_netmask(text, addr, b);
+    return address_parse_ipv6_netmask(text, addr, b);
 
   return HM_HOST;
 }
@@ -360,7 +360,7 @@ address_mask(struct io_addr *addr, int bits)
  * @return True if addresses match based on the specified criteria, false otherwise.
  */
 bool
-address_compare(const struct io_addr *addr, const struct io_addr *mask, bool exact, bool port, int bits)
+address_match(const struct io_addr *addr, const struct io_addr *mask, bool exact, bool port, int bits)
 {
   /* Check if address families are the same */
   if (addr->ss.ss_family != mask->ss.ss_family)
@@ -376,7 +376,7 @@ address_compare(const struct io_addr *addr, const struct io_addr *mask, bool exa
       return false;
     if (exact)
       return sin1->sin_addr.s_addr == sin2->sin_addr.s_addr;
-    return match_ipv4(addr, mask, bits);
+    return address_match_ipv4(addr, mask, bits);
   }
   else if (addr->ss.ss_family == AF_INET6)
   {
@@ -387,20 +387,20 @@ address_compare(const struct io_addr *addr, const struct io_addr *mask, bool exa
       return false;
     if (exact)
       return memcmp(sin1->sin6_addr.s6_addr, sin2->sin6_addr.s6_addr, sizeof(struct in6_addr)) == 0;
-    return match_ipv6(addr, mask, bits);
+    return address_match_ipv6(addr, mask, bits);
   }
 
   return false;  /* Invalid address family */
 }
 
 /* The address matching stuff... */
-/* int match_ipv6(struct io_addr *, struct io_addr *, int)
+/* int address_match_ipv6(struct io_addr *, struct io_addr *, int)
  * Input: An IP address, an IP mask, the number of bits in the mask.
  * Output: if match, -1 else 0
  * Side effects: None
  */
 bool
-match_ipv6(const struct io_addr *addr, const struct io_addr *mask, int bits)
+address_match_ipv6(const struct io_addr *addr, const struct io_addr *mask, int bits)
 {
   int i, m, n = bits / 8;
   const struct sockaddr_in6 *const v6 = (const struct sockaddr_in6 *)addr;
@@ -418,13 +418,13 @@ match_ipv6(const struct io_addr *addr, const struct io_addr *mask, int bits)
   return false;
 }
 
-/* int match_ipv4(struct io_addr *, struct io_addr *, int)
+/* int address_match_ipv4(struct io_addr *, struct io_addr *, int)
  * Input: An IP address, an IP mask, the number of bits in the mask.
  * Output: if match, -1 else 0
  * Side Effects: None
  */
 bool
-match_ipv4(const struct io_addr *addr, const struct io_addr *mask, int bits)
+address_match_ipv4(const struct io_addr *addr, const struct io_addr *mask, int bits)
 {
   const struct sockaddr_in *const v4 = (const struct sockaddr_in *)addr;
   const struct sockaddr_in *const v4mask = (const struct sockaddr_in *)mask;
