@@ -112,7 +112,7 @@ New_Prefix2(int family, const void *dest, int bitlen, patricia_prefix_t *prefix)
   memcpy(&prefix->add.sin6, dest, addr_size);
   prefix->bitlen = (bitlen >= 0) ? bitlen : addr_size * 8;
   prefix->family = family;
-  prefix->ref_count = dynamic_allocated == true;
+  prefix->ref_count = dynamic_allocated ? 1 : 0;
 
   return prefix;
 }
