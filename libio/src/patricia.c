@@ -47,12 +47,12 @@
 
 #define prefix_to_uint8(prefix) ((const uint8_t *)&(prefix)->add.sin)
 
-static int
+static bool
 comp_with_mask(const uint8_t *addr, const uint8_t *dest, unsigned int mask)
 {
   /* Mask length of zero matches everything. */
   if (mask == 0)
-    return 1;
+    return true;
 
   if (memcmp(addr, dest, mask / 8) == 0)
   {
@@ -60,10 +60,10 @@ comp_with_mask(const uint8_t *addr, const uint8_t *dest, unsigned int mask)
     int m = ~((1 << (8 - (mask % 8))) - 1);
 
     if (mask % 8 == 0 || (addr[n] & m) == (dest[n] & m))
-      return 1;
+      return true;
   }
 
-  return 0;
+  return false;
 }
 
 /*
