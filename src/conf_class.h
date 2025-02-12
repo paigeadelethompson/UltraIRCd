@@ -30,6 +30,9 @@
 #ifndef INCLUDED_conf_class_h
 #define INCLUDED_conf_class_h
 
+#include "list.h"
+#include "patricia.h"
+
 /**
  * @brief Flags for controlling class behavior.
  */
@@ -53,8 +56,8 @@ struct ClassItem
   char *name;  /**< Name of the class. */
   list_node_t node;  /**< List node for linking into class_list. */
   bool active;  /**< Indicates if the class is active. */
-  void *ip_tree_v6;  /**< Pointer to IPv6 patricia_tree_t item. */
-  void *ip_tree_v4;  /**< Pointer to IPv4 patricia_tree_t item. */
+  patricia_tree_t *ip_tree_v6;  /**< Pointer to IPv6 patricia_tree_t item. */
+  patricia_tree_t *ip_tree_v4;  /**< Pointer to IPv4 patricia_tree_t item. */
   unsigned int ref_count;  /**< Reference count for the class. */
   unsigned int max_sendq;  /**< Maximum send queue size for clients in this class. */
   unsigned int max_recvq;  /**< Maximum receive queue size for clients in this class. */
