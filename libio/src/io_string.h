@@ -20,7 +20,7 @@
  */
 
 /**
- * @file irc_string.h
+ * @file io_string.h
  * @brief Header file for IRC string functions and character attributes.
  *
  * This header file provides essential definitions, macros, and enumerations
@@ -28,8 +28,8 @@
  * character attribute flags, classification macros, and utility functions.
  */
 
-#ifndef INCLUDED_irc_string_h
-#define INCLUDED_irc_string_h
+#ifndef INCLUDED_io_string_h
+#define INCLUDED_io_string_h
 
 #include "config.h"
 
@@ -115,4 +115,4 @@ extern size_t strlcpy(char *, const char *, size_t);
 #ifndef HAVE_STRLCAT
 extern size_t strlcat(char *, const char *, size_t);
 #endif
-#endif  /* INCLUDED_irc_string_h */
+#endif  /* INCLUDED_io_string_h */
