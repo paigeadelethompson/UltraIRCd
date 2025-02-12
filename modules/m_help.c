@@ -34,7 +34,7 @@
 #include "conf.h"
 #include "parse.h"
 #include "module.h"
-#include "irc_string.h"
+#include "io_string.h"
 
 
 enum { HELPLEN = 400 };

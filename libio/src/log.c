@@ -30,10 +30,10 @@
 #include "stdinc.h"
 #include "list.h"
 #include "log.h"
+#include "io_string.h"
 #include "conf.h"
 #include "misc.h"
 #include "memory.h"
-#include "irc_string.h"
 
 /**
  * @def TRUNCATED_STRING

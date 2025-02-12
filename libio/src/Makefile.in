@@ -122,7 +122,7 @@ am__DEPENDENCIES_1 =
 am_libio_la_OBJECTS = address.lo base32.lo comm.lo comm_epoll.lo \
 	comm_kqueue.lo comm_poll.lo dbuf.lo event.lo fdlist.lo hook.lo \
 	io_getopt.lo io_pidfile.lo io_rlimit.lo io_signal.lo \
-	irc_string.lo io_time.lo list.lo log.lo match.lo misc.lo \
+	io_string.lo io_time.lo list.lo log.lo match.lo misc.lo \
 	memory.lo module.lo patricia.lo res.lo reslib.lo rng_mt.lo \
 	sha3.lo tls_gnutls.lo tls_none.lo tls_openssl.lo \
 	tls_wolfssl.lo
@@ -156,7 +156,7 @@ am__depfiles_remade = ./$(DEPDIR)/address.Plo ./$(DEPDIR)/base32.Plo \
 	./$(DEPDIR)/fdlist.Plo ./$(DEPDIR)/hook.Plo \
 	./$(DEPDIR)/io_getopt.Plo ./$(DEPDIR)/io_pidfile.Plo \
 	./$(DEPDIR)/io_rlimit.Plo ./$(DEPDIR)/io_signal.Plo \
-	./$(DEPDIR)/io_time.Plo ./$(DEPDIR)/irc_string.Plo \
+	./$(DEPDIR)/io_string.Plo ./$(DEPDIR)/io_time.Plo \
 	./$(DEPDIR)/list.Plo ./$(DEPDIR)/log.Plo ./$(DEPDIR)/match.Plo \
 	./$(DEPDIR)/memory.Plo ./$(DEPDIR)/misc.Plo \
 	./$(DEPDIR)/module.Plo ./$(DEPDIR)/patricia.Plo \
@@ -388,8 +388,8 @@ libio_la_SOURCES = address.c     \
                     io_rlimit.h   \
                     io_signal.c   \
                     io_signal.h   \
-                    irc_string.c  \
-                    irc_string.h  \
+                    io_string.c   \
+                    io_string.h   \
                     io_time.c     \
                     io_time.h     \
                     list.c        \
@@ -489,8 +489,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/io_pidfile.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/io_rlimit.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/io_signal.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/io_string.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/io_time.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/irc_string.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/list.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/log.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/match.Plo@am__quote@ # am--include-marker
@@ -681,8 +681,8 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/io_pidfile.Plo
 	-rm -f ./$(DEPDIR)/io_rlimit.Plo
 	-rm -f ./$(DEPDIR)/io_signal.Plo
+	-rm -f ./$(DEPDIR)/io_string.Plo
 	-rm -f ./$(DEPDIR)/io_time.Plo
-	-rm -f ./$(DEPDIR)/irc_string.Plo
 	-rm -f ./$(DEPDIR)/list.Plo
 	-rm -f ./$(DEPDIR)/log.Plo
 	-rm -f ./$(DEPDIR)/match.Plo
@@ -757,8 +757,8 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/io_pidfile.Plo
 	-rm -f ./$(DEPDIR)/io_rlimit.Plo
 	-rm -f ./$(DEPDIR)/io_signal.Plo
+	-rm -f ./$(DEPDIR)/io_string.Plo
 	-rm -f ./$(DEPDIR)/io_time.Plo
-	-rm -f ./$(DEPDIR)/irc_string.Plo
 	-rm -f ./$(DEPDIR)/list.Plo
 	-rm -f ./$(DEPDIR)/log.Plo
 	-rm -f ./$(DEPDIR)/match.Plo

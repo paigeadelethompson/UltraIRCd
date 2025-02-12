@@ -24,14 +24,14 @@
  */
 
 #include "stdinc.h"
+#include "log.h"
+#include "io_string.h"
 #include "client.h"
 #include "channel.h"
 #include "hash.h"
 #include "id.h"
-#include "irc_string.h"
 #include "ircd.h"
 #include "numeric.h"
-#include "log.h"
 #include "send.h"
 #include "user_mode.h"
 #include "conf.h"

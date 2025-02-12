@@ -34,7 +34,7 @@
 #include <stddef.h>
 #include <stdbool.h>
 
-#include "irc_string.h"
+#include "io_string.h"
 
 /**
  * @brief Matches a string against a wildcard pattern with support for '*' and '?' wildcards.

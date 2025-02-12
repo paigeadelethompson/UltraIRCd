@@ -26,8 +26,8 @@
 #include "stdinc.h"
 #include "defaults.h"
 #include "io_rlimit.h"
+#include "io_string.h"
 #include "fdlist.h"
-#include "irc_string.h"
 #include "comm.h"   /* comm_setselect */
 #include "memory.h"
 #include "misc.h"

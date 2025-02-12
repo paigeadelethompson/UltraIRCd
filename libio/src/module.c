@@ -31,7 +31,7 @@
 #include "ltdl.h"
 #include "stdinc.h"
 #include "io.h"
-#include "irc_string.h"
+#include "io_string.h"
 #include "list.h"
 #include "log.h"
 #include "memory.h"

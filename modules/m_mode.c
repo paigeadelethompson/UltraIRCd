@@ -31,7 +31,7 @@
 #include "client_svstag.h"
 #include "cloak.h"
 #include "hash.h"
-#include "irc_string.h"
+#include "io_string.h"
 #include "ircd.h"
 #include "numeric.h"
 #include "user_mode.h"

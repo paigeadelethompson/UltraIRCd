@@ -28,7 +28,7 @@
 #include "list.h"
 #include "hash.h"
 #include "fdlist.h"
-#include "irc_string.h"
+#include "io_string.h"
 #include "ircd.h"
 #include "numeric.h"
 #include "conf.h"

@@ -30,7 +30,7 @@
 #include "client_svstag.h"
 #include "hash.h"
 #include "id.h"
-#include "irc_string.h"
+#include "io_string.h"
 #include "ircd.h"
 #include "numeric.h"
 #include "conf.h"

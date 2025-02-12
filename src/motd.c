@@ -25,19 +25,19 @@
  */
 
 #include "stdinc.h"
+#include "address.h"
 #include "defaults.h"
+#include "log.h"
+#include "memory.h"
+#include "misc.h"
+#include "io_string.h"
 #include "list.h"
 #include "ircd.h"
 #include "conf.h"
 #include "send.h"
 #include "numeric.h"
 #include "client.h"
-#include "irc_string.h"
-#include "memory.h"
-#include "log.h"
 #include "motd.h"
-#include "address.h"
-#include "misc.h"
 
 /** Global list of messages of the day. */
 static struct

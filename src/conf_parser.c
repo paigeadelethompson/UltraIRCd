@@ -72,6 +72,7 @@
 
 #include "stdinc.h"
 #include "defaults.h"
+#include "io_string.h"
 #include "ircd.h"
 #include "list.h"
 #include "command.h"
@@ -86,7 +87,6 @@
 #include "event.h"
 #include "id.h"
 #include "log.h"
-#include "irc_string.h"
 #include "memory.h"
 #include "module.h"
 #include "nuh.h"

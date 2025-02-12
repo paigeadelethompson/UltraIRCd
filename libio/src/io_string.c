@@ -20,13 +20,13 @@
  */
 
 /**
- * @file irc_string.c
+ * @file io_string.c
  * @brief String manipulation functions.
  */
 
 #include "config.h"
 #include "stdinc.h"
-#include "irc_string.h"
+#include "io_string.h"
 
 /**
  * @brief Check for the presence of wildcard characters in a string.

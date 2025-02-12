@@ -30,7 +30,7 @@
 #include "send.h"
 #include "parse.h"
 #include "module.h"
-#include "irc_string.h"
+#include "io_string.h"
 
 
 /*! \brief SVSKILL command handler

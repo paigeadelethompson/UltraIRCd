@@ -27,13 +27,13 @@
 #include <netinet/in_systm.h>
 #include <netinet/ip.h>
 #include <netinet/tcp.h>
+#include "io_string.h"
 #include "io_time.h"
 #include "list.h"
 #include "log.h"
 #include "listener.h"
 #include "client.h"
 #include "fdlist.h"
-#include "irc_string.h"
 #include "ircd.h"
 #include "ircd_defs.h"
 #include "comm.h"

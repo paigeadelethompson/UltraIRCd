@@ -20,7 +20,7 @@
  */
 
 #include "stdinc.h"
-#include "irc_string.h"
+#include "io_string.h"
 #include "nuh.h"
 #include "numeric.h"
 #include "conf.h"

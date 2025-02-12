@@ -41,7 +41,7 @@
 #include "stdinc.h"
 #include "address.h"
 #include "comm.h"
-#include "irc_string.h"
+#include "io_string.h"
 #include "io_time.h"
 #include "fdlist.h"
 #include "log.h"

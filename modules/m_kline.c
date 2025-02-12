@@ -27,7 +27,7 @@
 #include "io_time.h"
 #include "list.h"
 #include "client.h"
-#include "irc_string.h"
+#include "io_string.h"
 #include "ircd.h"
 #include "conf.h"
 #include "conf_cluster.h"

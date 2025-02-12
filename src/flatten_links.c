@@ -21,7 +21,7 @@
 
 #include "stdinc.h"
 #include "memory.h"
-#include "irc_string.h"
+#include "io_string.h"
 #include "list.h"
 #include "log.h"
 #include "ircd.h"

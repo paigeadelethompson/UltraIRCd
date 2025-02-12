@@ -29,7 +29,7 @@
 #include "server_capab.h"
 #include "send.h"
 #include "module.h"
-#include "irc_string.h"
+#include "io_string.h"
 
 
 /*

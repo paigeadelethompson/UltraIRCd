@@ -24,6 +24,7 @@
  */
 
 #include "stdinc.h"
+#include "io_string.h"
 #include "io_time.h"
 #include "list.h"
 #include "send.h"
@@ -31,7 +32,6 @@
 #include "channel.h"
 #include "client.h"
 #include "dbuf.h"
-#include "irc_string.h"
 #include "comm.h"
 #include "server_capab.h"
 #include "user_mode.h"

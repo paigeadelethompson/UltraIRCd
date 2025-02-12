@@ -25,8 +25,8 @@
 
 #include "stdinc.h"
 #include "address.h"
+#include "io_string.h"
 #include "io_time.h"
-#include "irc_string.h"
 #include "list.h"
 #include "memory.h"
 #include "misc.h"

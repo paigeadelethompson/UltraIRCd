@@ -30,7 +30,7 @@
 #include "module.h"
 #include "log.h"
 #include "parse.h"
-#include "irc_string.h"
+#include "io_string.h"
 
 
 /*! \brief ERROR command handler

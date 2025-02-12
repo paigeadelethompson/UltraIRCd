@@ -26,10 +26,10 @@
 #include "stdinc.h"
 #include "defaults.h"
 #include "list.h"
-#include "conf.h"
-#include "irc_string.h"
+#include "io_string.h"
 #include "memory.h"
 #include "patricia.h"
+#include "conf.h"
 
 static list_t class_list;
 

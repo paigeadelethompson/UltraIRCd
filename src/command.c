@@ -20,11 +20,11 @@
  */
 
 #include "stdinc.h"
+#include "memory.h"
+#include "io_string.h"
 #include "client.h"
-#include "irc_string.h"
 #include "numeric.h"
 #include "send.h"
-#include "memory.h"
 #include "command.h"
 
 /*

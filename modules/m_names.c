@@ -28,7 +28,7 @@
 #include "channel.h"
 #include "client.h"
 #include "hash.h"
-#include "irc_string.h"
+#include "io_string.h"
 #include "ircd.h"
 #include "numeric.h"
 #include "send.h"

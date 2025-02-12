@@ -25,14 +25,14 @@
  */
 
 #include "stdinc.h"
+#include "log.h"
+#include "memory.h"
+#include "io_string.h"
 #include "conf.h"
 #include "conf_db.h"
 #include "conf_gecos.h"
 #include "conf_resv.h"
-#include "memory.h"
-#include "log.h"
 #include "send.h"
-#include "irc_string.h"
 
 /*! \brief Return the version number on the file.  Return 0 if there is no version
  * number or the number doesn't make sense (i.e. less than 1 or greater

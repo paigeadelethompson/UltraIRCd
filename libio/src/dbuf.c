@@ -36,9 +36,8 @@
 #include <string.h>
 #include <assert.h>
 
-#include "list.h"
-#include "dbuf.h"
 #include "memory.h"
+#include "dbuf.h"
 
 /**
  * @brief Allocate a new dynamic buffer block.

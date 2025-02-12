@@ -43,10 +43,10 @@
  */
 
 #include "stdinc.h"
+#include "io_string.h"
 #include "io_time.h"
 #include "list.h"
 #include "event.h"
-#include "irc_string.h"
 #include "rng_mt.h"
 #include "fdlist.h"
 #include "comm.h"

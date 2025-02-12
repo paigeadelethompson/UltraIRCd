@@ -24,11 +24,11 @@
  */
 
 #include "stdinc.h"
+#include "io_string.h"
 #include "io_time.h"
 #include "list.h"
 #include "client.h"
 #include "hash.h"
-#include "irc_string.h"
 #include "ircd.h"
 #include "ircd_defs.h"
 #include "comm.h"

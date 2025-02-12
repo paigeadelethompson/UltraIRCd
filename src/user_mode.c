@@ -21,7 +21,7 @@
 
 
 #include "stdinc.h"
-#include "irc_string.h"
+#include "io_string.h"
 #include "memory.h"
 #include "client.h"
 #include "send.h"

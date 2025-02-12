@@ -28,7 +28,7 @@
 #include "client.h"
 #include "ircd.h"
 #include "send.h"
-#include "irc_string.h"
+#include "io_string.h"
 #include "parse.h"
 #include "module.h"
 #include "conf.h"

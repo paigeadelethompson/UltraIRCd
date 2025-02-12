@@ -29,7 +29,10 @@
  */
 
 #include "stdinc.h"
+#include "dbuf.h"
 #include "list.h"
+#include "memory.h"
+#include "io_string.h"
 #include "conf.h"
 #include "channel.h"
 #include "channel_mode.h"
@@ -37,13 +40,10 @@
 #include "hash.h"
 #include "id.h"
 #include "rng_mt.h"
-#include "irc_string.h"
 #include "ircd.h"
 #include "numeric.h"
 #include "send.h"
 #include "user_mode.h"
-#include "memory.h"
-#include "dbuf.h"
 
 /**
  * @var static struct Client *idTable[HASHSIZE]

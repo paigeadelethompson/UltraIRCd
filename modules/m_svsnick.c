@@ -33,7 +33,7 @@
 #include "send.h"
 #include "parse.h"
 #include "module.h"
-#include "irc_string.h"
+#include "io_string.h"
 #include "user.h"
 #include "user_mode.h"
 #include "hash.h"

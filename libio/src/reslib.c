@@ -90,9 +90,9 @@
  */
 
 #include "stdinc.h"
+#include "io_string.h"
 #include "res.h"
 #include "reslib.h"
-#include "irc_string.h"
 
 #define MAXLINE 128
 

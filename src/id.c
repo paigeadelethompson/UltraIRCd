@@ -25,8 +25,8 @@
  */
 
 #include "stdinc.h"
+#include "io_string.h"
 #include "id.h"
-#include "irc_string.h"
 #include "client.h"
 
 /**

@@ -29,13 +29,13 @@
 
 #include "stdinc.h"
 #include "list.h"
+#include "memory.h"
+#include "io_string.h"
 #include "client.h"
 #include "parse.h"
 #include "hash.h"
-#include "irc_string.h"
 #include "numeric.h"
 #include "send.h"
-#include "memory.h"
 #include "conf_pseudo.h"
 
 static list_t pseudo_list;  /**< List to manage pseudo items. */

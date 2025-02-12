@@ -31,6 +31,8 @@
 #ifndef INCLUDED_dbuf_h
 #define INCLUDED_dbuf_h
 
+#include "list.h"
+
 /**
  * @def dbuf_length(x)
  * @brief Macro to get the total length of a dbuf queue.

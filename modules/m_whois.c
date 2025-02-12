@@ -38,7 +38,7 @@
 #include "server.h"
 #include "user_mode.h"
 #include "send.h"
-#include "irc_string.h"
+#include "io_string.h"
 #include "parse.h"
 #include "module.h"
 #include "ircd_hook.h"

@@ -26,10 +26,10 @@
 
 #include "stdinc.h"
 #include "io_pidfile.h"
+#include "io_string.h"
 #include "defaults.h"
 #include "fdlist.h"
 #include "ircd.h"
-#include "irc_string.h"
 #include "send.h"
 #include "log.h"
 #include "client.h"

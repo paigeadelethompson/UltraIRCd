@@ -28,10 +28,10 @@
  */
 
 #include "stdinc.h"
+#include "io_string.h"
 #include "io_time.h"
 #include "list.h"
 #include "memory.h"
-#include "irc_string.h"
 #include "client.h"
 #include "hash.h"
 #include "conf.h"

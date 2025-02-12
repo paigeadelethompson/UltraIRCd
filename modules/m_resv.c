@@ -27,7 +27,7 @@
 #include "io_time.h"
 #include "client.h"
 #include "ircd.h"
-#include "irc_string.h"
+#include "io_string.h"
 #include "numeric.h"
 #include "server_capab.h"
 #include "send.h"

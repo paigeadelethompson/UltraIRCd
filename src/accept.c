@@ -22,7 +22,7 @@
 #include "stdinc.h"
 #include "list.h"
 #include "memory.h"
-#include "irc_string.h"
+#include "io_string.h"
 #include "channel.h"
 #include "client.h"
 #include "conf.h"

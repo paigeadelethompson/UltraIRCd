@@ -33,7 +33,7 @@
 #include "client.h"
 #include "conf.h"
 #include "hash.h"
-#include "irc_string.h"
+#include "io_string.h"
 #include "ircd.h"
 #include "numeric.h"
 #include "send.h"

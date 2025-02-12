@@ -26,7 +26,7 @@
 #include "stdinc.h"
 #include "list.h"
 #include "client.h"
-#include "irc_string.h"
+#include "io_string.h"
 #include "conf.h"
 #include "conf_cluster.h"
 #include "conf_shared.h"

@@ -24,6 +24,7 @@
  */
 
 #include "stdinc.h"
+#include "io_string.h"
 #include "io_time.h"
 #include "defaults.h"
 #include "list.h"
@@ -39,7 +40,6 @@
 #include "server.h"
 #include "channel.h"
 #include "client.h"
-#include "irc_string.h"
 #include "ircd.h"
 #include "listener.h"
 #include "address.h"

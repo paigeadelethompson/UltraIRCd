@@ -38,7 +38,7 @@
 #include "module.h"
 #include "channel.h"
 #include "channel_mode.h"
-#include "irc_string.h"
+#include "io_string.h"
 #include "hash.h"
 #include "misc.h"
 #include "accept.h"

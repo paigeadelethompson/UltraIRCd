@@ -24,6 +24,7 @@
  */
 
 #include "stdinc.h"
+#include "io_string.h"
 #include "io_time.h"
 #include "defaults.h"
 #include "list.h"
@@ -34,7 +35,6 @@
 #include "cloak.h"
 #include "hash.h"
 #include "id.h"
-#include "irc_string.h"
 #include "ircd.h"
 #include "ircd_hook.h"
 #include "listener.h"

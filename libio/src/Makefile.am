@@ -30,8 +30,8 @@ libio_la_SOURCES =  address.c     \
                     io_rlimit.h   \
                     io_signal.c   \
                     io_signal.h   \
-                    irc_string.c  \
-                    irc_string.h  \
+                    io_string.c   \
+                    io_string.h   \
                     io_time.c     \
                     io_time.h     \
                     list.c        \
