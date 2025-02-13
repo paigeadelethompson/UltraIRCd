@@ -24,13 +24,11 @@
  */
 
 #include "stdinc.h"
-#include "io_time.h"
-#include "list.h"
-#include "ipcache.h"
 #include "event.h"
 #include "memory.h"
+#include "io_time.h"
 #include "conf.h"
-#include "patricia.h"
+#include "ipcache.h"
 
 static list_t ipcache_list;
 static patricia_tree_t *ipcache_trie_v6;
