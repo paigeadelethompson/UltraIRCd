@@ -164,7 +164,7 @@ user_mode_string_to_flags(const char *mode_string)
 {
   uint64_t mode_flags = 0;
 
-  if (EmptyString(mode_string))
+  if (string_is_empty(mode_string))
     return 0;
 
   if (*mode_string == '+')

@@ -51,14 +51,14 @@
 static void
 ms_pong(struct Client *source, int parc, char *parv[])
 {
-  if (EmptyString(parv[1]))
+  if (string_is_empty(parv[1]))
   {
     sendto_one_numeric(source, &me, ERR_NOORIGIN);
     return;
   }
 
   const char *const destination = parv[2];
-  if (!EmptyString(destination))
+  if (!string_is_empty(destination))
   {
     struct Client *target;
     if ((target = hash_find_client(destination)) ||
@@ -89,7 +89,7 @@ mr_pong(struct Client *source, int parc, char *parv[])
 {
   assert(MyConnect(source));
 
-  if (parc == 2 && !EmptyString(parv[1]))
+  if (parc == 2 && !string_is_empty(parv[1]))
   {
     if (ConfigGeneral.ping_cookie && source->connection->random_ping)
     {

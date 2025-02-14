@@ -79,7 +79,7 @@ check_string(char *s)
     }
   }
 
-  if (EmptyString(str))
+  if (string_is_empty(str))
     strcpy(str, "*");
 }
 
@@ -173,7 +173,7 @@ add_id(struct Client *client, struct Channel *channel, const char *banid, list_t
   }
 
   /* Don't allow empty bans */
-  if (EmptyString(maskptr))
+  if (string_is_empty(maskptr))
     return NULL;
 
   struct Ban *ban = io_calloc(sizeof(*ban));
@@ -646,7 +646,7 @@ chm_limit(struct Client *client, struct Channel *channel, int parc, int *parn, c
     char *const lstr = parv[(*parn)++];
     int limit = 0;
 
-    if (EmptyString(lstr) || (limit = atoi(lstr)) <= 0)
+    if (string_is_empty(lstr) || (limit = atoi(lstr)) <= 0)
       return;
 
     sprintf(lstr, "%d", limit);
@@ -688,7 +688,7 @@ chm_key(struct Client *client, struct Channel *channel, int parc, int *parn, cha
   {
     char *const key = fix_key(parv[(*parn)++]);
 
-    if (EmptyString(key))
+    if (string_is_empty(key))
       return;
 
     assert(*key != ' ');

@@ -264,7 +264,7 @@ add_conf_by_address(const unsigned int type, struct MaskItem *conf)
   static unsigned int prec_value = UINT_MAX;
   int bits = 0;
 
-  assert(type && !EmptyString(hostname));
+  assert(type && !string_is_empty(hostname));
 
   struct AddressRec *arec = io_calloc(sizeof(*arec));
   arec->masktype = address_parse_netmask(hostname, &arec->Mask.ipa.addr, &bits);
@@ -995,10 +995,10 @@ conf_set_defaults(void)
 static void
 conf_validate(void)
 {
-  if (EmptyString(ConfigServerInfo.network_name))
+  if (string_is_empty(ConfigServerInfo.network_name))
     ConfigServerInfo.network_name = io_strdup(NETWORK_NAME_DEFAULT);
 
-  if (EmptyString(ConfigServerInfo.network_description))
+  if (string_is_empty(ConfigServerInfo.network_description))
     ConfigServerInfo.network_description = io_strdup(NETWORK_DESCRIPTION_DEFAULT);
 }
 
@@ -1344,7 +1344,7 @@ conf_read_files(bool cold)
 void
 conf_add_class_to_conf(struct MaskItem *conf, const char *name)
 {
-  if (EmptyString(name) || (conf->class = class_find(name, true)) == NULL)
+  if (string_is_empty(name) || (conf->class = class_find(name, true)) == NULL)
   {
     conf->class = class_default;
 
@@ -1398,7 +1398,7 @@ conf_error_report(const char *msg)
 bool
 match_conf_password(const char *password, const struct MaskItem *conf)
 {
-  if (EmptyString(password) || EmptyString(conf->passwd))
+  if (string_is_empty(password) || string_is_empty(conf->passwd))
     return false;
 
   const char *encr;

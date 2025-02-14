@@ -93,7 +93,7 @@ m_accept(struct Client *source, int parc, char *parv[])
 {
   char *mask = collapse(parv[1]);
 
-  if (EmptyString(mask) || strcmp(mask, "*") == 0)
+  if (string_is_empty(mask) || strcmp(mask, "*") == 0)
   {
     accept_list(source);
     return;

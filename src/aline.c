@@ -188,7 +188,7 @@ aline_parse(const char *cmd, struct Client *client, int parc, char *parv[], stru
     --parc;
   }
 
-  if (parc == 0 || EmptyString(*parv))
+  if (parc == 0 || string_is_empty(*parv))
   {
     sendto_one_numeric(client, &me, ERR_NEEDMOREPARAMS, cmd);
     return false;
@@ -236,7 +236,7 @@ aline_parse(const char *cmd, struct Client *client, int parc, char *parv[], stru
         return false;
       }
 
-      if (parc == 0 || EmptyString(*parv))
+      if (parc == 0 || string_is_empty(*parv))
       {
         sendto_one_numeric(client, &me, ERR_NEEDMOREPARAMS, cmd);
         return false;
@@ -252,7 +252,7 @@ aline_parse(const char *cmd, struct Client *client, int parc, char *parv[], stru
 
   if (aline->add)
   {
-    if (parc == 0 || EmptyString(*parv))
+    if (parc == 0 || string_is_empty(*parv))
       aline->reason = default_reason;
     else
       aline->reason = *parv;

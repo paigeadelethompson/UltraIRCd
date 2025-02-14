@@ -162,10 +162,10 @@ user_introduce(struct Client *client)
                  client->username, client->host, client->realhost,
                  client->sockhost, client->id, client->account, client->info);
 
-  if (!EmptyString(client->tls_certfp))
+  if (!string_is_empty(client->tls_certfp))
     sendto_servers(client, 0, 0, ":%s CERTFP %s", client->id, client->tls_certfp);
 
-  if (!EmptyString(client->tls_cipher))
+  if (!string_is_empty(client->tls_cipher))
     sendto_servers(client, 0, 0, ":%s METADATA client %s cipher :%s",
                    client->servptr->id, client->id, client->tls_cipher);
   AddFlag(client, FLAGS_INTRODUCED);
@@ -194,7 +194,7 @@ user_welcome(struct Client *client)
     sendto_one_notice(client, &me, ":*** Connected securely via %s",
                       client->tls_cipher);
 
-    if (!EmptyString(client->tls_certfp))
+    if (!string_is_empty(client->tls_certfp))
       sendto_one_notice(client, &me, ":*** Your client certificate fingerprint is %s",
                         client->tls_certfp);
   }
@@ -298,7 +298,7 @@ user_register_local(struct Client *client)
   }
 
   /* Password check */
-  if (!EmptyString(conf->passwd))
+  if (!string_is_empty(conf->passwd))
   {
     if (match_conf_password(client->connection->password, conf) == false)
     {
@@ -414,7 +414,7 @@ valid_hostname(const char *hostname)
 
   assert(p);
 
-  if (EmptyString(p) || *p == '.' || *p == ':')
+  if (string_is_empty(p) || *p == '.' || *p == ':')
     return false;
 
   for (; *p; ++p)
@@ -497,7 +497,7 @@ valid_nickname(const char *nickname, bool local)
   /*
    * Nicks can't start with a digit or - or be 0 length.
    */
-  if (EmptyString(p) || *p == '-' || (IsDigit(*p) && local))
+  if (string_is_empty(p) || *p == '-' || (IsDigit(*p) && local))
     return false;
 
   for (; *p; ++p)

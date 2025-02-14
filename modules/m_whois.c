@@ -249,13 +249,13 @@ m_whois(struct Client *source, int parc, char *parv[])
 {
   static uintmax_t last_used = 0;
 
-  if (EmptyString(parv[1]))
+  if (string_is_empty(parv[1]))
   {
     sendto_one_numeric(source, &me, ERR_NONICKNAMEGIVEN);
     return;
   }
 
-  if (!EmptyString(parv[2]))
+  if (!string_is_empty(parv[2]))
   {
     /* seeing as this is going across servers, we should limit it */
     if ((last_used + ConfigGeneral.pace_wait_simple) > io_time_get(IO_TIME_MONOTONIC_SEC))
@@ -298,13 +298,13 @@ m_whois(struct Client *source, int parc, char *parv[])
 static void
 mo_whois(struct Client *source, int parc, char *parv[])
 {
-  if (EmptyString(parv[1]))
+  if (string_is_empty(parv[1]))
   {
     sendto_one_numeric(source, &me, ERR_NONICKNAMEGIVEN);
     return;
   }
 
-  if (!EmptyString(parv[2]))
+  if (!string_is_empty(parv[2]))
   {
     if (server_route_command(source, ":%s WHOIS %s :%s", 1, parv)->result != SERVER_ROUTE_ISME)
       return;

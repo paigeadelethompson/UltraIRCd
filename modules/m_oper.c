@@ -61,7 +61,7 @@ oper_up(struct Client *client, const struct MaskItem *conf)
 
   sendto_one_numeric(client, &me, RPL_YOUREOPER);
 
-  if (!EmptyString(conf->whois))
+  if (!string_is_empty(conf->whois))
   {
     svstag_attach(&client->svstags, RPL_WHOISOPERATOR, "+", conf->whois);
     sendto_servers(NULL, 0, 0, ":%s SVSTAG %s %ju %u + :%s",
@@ -131,9 +131,9 @@ m_oper(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  if (!EmptyString(conf->certfp))
+  if (!string_is_empty(conf->certfp))
   {
-    if (EmptyString(source->tls_certfp) || strcasecmp(source->tls_certfp, conf->certfp))
+    if (string_is_empty(source->tls_certfp) || strcasecmp(source->tls_certfp, conf->certfp))
     {
       failed_oper_notice(source, ERR_NOOPERHOST, opername, "client certificate fingerprint mismatch");
       return;

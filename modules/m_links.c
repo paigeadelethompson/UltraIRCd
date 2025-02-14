@@ -56,7 +56,7 @@ do_links(struct Client *source, char *parv[])
   }
 
   const char *mask = parv[2];
-  if (EmptyString(mask))
+  if (string_is_empty(mask))
     mask = parv[1];
 
   list_node_t *node;
@@ -73,7 +73,7 @@ do_links(struct Client *source, char *parv[])
       if (user_mode_has_flag(source, UMODE_OPER) == false)
         continue;
 
-    if (!EmptyString(mask) && match(mask, target->name))
+    if (!string_is_empty(mask) && match(mask, target->name))
       continue;
 
     /*
@@ -85,7 +85,7 @@ do_links(struct Client *source, char *parv[])
   }
 
   sendto_one_numeric(source, &me, RPL_ENDOFLINKS,
-                     EmptyString(mask) ? "*" : mask);
+                     string_is_empty(mask) ? "*" : mask);
 }
 
 static void

@@ -88,10 +88,9 @@ unsigned int
 hash_string(const char *name)
 {
   static unsigned int hashf_xor_key = 0;
-  const unsigned char *p = (const unsigned char *)name;
   unsigned int hval = FNV1_32_INIT;
 
-  if (EmptyString(p))
+  if (string_is_empty(name))
     return 0;
 
   if (hashf_xor_key == 0)
@@ -99,7 +98,7 @@ hash_string(const char *name)
       hashf_xor_key = genrand_int32() % 256;  /* better than nothing --adx */
     while (hashf_xor_key == 0);
 
-  for (; *p; ++p)
+  for (const unsigned char *p = (const unsigned char *)name; *p; ++p)
   {
     hval += (hval << 1) + (hval << 4) +
             (hval << 7) + (hval << 8) + (hval << 24);

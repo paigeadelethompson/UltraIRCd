@@ -169,7 +169,7 @@ cloak_set_num_bits(int value)
 void
 cloak_set_secret(const char *value)
 {
-  if (EmptyString(value))
+  if (string_is_empty(value))
     return;
 
   io_free(config->secret);
@@ -188,7 +188,7 @@ cloak_set_secret(const char *value)
 void
 cloak_set_suffix(const char *value)
 {
-  if (EmptyString(value))
+  if (string_is_empty(value))
     return;
 
   io_free(config->suffix);
@@ -288,7 +288,7 @@ cloak_compute(const struct io_addr *addr)
 {
   if (config->enabled == 0)
     return NULL;
-  if (config->num_bits == 0 || EmptyString(config->secret))
+  if (config->num_bits == 0 || string_is_empty(config->secret))
     return NULL;
 
   struct io_addr tmp;

@@ -53,7 +53,7 @@ mr_error(struct Client *source, int parc, char *parv[])
     return;
 
   const char *message = "<>";
-  if (!EmptyString(parv[1]))
+  if (!string_is_empty(parv[1]))
     message = parv[1];
 
   log_write(LOG_TYPE_IRCD, "Received ERROR message from %s: %s",
@@ -80,7 +80,7 @@ static void
 ms_error(struct Client *source, int parc, char *parv[])
 {
   const char *message = "<>";
-  if (!EmptyString(parv[1]))
+  if (!string_is_empty(parv[1]))
     message = parv[1];
 
   log_write(LOG_TYPE_IRCD, "Received ERROR message from %s: %s",

@@ -34,12 +34,6 @@
 #include "config.h"
 
 /**
- * @def EmptyString(x)
- * @brief Macro to check if a string is empty (NULL or contains only '\0').
- */
-#define EmptyString(x) (!(x) || (*(x) == '\0'))
-
-/**
  * @brief Enumeration of character attributes used for classification.
  *
  * This enum defines various character classes for classification,
@@ -115,4 +109,19 @@ extern size_t strlcpy(char *, const char *, size_t);
 #ifndef HAVE_STRLCAT
 extern size_t strlcat(char *, const char *, size_t);
 #endif
+
+/**
+ * @brief Checks if a string is empty.
+ *
+ * This function returns `true` if the provided string pointer is NULL or if the string's
+ * first character is the null terminator (`'\0'`), indicating an empty string.
+ *
+ * @param str Pointer to the string to check.
+ * @return `true` if the string is empty or NULL; `false` otherwise.
+ */
+static inline bool
+string_is_empty(const char *str)
+{
+  return !str || *str == '\0';
+}
 #endif  /* INCLUDED_io_string_h */

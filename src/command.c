@@ -196,7 +196,7 @@ command_tree_find(const char *name)
 {
   struct CommandTree *tree = &command_tree;
 
-  assert(!EmptyString(name));
+  assert(!string_is_empty(name));
 
   while (IsAlpha(*name) && (tree = tree->pointers[*name & (MAXPTRLEN - 1)]))
     if (*++name == '\0')

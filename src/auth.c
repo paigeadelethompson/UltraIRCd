@@ -212,7 +212,7 @@ auth_verify_hostname(const char *hostname)
 
   assert(p);
 
-  if (EmptyString(p) || *p == '.' || *p == ':')
+  if (string_is_empty(p) || *p == '.' || *p == ':')
     return false;
 
   for (; *p; ++p)
@@ -343,7 +343,7 @@ auth_check_ident_reply(char *const reply)
    * Second token is the reply type
    */
   char *token = vector[IDENT_REPLY_TYPE];
-  if (EmptyString(token))
+  if (string_is_empty(token))
     return NULL;
 
   while (IsSpace(*token))
@@ -356,7 +356,7 @@ auth_check_ident_reply(char *const reply)
    * Third token is the os type
    */
   token = vector[IDENT_OS_TYPE];
-  if (EmptyString(token))
+  if (string_is_empty(token))
     return NULL;
 
   while (IsSpace(*token))
@@ -382,7 +382,7 @@ auth_check_ident_reply(char *const reply)
    * Fourth token is the username
    */
   token = vector[IDENT_INFO];
-  if (EmptyString(token))
+  if (string_is_empty(token))
     return NULL;
 
   while (IsSpace(*token))
@@ -440,7 +440,7 @@ auth_read_reply(fde_t *F, void *data_)
   auth->fd = NULL;
   auth->ident_pending = false;
 
-  if (EmptyString(username))
+  if (string_is_empty(username))
   {
     auth_sendheader(auth->client, REPORT_FAIL_ID);
     ++ServerStats.is_abad;

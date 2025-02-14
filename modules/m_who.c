@@ -126,7 +126,7 @@ who_send(struct Client *source, const struct Client *target,
 
   if ((who->fields & WHO_FIELD_QTO))  /* Query token */
   {
-    if (EmptyString(who->token))
+    if (string_is_empty(who->token))
       p += snprintf(p, sizeof(buf) - (p - buf), " %s", "0");
     else
       p += snprintf(p, sizeof(buf) - (p - buf), " %s", who->token);
@@ -177,7 +177,7 @@ who_send(struct Client *source, const struct Client *target,
     if (member)
     {
       const char *prefix = member_get_prefix(member, who->fields || !!HasCap(source, CAP_MULTI_PREFIX));
-      if (!EmptyString(prefix))
+      if (!string_is_empty(prefix))
         strlcat(status, prefix, sizeof(status));
     }
 
@@ -424,7 +424,7 @@ m_who(struct Client *source, int parc, char *parv[])
   char *token = NULL;
   struct WhoQuery w = { .maxmatches = WHO_MAX_REPLIES }, *who = &w;
 
-  if (!EmptyString(options))
+  if (!string_is_empty(options))
   {
     char ch;
     char *p = options;
@@ -590,7 +590,7 @@ m_who(struct Client *source, int parc, char *parv[])
 
   if (who->maxmatches == 0)
     sendto_one_numeric(source, &me, ERR_WHOLIMEXCEED, WHO_MAX_REPLIES, "WHO");
-  sendto_one_numeric(source, &me, RPL_ENDOFWHO, EmptyString(mask) ? "*" : mask);
+  sendto_one_numeric(source, &me, RPL_ENDOFWHO, string_is_empty(mask) ? "*" : mask);
 }
 
 static struct Command command_table =

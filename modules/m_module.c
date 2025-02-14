@@ -219,7 +219,7 @@ module_cmd_list(struct Client *source, const char *arg)
   LIST_FOREACH(node, module_get_list()->head)
   {
     const struct Module *const module = node->data;
-    if (!EmptyString(arg) && match(arg, module->name))
+    if (!string_is_empty(arg) && match(arg, module->name))
       continue;
 
     sendto_one_numeric(source, &me, RPL_MODLIST,
@@ -280,7 +280,7 @@ mo_module(struct Client *source, int parc, char *parv[])
     if (irccmp(tab->cmd, subcmd))
       continue;
 
-    if (tab->arg_required && EmptyString(module))
+    if (tab->arg_required && string_is_empty(module))
     {
       sendto_one_numeric(source, &me, ERR_NEEDMOREPARAMS, "MODULE");
       return;

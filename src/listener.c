@@ -490,7 +490,7 @@ listener_add(int port, const char *vhost_ip, unsigned int flags)
   vaddr.ss_len = res->ai_addrlen;
   freeaddrinfo(res);
 
-  if (!EmptyString(vhost_ip))
+  if (!string_is_empty(vhost_ip))
   {
     if (getaddrinfo(vhost_ip, portname, &hints, &res))
       return;

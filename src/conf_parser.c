@@ -3922,7 +3922,7 @@ yyreduce:
   {
     char *s = node->data;
 
-    if (EmptyString(s))
+    if (string_is_empty(s))
       continue;
 
     struct nuh_split nuh =
@@ -4696,7 +4696,7 @@ yyreduce:
   {
     char *s = node->data;
 
-    if (EmptyString(s))
+    if (string_is_empty(s))
       continue;
 
     struct nuh_split nuh =

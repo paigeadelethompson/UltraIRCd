@@ -70,7 +70,7 @@ pseudo_message_handler(struct Client *source, int parc, char *parv[])
   const struct PseudoItem *const pseudo = (const struct PseudoItem *)parv[1];
   const char *msg = parv[parc - 1];
 
-  if (parc < 3 || EmptyString(msg))
+  if (parc < 3 || string_is_empty(msg))
   {
     sendto_one_numeric(source, &me, ERR_NOTEXTTOSEND);
     return;
@@ -118,7 +118,7 @@ pseudo_register(const char *name, const char *nick, const char *server, const ch
   pseudo->nick = io_strdup(nick);
   pseudo->server = io_strdup(server);
   pseudo->command = io_strdup(command);
-  pseudo->prepend = !EmptyString(prepend) ? io_strdup(prepend) : NULL;
+  pseudo->prepend = !string_is_empty(prepend) ? io_strdup(prepend) : NULL;
   pseudo->command_struct = (struct Command) {
     .name = pseudo->command,
     .extra = pseudo,

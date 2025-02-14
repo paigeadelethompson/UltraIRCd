@@ -202,7 +202,7 @@ set_initial_nick(struct Client *source, const char *nick)
 static void
 nick_change_local(struct Client *source, const char *nick)
 {
-  assert(source->name[0] && !EmptyString(nick));
+  assert(source->name[0] && !string_is_empty(nick));
   assert(MyClient(source));
 
   if ((source->connection->nick.last_attempt + ConfigGeneral.max_nick_time) < io_time_get(IO_TIME_MONOTONIC_SEC))
@@ -276,7 +276,7 @@ nick_change_local(struct Client *source, const char *nick)
 static void
 nick_change_remote(struct Client *source, char *parv[])
 {
-  assert(!EmptyString(parv[1]));
+  assert(!string_is_empty(parv[1]));
   assert(IsClient(source));
   assert(source->name[0]);
 
@@ -581,7 +581,7 @@ perform_nick_change_collides(struct Client *source, struct Client *target,
 static void
 mr_nick(struct Client *source, int parc, char *parv[])
 {
-  if (EmptyString(parv[1]))
+  if (string_is_empty(parv[1]))
   {
     sendto_one_numeric(source, &me, ERR_NONICKNAMEGIVEN);
     return;
@@ -633,7 +633,7 @@ m_nick(struct Client *source, int parc, char *parv[])
 
   assert(MyClient(source));
 
-  if (EmptyString(parv[1]))
+  if (string_is_empty(parv[1]))
   {
     sendto_one_numeric(source, &me, ERR_NONICKNAMEGIVEN);
     return;

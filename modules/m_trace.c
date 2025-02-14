@@ -126,7 +126,7 @@ do_trace(struct Client *source, const char *name)
                  source->name, source->username, source->host, source->servptr->name);
 
   bool doall = false;
-  if (EmptyString(name))
+  if (string_is_empty(name))
     doall = true;
   else if (match(name, me.name) == 0)
     doall = true;

@@ -71,7 +71,7 @@ ms_svstag(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  if (EmptyString(parv[5]))
+  if (string_is_empty(parv[5]))
     return;
 
   svstag_attach(&target->svstags, strtoul(parv[3], NULL, 10), parv[4], parv[5]);

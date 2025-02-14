@@ -34,7 +34,7 @@
 static enum extban_match
 extban_tlsinfo_matches(struct Client *client, struct Channel *channel, struct Ban *ban)
 {
-  if (!EmptyString(client->tls_cipher))
+  if (!string_is_empty(client->tls_cipher))
     if (match(ban->host, client->tls_cipher) == 0)
       return EXTBAN_MATCH;
 

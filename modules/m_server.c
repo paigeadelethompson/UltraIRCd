@@ -94,10 +94,10 @@ server_send_client(struct Client *client_p, struct Client *target)
              target->sockhost, target->id,
              target->account, target->info);
 
-  if (!EmptyString(target->tls_certfp))
+  if (!string_is_empty(target->tls_certfp))
     sendto_one(client_p, ":%s CERTFP %s", target->id, target->tls_certfp);
 
-  if (!EmptyString(target->tls_cipher))
+  if (!string_is_empty(target->tls_cipher))
     sendto_one(client_p, ":%s METADATA client %s cipher :%s",
                target->servptr->id, target->id, target->tls_cipher);
 
@@ -325,8 +325,8 @@ server_check(const char *name, struct Client *client_p)
       if (match_conf_password(client_p->connection->password, conf) == false)
         return SERVER_CHECK_INVALID_PASSWORD;
 
-      if (!EmptyString(conf->certfp))
-        if (EmptyString(client_p->tls_certfp) || strcasecmp(client_p->tls_certfp, conf->certfp))
+      if (!string_is_empty(conf->certfp))
+        if (string_is_empty(client_p->tls_certfp) || strcasecmp(client_p->tls_certfp, conf->certfp))
           return SERVER_CHECK_INVALID_CERTIFICATE;
 
       conf_attach(client_p, conf);

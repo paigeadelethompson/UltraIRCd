@@ -1046,7 +1046,7 @@ parse_stats_args(struct Client *client, int parc, char *parv[], bool *doall, boo
 {
   const char *const name = parv[2];
 
-  if (EmptyString(name))
+  if (string_is_empty(name))
     return NULL;
 
   if (irccmp(name, ID_or_name(&me, client)) == 0)

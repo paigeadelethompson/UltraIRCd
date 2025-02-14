@@ -48,11 +48,11 @@ do_admin(struct Client *source)
 
   sendto_one_numeric(source, &me, RPL_ADMINME, me.name);
 
-  if (!EmptyString(ConfigAdminInfo.name))
+  if (!string_is_empty(ConfigAdminInfo.name))
     sendto_one_numeric(source, &me, RPL_ADMINLOC1, ConfigAdminInfo.name);
-  if (!EmptyString(ConfigAdminInfo.description))
+  if (!string_is_empty(ConfigAdminInfo.description))
     sendto_one_numeric(source, &me, RPL_ADMINLOC2, ConfigAdminInfo.description);
-  if (!EmptyString(ConfigAdminInfo.email))
+  if (!string_is_empty(ConfigAdminInfo.email))
     sendto_one_numeric(source, &me, RPL_ADMINEMAIL, ConfigAdminInfo.email);
 }
 

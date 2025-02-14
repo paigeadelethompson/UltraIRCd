@@ -90,7 +90,7 @@ mo_squit(struct Client *source, int parc, char *parv[])
   }
 
   char comment[REASONLEN + 1] = CONF_NOREASON;
-  if (!EmptyString(parv[2]))
+  if (!string_is_empty(parv[2]))
     strlcpy(comment, parv[2], sizeof(comment));
 
   if (MyConnect(target))

@@ -56,7 +56,7 @@ do_list(struct Client *source, char *arg)
   list_add(source, &lt->node, &listing_client_list);
 
   bool no_masked_channels = true;
-  if (!EmptyString(arg))
+  if (!string_is_empty(arg))
   {
     list_t *list;
     char *opt, *save = NULL;
@@ -121,7 +121,7 @@ do_list(struct Client *source, char *arg)
               break;
             case ':':
               topic = opt + 1;
-              if (!EmptyString(topic))
+              if (!string_is_empty(topic))
                 lt->topic = io_strndup(topic, TOPICLEN);
               else
                 error = true;

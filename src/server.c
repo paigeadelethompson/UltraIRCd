@@ -62,7 +62,7 @@ server_route_command(struct Client *client, const char *command, const int serve
   const char *const mask = parv[server];
 
   /* Assume it's this server if no target is specified. */
-  if (EmptyString(mask))
+  if (string_is_empty(mask))
   {
     route->target = &me;
     route->result = SERVER_ROUTE_ISME;
@@ -276,7 +276,7 @@ server_tls_connect_init(struct Client *client, const struct MaskItem *conf, fde_
     return;
   }
 
-  if (!EmptyString(conf->cipher_list))
+  if (!string_is_empty(conf->cipher_list))
     tls_set_ciphers(&F->tls, conf->cipher_list);
 
   server_tls_handshake(F, client);

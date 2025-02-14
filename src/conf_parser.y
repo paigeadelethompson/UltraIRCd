@@ -931,7 +931,7 @@ oper_entry: OPERATOR
   {
     char *s = node->data;
 
-    if (EmptyString(s))
+    if (string_is_empty(s))
       continue;
 
     struct nuh_split nuh =
@@ -1467,7 +1467,7 @@ auth_entry: IRCD_AUTH
   {
     char *s = node->data;
 
-    if (EmptyString(s))
+    if (string_is_empty(s))
       continue;
 
     struct nuh_split nuh =

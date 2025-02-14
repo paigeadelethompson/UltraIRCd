@@ -82,7 +82,7 @@ ms_encap(struct Client *source, int parc, char *parv[])
 
   if (handler->args_min &&
       (((unsigned int)parc < handler->args_min) ||
-       (handler->empty_last_arg != true && EmptyString(parv[handler->args_min - 1]))))
+       (handler->empty_last_arg != true && string_is_empty(parv[handler->args_min - 1]))))
     return;
 
   handler->handler(source, parc, parv);

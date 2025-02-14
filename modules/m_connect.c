@@ -116,7 +116,7 @@ do_connect(struct Client *source, const char *name)
 static void
 mo_connect(struct Client *source, int parc, char *parv[])
 {
-  if (!EmptyString(parv[3]))
+  if (!string_is_empty(parv[3]))
   {
     if (!HasOFlag(source, OPER_FLAG_CONNECT_REMOTE))
     {

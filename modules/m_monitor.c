@@ -53,7 +53,7 @@ monitor_add(struct Client *source, char *list)
   for (const char *name = strtok_r(list, ",", &p); name;
                    name = strtok_r(NULL, ",", &p))
   {
-    if (EmptyString(name) || valid_nickname(name, true) == false)
+    if (string_is_empty(name) || valid_nickname(name, true) == false)
       continue;
 
     if (list_length(&source->connection->monitors) >= ConfigGeneral.max_monitor)
@@ -65,7 +65,7 @@ monitor_add(struct Client *source, char *list)
       if (ofbufptr != ofbuf)
         sendto_one_numeric(source, &me, RPL_MONOFFLINE, ofbuf);
 
-      if (EmptyString(p))
+      if (string_is_empty(p))
         snprintf(buf, sizeof(buf), "%s", name);
       else
         snprintf(buf, sizeof(buf), "%s,%s", name, p);
@@ -122,7 +122,7 @@ monitor_del(struct Client *source, char *list)
   char *p = NULL;
   for (const char *name = strtok_r(list, ",", &p); name;
                    name = strtok_r(NULL, ",", &p))
-    if (!EmptyString(name))
+    if (!string_is_empty(name))
       monitor_del_from_hash_table(name, source);
 }
 
@@ -226,7 +226,7 @@ m_monitor(struct Client *source, int parc, char *parv[])
   switch (*parv[1])
   {
     case '+':
-      if (EmptyString(parv[2]))
+      if (string_is_empty(parv[2]))
       {
         sendto_one_numeric(source, &me, ERR_NEEDMOREPARAMS, "MONITOR");
         return;
@@ -235,7 +235,7 @@ m_monitor(struct Client *source, int parc, char *parv[])
       monitor_add(source, parv[2]);
       break;
     case '-':
-      if (EmptyString(parv[2]))
+      if (string_is_empty(parv[2]))
       {
         sendto_one_numeric(source, &me, ERR_NEEDMOREPARAMS, "MONITOR");
         return;

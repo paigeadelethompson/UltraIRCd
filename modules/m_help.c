@@ -81,7 +81,7 @@ do_help(struct Client *source, char *topic)
 {
   char h_index[] = "index";
 
-  if (EmptyString(topic))
+  if (string_is_empty(topic))
     topic = h_index;
   else
     for (char *p = topic; *p; ++p)

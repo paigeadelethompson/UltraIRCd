@@ -80,7 +80,7 @@ whowas_do(struct Client *source, char *parv[])
 {
   int count = 0, max = -1;
 
-  if (!EmptyString(parv[2]))
+  if (!string_is_empty(parv[2]))
     max = atoi(parv[2]);
 
   if (!MyConnect(source) && (max <= 0 || max > WHOWAS_MAX_REPLIES))
@@ -124,7 +124,7 @@ m_whowas(struct Client *source, int parc, char *parv[])
 {
   static uintmax_t last_used = 0;
 
-  if (EmptyString(parv[1]))
+  if (string_is_empty(parv[1]))
   {
     sendto_one_numeric(source, &me, ERR_NONICKNAMEGIVEN);
     return;
@@ -161,7 +161,7 @@ m_whowas(struct Client *source, int parc, char *parv[])
 static void
 ms_whowas(struct Client *source, int parc, char *parv[])
 {
-  if (EmptyString(parv[1]))
+  if (string_is_empty(parv[1]))
   {
     sendto_one_numeric(source, &me, ERR_NONICKNAMEGIVEN);
     return;

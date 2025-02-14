@@ -89,7 +89,7 @@ flatten_links_add(const char *const data)
 void
 flatten_links_write_file(void *unused)
 {
-  if (EmptyString(ConfigServerHide.flatten_links_file))
+  if (string_is_empty(ConfigServerHide.flatten_links_file))
     return;
 
   FILE *file = fopen(ConfigServerHide.flatten_links_file, "w");
@@ -137,7 +137,7 @@ flatten_links_write_file(void *unused)
 void
 flatten_links_read_file(void)
 {
-  if (EmptyString(ConfigServerHide.flatten_links_file))
+  if (string_is_empty(ConfigServerHide.flatten_links_file))
     return;
 
   FILE *file = fopen(ConfigServerHide.flatten_links_file, "r");

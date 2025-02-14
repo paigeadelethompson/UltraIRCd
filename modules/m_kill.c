@@ -56,7 +56,7 @@ static void
 mo_kill(struct Client *source, int parc, char *parv[])
 {
   const char *reason = parv[2];  /* Either defined or NULL (parc >= 2!!) */
-  if (EmptyString(reason))
+  if (string_is_empty(reason))
     reason = CONF_NOREASON;
 
   struct Client *target = find_person(source, parv[1]);

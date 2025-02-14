@@ -247,7 +247,7 @@ sendto_one_numeric(struct Client *to, const struct Client *from, enum irc_numeri
     return;  /* This socket has already been marked as dead */
 
   const char *dest = ID_or_name(to, to);
-  if (EmptyString(dest))
+  if (string_is_empty(dest))
     dest = "*";
 
   struct dbuf_block *buffer = dbuf_alloc();
@@ -277,7 +277,7 @@ sendto_one_notice(struct Client *to, const struct Client *from, const char *form
     return;  /* This socket has already been marked as dead */
 
   const char *dest = ID_or_name(to, to);
-  if (EmptyString(dest))
+  if (string_is_empty(dest))
     dest = "*";
 
   struct dbuf_block *buffer = dbuf_alloc();

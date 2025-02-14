@@ -58,7 +58,7 @@ motd_create(const char *mask, const char *path)
 {
   struct Motd *motd = io_calloc(sizeof(*motd));
 
-  if (EmptyString(mask))
+  if (string_is_empty(mask))
     motd->type = MOTD_UNIVERSAL;
   else if (class_find(mask, true))
     motd->type = MOTD_CLASS;
@@ -360,7 +360,7 @@ motd_init(void)
   }
 
   const char *const path = ConfigServerInfo.motd_file;
-  if (EmptyString(path))
+  if (string_is_empty(path))
     return;
 
   MotdList.local = motd_create(NULL, path);

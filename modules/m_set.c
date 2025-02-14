@@ -127,7 +127,7 @@ mo_set(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  if (EmptyString(parv[1]))
+  if (string_is_empty(parv[1]))
   {
     set_option_list(source);
     return;
@@ -140,7 +140,7 @@ mo_set(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  if (EmptyString(parv[2]))
+  if (string_is_empty(parv[2]))
   {
     set_option(source, option, -1);
     return;

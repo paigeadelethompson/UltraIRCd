@@ -122,7 +122,7 @@ mo_rehash(struct Client *source, int parc, char *parv[])
   const char *option = NULL;
   const char *server = NULL;
 
-  if (!EmptyString(parv[2]))
+  if (!string_is_empty(parv[2]))
   {
     if (!HasOFlag(source, OPER_FLAG_REHASH_REMOTE))
     {
@@ -149,10 +149,10 @@ mo_rehash(struct Client *source, int parc, char *parv[])
     if (irccmp(tab->option, option))
       continue;
 
-    if (!EmptyString(server))
+    if (!string_is_empty(server))
       sendto_match_servs(source, server, 0, "REHASH %s %s", server, option);
 
-    if (EmptyString(server) || match(server, me.name) == 0)
+    if (string_is_empty(server) || match(server, me.name) == 0)
       tab->handler(source);
 
     return;

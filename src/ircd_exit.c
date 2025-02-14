@@ -84,7 +84,7 @@ ircd_exit(ircd_exit_action_t action, const char *message)
   }
 
   char buf[IRCD_BUFSIZE];
-  if (EmptyString(message))
+  if (string_is_empty(message))
     snprintf(buf, sizeof(buf), "Server is %s",
              action == IRCD_EXIT_RESTART ? "restarting" : "terminating");
   else

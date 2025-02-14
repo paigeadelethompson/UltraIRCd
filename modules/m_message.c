@@ -375,7 +375,7 @@ target_process(struct Client *source, const char *name, const char *text, bool n
       access_rank = prefix_rank;
   }
 
-  if (EmptyString(name))
+  if (string_is_empty(name))
   {
     sendto_one_numeric(source, &me, ERR_NORECIPIENT, command[notice]);
     return;
@@ -435,14 +435,14 @@ target_process_list(struct Client *source, char *list, const char *text, bool no
 static void
 m_message(struct Client *source, int parc, char *parv[], bool notice)
 {
-  if (EmptyString(parv[1]))
+  if (string_is_empty(parv[1]))
   {
     if (notice == false)
       sendto_one_numeric(source, &me, ERR_NORECIPIENT, command[notice]);
     return;
   }
 
-  if (EmptyString(parv[2]))
+  if (string_is_empty(parv[2]))
   {
     if (notice == false)
       sendto_one_numeric(source, &me, ERR_NOTEXTTOSEND);

@@ -61,7 +61,7 @@ whois_send_hook(void *ctx_)
            "is using a secure connection", ctx->target->tls_cipher);
   sendto_one_numeric(ctx->source, &me, RPL_WHOISSECURE, ctx->target->name, buf);
 
-  if (!EmptyString(ctx->target->tls_certfp))
+  if (!string_is_empty(ctx->target->tls_certfp))
     if (user_mode_has_flag(ctx->source, UMODE_OPER) || ctx->source == ctx->target)
       sendto_one_numeric(ctx->source, &me, RPL_WHOISCERTFP, ctx->target->name, ctx->target->tls_certfp);
 

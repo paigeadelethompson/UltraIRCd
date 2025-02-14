@@ -47,7 +47,7 @@ do_away(struct Client *source, const char *message)
 {
   assert(IsClient(source));
 
-  if (EmptyString(message))
+  if (string_is_empty(message))
   {
     /* Marking as not away */
     if (source->away)

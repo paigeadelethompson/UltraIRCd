@@ -94,7 +94,7 @@ m_invite(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  if (EmptyString(parv[2]))
+  if (string_is_empty(parv[2]))
   {
     sendto_one_numeric(source, &me, ERR_NEEDMOREPARAMS, "INVITE");
     return;

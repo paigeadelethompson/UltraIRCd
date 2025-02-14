@@ -52,7 +52,7 @@ m_names(struct Client *source, int parc, char *parv[])
 {
   const char *const name = parv[1];
 
-  if (!EmptyString(name))
+  if (!string_is_empty(name))
   {
     struct Channel *channel = hash_find_channel(name);
     if (channel)

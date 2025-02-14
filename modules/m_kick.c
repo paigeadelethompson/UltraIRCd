@@ -98,7 +98,7 @@ m_kick(struct Client *source, int parc, char *parv[])
   }
 
   const char *reason = source->name;
-  if (!EmptyString(parv[3]))
+  if (!string_is_empty(parv[3]))
     reason = parv[3];
 
   sendto_channel_local(NULL, channel, 0, 0, 0, ":%s!%s@%s KICK %s %s :%.*s",
@@ -138,7 +138,7 @@ ms_kick(struct Client *source, int parc, char *parv[])
     return;
 
   const char *reason = source->name;
-  if (!EmptyString(parv[3]))
+  if (!string_is_empty(parv[3]))
     reason = parv[3];
 
   if (IsClient(source))

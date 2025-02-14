@@ -456,7 +456,7 @@ main(int argc, char *argv[])
   initialize_global_set_options();  /* Has to be called after conf_read_files() */
   flatten_links_init();
 
-  if (EmptyString(ConfigServerInfo.name))
+  if (string_is_empty(ConfigServerInfo.name))
   {
     log_write(LOG_TYPE_IRCD, "ERROR: No server name specified in serverinfo block.");
     exit(EXIT_FAILURE);
@@ -465,7 +465,7 @@ main(int argc, char *argv[])
   strlcpy(me.name, ConfigServerInfo.name, sizeof(me.name));
 
   /* serverinfo {} description must exist.  If not, error out.*/
-  if (EmptyString(ConfigServerInfo.description))
+  if (string_is_empty(ConfigServerInfo.description))
   {
     log_write(LOG_TYPE_IRCD, "ERROR: No server description specified in serverinfo block.");
     exit(EXIT_FAILURE);
@@ -473,7 +473,7 @@ main(int argc, char *argv[])
 
   strlcpy(me.info, ConfigServerInfo.description, sizeof(me.info));
 
-  if (EmptyString(ConfigServerInfo.sid))
+  if (string_is_empty(ConfigServerInfo.sid))
   {
     log_write(LOG_TYPE_IRCD, "Generating server ID");
     generate_sid();

@@ -308,7 +308,7 @@ channel_check_name(const char *name, bool local)
 {
   const char *p = name;
 
-  assert(!EmptyString(p));
+  assert(!string_is_empty(p));
 
   if (!IsChanPrefix(*p))
     return false;
@@ -360,7 +360,7 @@ channel_free_mask_list(list_t *list)
 struct Channel *
 channel_make(const char *name)
 {
-  assert(!EmptyString(name));
+  assert(!string_is_empty(name));
 
   struct Channel *channel = io_calloc(sizeof(*channel));
   channel->hnextch = channel;
@@ -966,13 +966,13 @@ channel_set_topic(struct Channel *channel, const char *topic, const char *topic_
   io_free(channel->topic_info);
   channel->topic_info = NULL;
 
-  if (!EmptyString(topic))
+  if (!string_is_empty(topic))
   {
     size_t max_length = local ? ConfigServerInfo.max_topic_length : TOPICLEN;
     channel->topic = io_strndup(topic, max_length);
   }
 
-  if (!EmptyString(topic_info))
+  if (!string_is_empty(topic_info))
     channel->topic_info = io_strdup(topic_info);
 
   channel->topic_time = topicts;
@@ -989,7 +989,7 @@ channel_set_mode_lock(struct Client *client, struct Channel *channel, const char
   io_free(channel->mode_lock);
   channel->mode_lock = NULL;
 
-  if (!EmptyString(mode_lock))
+  if (!string_is_empty(mode_lock))
     channel->mode_lock = io_strdup(mode_lock);
 }
 
@@ -1009,7 +1009,7 @@ channel_join_list(struct Client *client, char *chan_list, char *key_list)
     unsigned int flags = 0;
 
     /* If we have any more keys, take the first for this channel. */
-    if (!EmptyString(key_list) && (key_list = strchr(key = key_list, ',')))
+    if (!string_is_empty(key_list) && (key_list = strchr(key = key_list, ',')))
       *key_list++ = '\0';
 
     /* Empty keys are the same as no keys. */
@@ -1145,7 +1145,7 @@ channel_part_one(struct Client *client, const char *name, const char *reason)
    * Remove user from the old channel (if any). Only allow /part reasons in -m chans.
    */
   bool show_reason = true;
-  if (EmptyString(reason))
+  if (string_is_empty(reason))
     show_reason = false;
   else if (MyConnect(client))
   {

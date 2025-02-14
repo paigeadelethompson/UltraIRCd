@@ -53,7 +53,7 @@ m_ping(struct Client *source, int parc, char *parv[])
 {
   struct Client *target = NULL;
 
-  if (EmptyString(parv[1]))
+  if (string_is_empty(parv[1]))
   {
     sendto_one_numeric(source, &me, ERR_NOORIGIN);
     return;
@@ -67,7 +67,7 @@ m_ping(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  if (EmptyString(destination) || ((target = hash_find_server(destination)) && IsMe(target)))
+  if (string_is_empty(destination) || ((target = hash_find_server(destination)) && IsMe(target)))
     sendto_one(source, ":%s PONG %s :%s", me.name, me.name, parv[1]);
   else if (target)
     sendto_one(target, ":%s PING %s :%s",
@@ -93,14 +93,14 @@ ms_ping(struct Client *source, int parc, char *parv[])
 {
   struct Client *target = NULL;
 
-  if (EmptyString(parv[1]))
+  if (string_is_empty(parv[1]))
   {
     sendto_one_numeric(source, &me, ERR_NOORIGIN);
     return;
   }
 
   const char *const destination = parv[2];  /* Will get NULL or pointer (parc >= 2!!) */
-  if (EmptyString(destination) || ((target = hash_find_server(destination)) && IsMe(target)))
+  if (string_is_empty(destination) || ((target = hash_find_server(destination)) && IsMe(target)))
     sendto_one(source, ":%s PONG %s :%s",
                ID_or_name(&me, source), me.name, ID_or_name(source, source));
   else if (target)

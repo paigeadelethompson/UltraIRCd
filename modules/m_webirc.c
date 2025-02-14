@@ -80,7 +80,7 @@ mr_webirc(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  if (EmptyString(conf->passwd))
+  if (string_is_empty(conf->passwd))
   {
     client_exit(source, "WebIRC auth blocks must have a password");
     return;

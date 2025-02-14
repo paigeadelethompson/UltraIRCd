@@ -167,7 +167,7 @@ parse_handle_command(struct Command *command, struct Client *source,
   /* Check right amount of parameters is passed... --is */
   if (handler->args_min &&
       ((i < handler->args_min) ||
-       (handler->empty_last_arg != true && EmptyString(para[handler->args_min - 1]))))
+       (handler->empty_last_arg != true && string_is_empty(para[handler->args_min - 1]))))
     sendto_one_numeric(source, &me, ERR_NEEDMOREPARAMS, command->name);
   else
     handler->handler(source, i, para);
