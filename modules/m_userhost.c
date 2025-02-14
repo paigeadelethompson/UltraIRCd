@@ -24,19 +24,17 @@
  */
 
 #include "stdinc.h"
+#include "module.h"
+#include "io_string.h"
 #include "client.h"
 #include "ircd.h"
 #include "numeric.h"
 #include "send.h"
 #include "user_mode.h"
-#include "io_string.h"
 #include "parse.h"
-#include "module.h"
-
 
 /** See 5.7 Userhost message in RFC1459 */
 enum { RFC1459_MAX_USERHOST_LIST = 5 };
-
 
 /*! \brief USERHOST command handler
  *

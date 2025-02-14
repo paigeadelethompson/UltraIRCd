@@ -28,7 +28,6 @@
 #include "io_time.h"
 #include <sys/event.h>
 #include "fdlist.h"
-#include "ircd.h"
 #include "comm.h"
 #include "log.h"
 

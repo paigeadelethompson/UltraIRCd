@@ -30,11 +30,11 @@
 
 #include "stdinc.h"
 #include "list.h"
+#include "memory.h"
 #include "io_string.h"
 #include "client.h"
 #include "ircd_defs.h"
 #include "server_capab.h"
-#include "memory.h"
 
 /** @brief List of server capabilities supported by this IRC server. */
 static list_t capab_list;

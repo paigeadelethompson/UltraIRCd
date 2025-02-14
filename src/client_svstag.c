@@ -25,8 +25,8 @@
 
 #include "stdinc.h"
 #include "list.h"
-#include "client_svstag.h"
 #include "memory.h"
+#include "client_svstag.h"
 #include "numeric.h"
 #include "user_mode.h"
 

@@ -25,11 +25,11 @@
 
 #include "stdinc.h"
 #include "address.h"
-#include "io_string.h"
-#include "io_time.h"
 #include "list.h"
 #include "memory.h"
 #include "misc.h"
+#include "io_string.h"
+#include "io_time.h"
 #include "defaults.h"
 #include "channel.h"
 #include "channel_invite.h"

@@ -24,15 +24,14 @@
  */
 
 #include "stdinc.h"
+#include "module.h"
+#include "io_string.h"
 #include "client.h"
 #include "ircd.h"
-#include "io_string.h"
 #include "numeric.h"
 #include "send.h"
 #include "parse.h"
-#include "module.h"
 #include "ircd_exit.h"
-
 
 /*! \brief DIE command handler
  *

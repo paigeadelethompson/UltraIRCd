@@ -24,11 +24,11 @@
  */
 
 #include "stdinc.h"
-#include "io_time.h"
 #include "list.h"
+#include "memory.h"
+#include "io_time.h"
 #include "send.h"
 #include "client.h"
-#include "memory.h"
 #include "conf_gecos.h"
 
 static list_t gecos_list;

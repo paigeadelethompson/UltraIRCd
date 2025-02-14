@@ -24,21 +24,21 @@
  */
 
 #include "stdinc.h"
+#include "comm.h"
+#include "list.h"
+#include "log.h"
+#include "memory.h"
 #include "io_string.h"
 #include "io_time.h"
-#include "list.h"
 #include "client.h"
 #include "hash.h"
 #include "ircd.h"
 #include "ircd_defs.h"
-#include "comm.h"
 #include "packet.h"
 #include "conf.h"
 #include "server.h"
 #include "server_capab.h"
-#include "log.h"
 #include "send.h"
-#include "memory.h"
 #include "parse.h"
 
 /**

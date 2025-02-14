@@ -25,13 +25,12 @@
 
 #include "stdinc.h"
 #include "list.h"
+#include "module.h"
 #include "client.h"
 #include "ircd.h"
 #include "numeric.h"
 #include "send.h"
 #include "parse.h"
-#include "module.h"
-
 
 /*! \brief CLOSE command handler
  *

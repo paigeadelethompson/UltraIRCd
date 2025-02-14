@@ -24,11 +24,10 @@
  */
 
 #include "stdinc.h"
+#include "module.h"
 #include "client.h"
 #include "server_capab.h"
 #include "parse.h"
-#include "module.h"
-
 
 /*! \brief CAPAB command handler
  *

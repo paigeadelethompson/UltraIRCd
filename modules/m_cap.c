@@ -26,6 +26,8 @@
 
 #include "stdinc.h"
 #include "misc.h"
+#include "module.h"
+#include "io_string.h"
 #include "cap.h"
 #include "client.h"
 #include "ircd.h"
@@ -33,9 +35,6 @@
 #include "user.h"
 #include "send.h"
 #include "parse.h"
-#include "module.h"
-#include "io_string.h"
-
 
 static const struct Cap *
 find_cap(const char **caplist_p, bool *negate_p)

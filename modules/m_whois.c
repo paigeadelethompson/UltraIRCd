@@ -24,8 +24,11 @@
  */
 
 #include "stdinc.h"
-#include "io_time.h"
 #include "list.h"
+#include "misc.h"
+#include "module.h"
+#include "io_string.h"
+#include "io_time.h"
 #include "client.h"
 #include "client_svstag.h"
 #include "hash.h"
@@ -34,15 +37,11 @@
 #include "ircd.h"
 #include "numeric.h"
 #include "conf.h"
-#include "misc.h"
 #include "server.h"
 #include "user_mode.h"
 #include "send.h"
-#include "io_string.h"
 #include "parse.h"
-#include "module.h"
 #include "ircd_hook.h"
-
 
 /**
  * @enum whois_channel_visibility_t

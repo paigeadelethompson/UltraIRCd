@@ -24,13 +24,12 @@
  */
 
 #include "stdinc.h"
+#include "memory.h"
+#include "module.h"
 #include "client.h"
 #include "ircd.h"
 #include "send.h"
 #include "parse.h"
-#include "module.h"
-#include "memory.h"
-
 
 /*! \brief CERTFP command handler
  *

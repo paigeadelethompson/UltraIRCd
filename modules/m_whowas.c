@@ -24,23 +24,22 @@
  */
 
 #include "stdinc.h"
-#include "io_time.h"
 #include "list.h"
+#include "misc.h"
+#include "module.h"
+#include "io_string.h"
+#include "io_time.h"
 #include "whowas.h"
 #include "client.h"
 #include "hash.h"
-#include "io_string.h"
 #include "ircd.h"
 #include "numeric.h"
-#include "misc.h"
 #include "server.h"
 #include "send.h"
 #include "user_mode.h"
 #include "conf.h"
 #include "conf_service.h"
 #include "parse.h"
-#include "module.h"
-
 
 /** Maximum number of lines to send in response to a /WHOWAS. Only applies to remote clients. */
 enum { WHOWAS_MAX_REPLIES = 20 };

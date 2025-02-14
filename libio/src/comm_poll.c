@@ -28,9 +28,7 @@
 #include "io_time.h"
 #include <sys/poll.h>
 #include "fdlist.h"
-#include "list.h"
 #include "memory.h"
-#include "ircd.h"
 #include "comm.h"
 #include "log.h"
 

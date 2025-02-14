@@ -24,13 +24,12 @@
  */
 
 #include "stdinc.h"
+#include "module.h"
+#include "io_string.h"
 #include "client.h"
 #include "parse.h"
 #include "server_capab.h"
 #include "send.h"
-#include "module.h"
-#include "io_string.h"
-
 
 /*
  * ms_encap()

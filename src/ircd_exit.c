@@ -25,13 +25,13 @@
  */
 
 #include "stdinc.h"
+#include "fdlist.h"
+#include "log.h"
 #include "io_pidfile.h"
 #include "io_string.h"
 #include "defaults.h"
-#include "fdlist.h"
 #include "ircd.h"
 #include "send.h"
-#include "log.h"
 #include "client.h"
 #include "conf_db.h"
 #include "ircd_exit.h"

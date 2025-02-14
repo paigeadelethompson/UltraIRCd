@@ -24,21 +24,21 @@
  */
 
 #include "stdinc.h"
+#include "address.h"
+#include "comm.h"
+#include "dbuf.h"
+#include "list.h"
+#include "log.h"
 #include "io_string.h"
 #include "io_time.h"
-#include "list.h"
 #include "send.h"
 #include "cap.h"
 #include "channel.h"
 #include "client.h"
-#include "dbuf.h"
-#include "comm.h"
 #include "server_capab.h"
 #include "user_mode.h"
 #include "conf_class.h"
-#include "log.h"
 #include "conf.h"
-#include "address.h"
 
 static uintmax_t send_marker;
 

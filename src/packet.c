@@ -24,19 +24,19 @@
  */
 
 #include "stdinc.h"
+#include "fdlist.h"
+#include "comm.h"
+#include "list.h"
+#include "misc.h"
 #include "io_string.h"
 #include "io_time.h"
-#include "list.h"
-#include "comm.h"
 #include "conf.h"
 #include "client.h"
 #include "ircd.h"
 #include "parse.h"
-#include "fdlist.h"
 #include "packet.h"
 #include "send.h"
 #include "user_mode.h"
-#include "misc.h"
 
 
 enum { READBUF_SIZE = 16384 };

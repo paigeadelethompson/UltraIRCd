@@ -24,19 +24,19 @@
  */
 
 #include "stdinc.h"
+#include "address.h"
+#include "list.h"
+#include "memory.h"
+#include "misc.h"
 #include "io_string.h"
 #include "io_time.h"
-#include "list.h"
 #include "send.h"
 #include "client.h"
-#include "memory.h"
 #include "ircd.h"
 #include "ircd_defs.h"
-#include "misc.h"
 #include "nuh.h"
 #include "conf.h"
 #include "conf_resv.h"
-#include "address.h"
 
 static list_t resv_chan_list;
 static list_t resv_nick_list;

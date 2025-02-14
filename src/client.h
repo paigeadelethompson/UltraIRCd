@@ -27,13 +27,13 @@
 #ifndef INCLUDED_client_h
 #define INCLUDED_client_h
 
+#include "address.h"
+#include "dbuf.h"
+#include "fdlist.h"
 #include "io.h"
 #include "list.h"
-#include "fdlist.h"
-#include "ircd_defs.h"
-#include "dbuf.h"
 #include "auth.h"
-#include "address.h"
+#include "ircd_defs.h"
 
 
 /** Client connection states */

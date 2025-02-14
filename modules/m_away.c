@@ -25,17 +25,16 @@
 
 #include "stdinc.h"
 #include "memory.h"
+#include "module.h"
+#include "io_string.h"
 #include "io_time.h"
 #include "cap.h"
 #include "client.h"
-#include "io_string.h"
 #include "ircd.h"
 #include "numeric.h"
 #include "send.h"
 #include "parse.h"
-#include "module.h"
 #include "conf.h"
-#include "isupport.h"
 
 
 /*!

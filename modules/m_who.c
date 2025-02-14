@@ -25,8 +25,11 @@
  */
 
 #include "stdinc.h"
-#include "io_time.h"
+#include "address.h"
 #include "list.h"
+#include "module.h"
+#include "io_string.h"
+#include "io_time.h"
 #include "cap.h"
 #include "client.h"
 #include "channel.h"
@@ -37,13 +40,9 @@
 #include "numeric.h"
 #include "send.h"
 #include "user_mode.h"
-#include "io_string.h"
 #include "ircd_hook.h"
 #include "conf.h"
 #include "parse.h"
-#include "module.h"
-#include "address.h"
-
 
 /** Maximum number of lines to send in response to a /WHO. */
 enum { WHO_MAX_REPLIES = 500 };

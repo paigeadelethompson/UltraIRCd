@@ -34,12 +34,12 @@
  */
 
 #include "stdinc.h"
+#include "address.h"
 #include "base32.h"
+#include "memory.h"
 #include "sha3.h"
 #include "io_string.h"
-#include "memory.h"
 #include "ircd_defs.h"
-#include "address.h"
 #include "cloak.h"
 
 /**

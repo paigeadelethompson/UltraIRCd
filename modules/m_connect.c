@@ -24,19 +24,18 @@
  */
 
 #include "stdinc.h"
+#include "log.h"
+#include "module.h"
+#include "io_string.h"
 #include "client.h"
 #include "ircd.h"
-#include "io_string.h"
 #include "numeric.h"
 #include "conf.h"
-#include "log.h"
 #include "server.h"
 #include "send.h"
 #include "user_mode.h"
 #include "parse.h"
 #include "hash.h"
-#include "module.h"
-
 
 static void
 do_connect(struct Client *source, const char *name)
