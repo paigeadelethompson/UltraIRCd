@@ -12,6 +12,7 @@ AC_DEFUN([AX_ARG_ENABLE_WARNINGS], [
     AX_APPEND_COMPILE_FLAGS([-Wempty-body])
     AX_APPEND_COMPILE_FLAGS([-Wenum-conversion])
     AX_APPEND_COMPILE_FLAGS([-Wignored-qualifiers])
+    AX_APPEND_COMPILE_FLAGS([-Winline])
     AX_APPEND_COMPILE_FLAGS([-Wlogical-op])
     AX_APPEND_COMPILE_FLAGS([-Wmissing-declarations])
     AX_APPEND_COMPILE_FLAGS([-Wmissing-field-initializers])

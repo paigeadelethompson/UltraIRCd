@@ -108,6 +108,7 @@ The `configure` script accepts several optional parameters for further customiza
   - `-Wempty-body`
   - `-Wenum-conversion`
   - `-Wignored-qualifiers`
+  - `-Winline`
   - `-Wlogical-op`
   - `-Wmissing-declarations`
   - `-Wmissing-field-initializers`
