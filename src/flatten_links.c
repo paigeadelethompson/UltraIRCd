@@ -63,7 +63,10 @@ flatten_links_send(struct Client *client)
 
   list_node_t *node;
   LIST_FOREACH(node, flatten_links.head)
-    sendto_one_numeric(client, &me, RPL_LINKS | SND_EXPLICIT, "%s", node->data);
+  {
+    const char *const string = node->data;
+    sendto_one_numeric(client, &me, RPL_LINKS | SND_EXPLICIT, "%s", string);
+  }
 
   sendto_one_numeric(client, &me, RPL_ENDOFLINKS, "*");
 }
