@@ -290,12 +290,12 @@ channel_send_modes(struct Client *client, const struct Channel *channel)
   if (channel->topic_time)
     sendto_one(client, ":%s TBURST %ju %s %ju %s :%s",
                me.id, channel->creation_time, channel->name, channel->topic_time,
-               channel->topic_info, channel->topic ? channel->topic : "");
+               channel->topic_info, string_or_empty(channel->topic));
 
   if (capab_has_flag(client, CAPAB_MLOCK))
     sendto_one(client, ":%s MLOCK %ju %s %ju :%s",
                me.id, channel->creation_time, channel->name, channel->mode_lock_time,
-               channel->mode_lock == NULL ? "" : channel->mode_lock);
+               string_or_empty(channel->mode_lock));
 }
 
 /*! \brief Check channel name for invalid characters

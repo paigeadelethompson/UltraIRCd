@@ -570,7 +570,7 @@ list_one_channel(struct Client *client, struct Channel *channel)
            channel_modes(channel, client, false));
 
   sendto_one_numeric(client, &me, RPL_LIST,
-                     channel->name, list_length(&channel->members), buf, channel->topic ? channel->topic : "");
+                     channel->name, list_length(&channel->members), buf, string_or_empty(channel->topic));
 }
 
 /**

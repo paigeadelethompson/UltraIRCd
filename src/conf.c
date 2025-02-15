@@ -649,8 +649,7 @@ verify_access(struct Client *client)
   if (IsConfRedir(conf))
   {
     sendto_one_numeric(client, &me, RPL_REDIR,
-                       conf->name ? conf->name : "",
-                       conf->port);
+                       string_or_empty(conf->name), conf->port);
     return NOT_AUTHORIZED;
   }
 

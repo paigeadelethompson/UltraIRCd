@@ -25,6 +25,8 @@
 
 #include "stdinc.h"
 #include "list.h"
+#include "module.h"
+#include "io_string.h"
 #include "channel.h"
 #include "channel_mode.h"
 #include "client.h"
@@ -32,7 +34,6 @@
 #include "ircd.h"
 #include "send.h"
 #include "parse.h"
-#include "module.h"
 #include "server_capab.h"
 
 
@@ -67,9 +68,8 @@ ms_mlock(struct Client *source, int parc, char *parv[])
     channel->mode_lock_time = timestamp;
 
   sendto_servers(source, CAPAB_MLOCK, 0, ":%s MLOCK %ju %s %ju :%s",
-                 source->id, channel->creation_time, channel->name,
-                 channel->mode_lock_time,
-                 channel->mode_lock ? channel->mode_lock : "");
+                 source->id, channel->creation_time, channel->name, channel->mode_lock_time,
+                 string_or_empty(channel->mode_lock));
 }
 
 static struct Command command_table =

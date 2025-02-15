@@ -124,4 +124,19 @@ string_is_empty(const char *str)
 {
   return !str || *str == '\0';
 }
+
+/**
+ * @brief Returns a non-NULL string.
+ *
+ * This function returns the provided string if it is non-NULL; otherwise, it returns
+ * an empty string ("").
+ *
+ * @param str Pointer to the string to check.
+ * @return The original string if non-NULL, or an empty string ("") if NULL.
+ */
+static inline const char *
+string_or_empty(const char *str)
+{
+  return str ? str : "";
+}
 #endif  /* INCLUDED_io_string_h */
