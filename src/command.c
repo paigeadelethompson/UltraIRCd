@@ -21,6 +21,7 @@
 
 #include "stdinc.h"
 #include "memory.h"
+#include "misc.h"
 #include "io_string.h"
 #include "client.h"
 #include "numeric.h"
@@ -305,7 +306,7 @@ command_report(struct Client *client)
       const struct CommandTree *ptr = current->pointers[i];
       if (ptr)
       {
-        if (top >= sizeof(stack) / sizeof(stack[0]))
+        if (top >= IO_ARRAY_LENGTH(stack))
           return;
         stack[top++] = ptr;
       }
