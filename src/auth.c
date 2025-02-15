@@ -240,10 +240,10 @@ auth_verify_hostname(const char *hostname)
  * @param vptr A pointer to the pending AuthRequest struct.
  * @param addr The IP address being resolved.
  * @param name The resolved hostname, or NULL if the lookup failed.
- * @param namelength The length of the resolved hostname string.
+ * @param name_length The length of the resolved hostname string.
  */
 static void
-auth_dns_callback(void *vptr, const struct io_addr *addr, const char *name, size_t namelength)
+auth_dns_callback(void *vptr, const struct io_addr *addr, const char *name, size_t name_length)
 {
   struct AuthRequest *const auth = vptr;
   auth_report_type_t report;
@@ -253,9 +253,9 @@ auth_dns_callback(void *vptr, const struct io_addr *addr, const char *name, size
 
   auth->dns_pending = false;
 
-  if (namelength == 0)
+  if (name_length == 0)
     report = REPORT_FAIL_DNS;
-  else if (namelength > HOSTLEN)
+  else if (name_length > HOSTLEN)
     report = REPORT_HOST_TOOLONG;
   else if (address_match(addr, &auth->client->addr, true, false, 0) == false)
     report = REPORT_IP_MISMATCH;
