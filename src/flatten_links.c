@@ -53,19 +53,19 @@ flatten_links_init(void)
 }
 
 void
-flatten_links_send(struct Client *source)
+flatten_links_send(struct Client *client)
 {
   /*
    * Print our own info so at least it looks like a normal links, then
    * print out the file (which may or may not be empty).
    */
-  sendto_one_numeric(source, &me, RPL_LINKS, me.name, me.name, 0, me.info);
+  sendto_one_numeric(client, &me, RPL_LINKS, me.name, me.name, 0, me.info);
 
   list_node_t *node;
   LIST_FOREACH(node, flatten_links.head)
-    sendto_one_numeric(source, &me, RPL_LINKS | SND_EXPLICIT, "%s", node->data);
+    sendto_one_numeric(client, &me, RPL_LINKS | SND_EXPLICIT, "%s", node->data);
 
-  sendto_one_numeric(source, &me, RPL_ENDOFLINKS, "*");
+  sendto_one_numeric(client, &me, RPL_ENDOFLINKS, "*");
 }
 
 void
