@@ -101,7 +101,7 @@ enum auth_report_type
  *
  * This array contains header messages corresponding to different authentication report types.
  */
-static const char *const HeaderMessages[] =
+static const char *const auth_report_headers[] =
 {
   [REPORT_DO_DNS] = ":*** Looking up your hostname",
   [REPORT_FIN_DNS] = ":*** Found your hostname",
@@ -115,15 +115,19 @@ static const char *const HeaderMessages[] =
 };
 
 /**
- * @def auth_sendheader(c, i)
- * @brief Send authentication header message to the client.
+ * @brief Sends an authentication header notice to a client.
  *
- * This macro sends an authentication header message to the specified client based on the given report type.
+ * This function sends an authentication header message to the specified client based on the provided
+ * report type. The report type indexes into the auth_report_headers array.
  *
- * @param c Pointer to the client.
- * @param i Report type index.
+ * @param client Pointer to the Client structure.
+ * @param report An authentication report type (from the auth_report_type enumeration).
  */
-#define auth_sendheader(c, i) sendto_one_notice((c), &me, "%s", HeaderMessages[(i)])
+static inline void
+auth_send_header(struct Client *client, enum auth_report_type report)
+{
+  sendto_one_notice(client, &me, "%s", auth_report_headers[report]);
+}
 
 /**
  * @brief Allocate a new authentication request.
@@ -263,7 +267,7 @@ auth_dns_callback(void *vptr, const struct io_addr *addr, const char *name, size
     strlcpy(auth->client->host, name, sizeof(auth->client->host));
   }
 
-  auth_sendheader(auth->client, report_type);
+  auth_send_header(auth->client, report_type);
   auth_release_client(auth);
 }
 
@@ -293,7 +297,7 @@ auth_error(struct AuthRequest *auth)
   auth->fd = NULL;
   auth->ident_pending = false;
 
-  auth_sendheader(auth->client, REPORT_FAIL_ID);
+  auth_send_header(auth->client, REPORT_FAIL_ID);
 
   auth_release_client(auth);
 }
@@ -442,14 +446,14 @@ auth_read_reply(fde_t *F, void *data_)
 
   if (string_is_empty(username))
   {
-    auth_sendheader(auth->client, REPORT_FAIL_ID);
+    auth_send_header(auth->client, REPORT_FAIL_ID);
     ++ServerStats.is_abad;
   }
   else
   {
     strlcpy(auth->client->username, username, sizeof(auth->client->username));
     AddFlag(auth->client, FLAGS_GOTID);
-    auth_sendheader(auth->client, REPORT_FIN_ID);
+    auth_send_header(auth->client, REPORT_FIN_ID);
     ++ServerStats.is_asuc;
   }
 
@@ -556,7 +560,7 @@ auth_start_query(struct AuthRequest *auth)
   auth->fd = fd_open(fd, true, "ident");
   auth->ident_pending = true;
 
-  auth_sendheader(auth->client, REPORT_DO_ID);
+  auth_send_header(auth->client, REPORT_DO_ID);
 
   /*
    * Get the local address of the client and bind to that to
@@ -600,7 +604,7 @@ auth_start(struct Client *client)
   assert(client);
   assert(client->connection);
 
-  auth_sendheader(client, REPORT_DO_DNS);
+  auth_send_header(client, REPORT_DO_DNS);
 
   auth->dns_pending = true;
 
