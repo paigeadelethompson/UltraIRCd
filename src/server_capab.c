@@ -70,7 +70,7 @@ capab_add(const char *name, unsigned int flag, bool active)
 {
   struct Capability *cap = io_calloc(sizeof(*cap));
   cap->name = io_strdup(name);
-  cap->cap = flag;
+  cap->flag = flag;
   cap->active = active;
   list_add(cap, &cap->node, &capab_list);
 }
@@ -119,30 +119,31 @@ capab_find(const char *name)
   {
     const struct Capability *cap = node->data;
     if (irccmp(cap->name, name) == 0)
-      return cap->cap;
+      return cap->flag;
   }
 
   return 0;
 }
 
 /**
- * @brief Show the current server capabilities.
+ * @brief Generate a string representation of server capabilities.
  *
- * This function generates a static string representation of the current server capabilities.
- * The capabilities can be filtered based on a struct Client (ptr), and the active parameter
- * controls whether only active capabilities should be included in the output.
+ * This function generates a static, space-separated string of capability names.
+ * If a non-NULL client pointer is passed, the function filters the capabilities to only
+ * include those supported by that client (using its capability bitmask). If the client pointer
+ * is NULL, then all capabilities in the global list are included (subject to the 'active' flag).
  *
- * @param ptr Pointer to a struct Client (can be NULL).
- * @param active Boolean indicating whether to display only active capabilities.
+ * @param client Pointer to a Client structure (can be NULL).
+ * @param active Boolean indicating whether only active capabilities should be included.
  * @return Pointer to a static string representing the server capabilities.
  */
 const char *
-capab_get(const void *ptr, bool active)
+capab_get(const struct Client *client, bool active)
 {
   static char buf[IRCD_BUFSIZE];
   char *bufptr = buf;
 
-  *bufptr = '\0';  /* buf is static */
+  *bufptr = '\0';  /* Clear the static buffer. */
 
   list_node_t *node;
   LIST_FOREACH(node, capab_list.head)
@@ -150,7 +151,7 @@ capab_get(const void *ptr, bool active)
     const struct Capability *cap = node->data;
     if (active && cap->active == false)
       continue;
-    if (ptr && !IsCapable(((const struct Client *)ptr), cap->cap))
+    if (client && !capab_has_flag(client, cap->flag))
       continue;
 
     bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), bufptr != buf ? " %s" : "%s", cap->name);

@@ -277,7 +277,7 @@ server_estab(struct Client *client_p)
 
   server_burst(client_p);
 
-  if (IsCapable(client_p, CAPAB_EOB))
+  if (capab_has_flag(client_p, CAPAB_EOB))
   {
     LIST_FOREACH_PREV(node, global_server_list.tail)
     {
@@ -434,8 +434,8 @@ mr_server(struct Client *source, int parc, char *parv[])
 
   if (service_find(name, irccmp) == NULL)
   {
-    if ((ConfigChannel.enable_owner == 0) != !IsCapable(source, CAPAB_QOP) ||
-        (ConfigChannel.enable_admin == 0) != !IsCapable(source, CAPAB_AOP))
+    if ((ConfigChannel.enable_owner == 0) != !capab_has_flag(source, CAPAB_QOP) ||
+        (ConfigChannel.enable_admin == 0) != !capab_has_flag(source, CAPAB_AOP))
     {
       sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
                      "Link %s introduced server with mismatching AOP/QOP capabilities",

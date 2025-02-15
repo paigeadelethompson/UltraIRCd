@@ -189,7 +189,7 @@ ms_join(struct Client *source, int parc, char *parv[])
   struct Channel *channel = hash_find_channel(parv[2]);
   if (channel == NULL)
   {
-    if (IsCapable(source->from, CAPAB_RESYNC))
+    if (capab_has_flag(source->from, CAPAB_RESYNC))
     {
       sendto_one(source, ":%s RESYNC %s", me.id, parv[2]);
       return;

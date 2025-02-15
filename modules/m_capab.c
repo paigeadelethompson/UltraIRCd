@@ -49,9 +49,9 @@ mr_capab(struct Client *source, int parc, char *parv[])
   for (const char *name = strtok_r(list, " ", &p); name;
                    name = strtok_r(NULL, " ", &p))
   {
-    unsigned int cap = capab_find(name);
-    if (cap)
-      SetCapable(source, cap);
+    unsigned int flag = capab_find(name);
+    if (flag)
+      capab_set_flag(source, flag);
   }
 }
 

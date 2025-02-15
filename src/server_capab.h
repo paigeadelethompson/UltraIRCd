@@ -32,6 +32,8 @@
 #ifndef INCLUDED_server_capab_h
 #define INCLUDED_server_capab_h
 
+#include "client.h"
+
 /**
  * @brief Server capability flags.
  *
@@ -57,30 +59,6 @@ enum
 };
 
 /**
- * @def IsCapable(x, cap)
- * @brief Check if a server is capable of a certain capability.
- * @param x Pointer to the client structure.
- * @param cap Capability flag to check.
- */
-#define IsCapable(x, cap)   ((x)->connection->capab &   (cap))
-
-/**
- * @def SetCapable(x, cap)
- * @brief Set a capability for a server.
- * @param x Pointer to the client structure.
- * @param cap Capability flag to set.
- */
-#define SetCapable(x, cap)  ((x)->connection->capab |=  (cap))
-
-/**
- * @def ClearCap(x, cap)
- * @brief Clear a capability for a server.
- * @param x Pointer to the client structure.
- * @param cap Capability flag to clear.
- */
-#define ClearCap(x, cap)    ((x)->connection->capab &= ~(cap))
-
-/**
  * @struct Capability
  * @brief Describes a single server capability.
  *
@@ -92,7 +70,7 @@ struct Capability
 {
   list_node_t node;  /**< List node; linked into capab_list. */
   char *name;  /**< Name of the capability. */
-  unsigned int cap;  /**< Bitmask value representing the capability. */
+  unsigned int flag;  /**< Bitmask value representing the capability. */
   bool active;  /**< Indicates whether the capability is currently active on this server and advertised to others. */
 };
 
@@ -100,5 +78,42 @@ extern void capab_init(void);
 extern void capab_add(const char *, unsigned int, bool);
 extern void capab_del(const char *);
 extern unsigned int capab_find(const char *);
-extern const char *capab_get(const void *, bool);
+extern const char *capab_get(const struct Client *, bool);
+
+/**
+ * @brief Checks whether a specific capability flag is set for the client.
+ *
+ * @param client Pointer to the Client structure.
+ * @param flag The flag to check.
+ * @return true if the flag is set; false otherwise.
+ */
+static inline bool
+capab_has_flag(const struct Client *client, unsigned int flag)
+{
+  return (client->connection->capab & flag) != 0;
+}
+
+/**
+ * @brief Sets a specific capability flag for the client.
+ *
+ * @param client Pointer to the Client structure.
+ * @param flag The flag to set.
+ */
+static inline void
+capab_set_flag(struct Client *client, unsigned int flag)
+{
+  client->connection->capab |= flag;
+}
+
+/**
+ * @brief Unsets (clears) a specific capability flag for the client.
+ *
+ * @param client Pointer to the Client structure.
+ * @param flag The flag to clear.
+ */
+static inline void
+capab_unset_flag(struct Client *client, unsigned int flag)
+{
+  client->connection->capab &= ~flag;
+}
 #endif  /* INCLUDED_server_capab_h */

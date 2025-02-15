@@ -586,11 +586,11 @@ sendto_servers(const struct Client *one, const unsigned int capab,
       continue;
 
     /* check we have required capabs */
-    if (IsCapable(client, capab) != capab)
+    if (capab_has_flag(client, capab) != capab)
       continue;
 
     /* check we don't have any forbidden capabs */
-    if (IsCapable(client, nocapab))
+    if (capab_has_flag(client, nocapab))
       continue;
 
     sendto_one_buffer(client, buffer);
@@ -641,7 +641,7 @@ sendto_match_servs(const struct Client *source, const char *mask, unsigned int c
     if (target->from->connection->send_marker == send_marker)
       continue;
 
-    if (IsCapable(target->from, capab) != capab)
+    if (capab_has_flag(target->from, capab) != capab)
       continue;
 
     if (match(mask, target->name))
