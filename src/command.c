@@ -280,7 +280,7 @@ void
 command_report(struct Client *client)
 {
   const struct CommandTree *const tree = &command_tree;
-  const struct CommandTree *stack[MAXPTRLEN * MAXPTRLEN];
+  const struct CommandTree *stack[128];
   unsigned int top = 0;
 
   /* Initialize stack with the root node. */
