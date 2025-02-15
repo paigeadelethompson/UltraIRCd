@@ -89,32 +89,29 @@ mo_squit(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  char comment[REASONLEN + 1] = CONF_NOREASON;
-  if (!string_is_empty(parv[2]))
-    strlcpy(comment, parv[2], sizeof(comment));
-
+  const char *comment = string_default(parv[2], CONF_NOREASON);
   if (MyConnect(target))
   {
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Received SQUIT %s from %s (%s)",
-                   target->name, get_oper_name(source), comment);
-    log_write(LOG_TYPE_IRCD, "SQUIT %s from %s (%s)",
-              target->name, get_oper_name(source), comment);
+    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Received SQUIT %s from %s (%.*s)",
+                   target->name, get_oper_name(source), REASONLEN, comment);
+    log_write(LOG_TYPE_IRCD, "SQUIT %s from %s (%.*s)",
+              target->name, get_oper_name(source), REASONLEN, comment);
 
     /* To them, we are exiting */
-    sendto_one(target, ":%s SQUIT %s :%s", source->id, me.id, comment);
+    sendto_one(target, ":%s SQUIT %s :%.*s", source->id, me.id, REASONLEN, comment);
 
     /* Send to everything but target */
-    sendto_servers(target, 0, 0, ":%s SQUIT %s :%s",
-                   source->id, target->id, comment);
+    sendto_servers(target, 0, 0, ":%s SQUIT %s :%.*s",
+                   source->id, target->id, REASONLEN, comment);
   }
   else
     /* Send to everything */
-    sendto_servers(NULL, 0, 0, ":%s SQUIT %s :%s",
-                   source->id, target->id, comment);
+    sendto_servers(NULL, 0, 0, ":%s SQUIT %s :%.*s",
+                   source->id, target->id, REASONLEN, comment);
 
   AddFlag(target, FLAGS_SQUIT);
 
-  client_exit(target, comment);
+  client_exit_fmt(target, "%.*s", REASONLEN, comment);
 }
 
 /*! \brief SQUIT command handler
@@ -142,10 +139,7 @@ ms_squit(struct Client *source, int parc, char *parv[])
   if (IsMe(target))
     target = source->from;
 
-  const char *comment = source->name;
-  if (parc > 2 && parv[parc - 1])
-    comment = parv[parc - 1];
-
+  const char *comment = string_default(parv[2], source->name);
   if (MyConnect(target))
   {
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_GLOBAL, "from %s: Remote SQUIT %s from %s (%s)",
