@@ -55,10 +55,6 @@
 static void
 mo_kill(struct Client *source, int parc, char *parv[])
 {
-  const char *reason = parv[2];  /* Either defined or NULL (parc >= 2!!) */
-  if (string_is_empty(reason))
-    reason = CONF_NOREASON;
-
   struct Client *target = find_person(source, parv[1]);
   if (target == NULL)
   {
@@ -96,6 +92,7 @@ mo_kill(struct Client *source, int parc, char *parv[])
     return;
   }
 
+  const char *reason = string_default(parv[2], CONF_NOREASON);
   if (MyConnect(target))
     sendto_one(target, ":%s!%s@%s KILL %s :%.*s",
                source->name, source->username, source->host,

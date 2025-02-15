@@ -97,15 +97,13 @@ m_kick(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  const char *reason = source->name;
-  if (!string_is_empty(parv[3]))
-    reason = parv[3];
-
+  const char *reason = string_default(parv[3], source->name);
   sendto_channel_local(NULL, channel, 0, 0, 0, ":%s!%s@%s KICK %s %s :%.*s",
                        source->name, source->username, source->host, channel->name,
                        target->name, ConfigChannel.max_kick_length, reason);
   sendto_servers(source, 0, 0, ":%s KICK %s %s :%.*s",
                  source->id, channel->name, target->id, ConfigChannel.max_kick_length, reason);
+
   channel_remove_user(member_target);
 }
 
@@ -137,10 +135,7 @@ ms_kick(struct Client *source, int parc, char *parv[])
   if (member_target == NULL)
     return;
 
-  const char *reason = source->name;
-  if (!string_is_empty(parv[3]))
-    reason = parv[3];
-
+  const char *reason = string_default(parv[3], source->name);
   if (IsClient(source))
     sendto_channel_local(NULL, channel, 0, 0, 0, ":%s!%s@%s KICK %s %s :%.*s",
                          source->name, source->username, source->host, channel->name,
@@ -152,6 +147,7 @@ ms_kick(struct Client *source, int parc, char *parv[])
 
   sendto_servers(source, 0, 0, ":%s KICK %s %s :%.*s",
                  source->id, channel->name, target->id, ConfigChannel.max_kick_length, reason);
+
   channel_remove_user(member_target);
 }
 

@@ -72,11 +72,7 @@ m_quit(struct Client *source, int parc, char *parv[])
 static void
 ms_quit(struct Client *source, int parc, char *parv[])
 {
-  const char *reason = "";
-
-  if (!string_is_empty(parv[1]))
-    reason = parv[1];
-
+  const char *reason = string_default(parv[1], "");
   client_exit_fmt(source, "%.*s", KICKLEN, reason);
 }
 

@@ -111,6 +111,23 @@ extern size_t strlcat(char *, const char *, size_t);
 #endif
 
 /**
+ * @brief Returns a default string if the provided string is NULL or empty.
+ *
+ * This function checks if the provided string is non-NULL and not empty.
+ * If it is, the function returns the original string; otherwise, it returns
+ * the provided default string.
+ *
+ * @param str Pointer to the string to check.
+ * @param default_str The default string to return if `str` is NULL or empty.
+ * @return The original string if non-NULL and not empty, or the default string.
+ */
+static inline const char *
+string_default(const char *str, const char *default_str)
+{
+  return (str && *str != '\0') ? str : default_str;
+}
+
+/**
  * @brief Checks if a string is empty.
  *
  * This function returns `true` if the provided string pointer is NULL or if the string's

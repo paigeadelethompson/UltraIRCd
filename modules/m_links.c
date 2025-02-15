@@ -55,10 +55,7 @@ do_links(struct Client *source, char *parv[])
     return;
   }
 
-  const char *mask = parv[2];
-  if (string_is_empty(mask))
-    mask = parv[1];
-
+  const char *mask = string_default(parv[2], parv[1]);
   list_node_t *node;
   LIST_FOREACH(node, global_server_list.head)
   {
@@ -85,7 +82,7 @@ do_links(struct Client *source, char *parv[])
   }
 
   sendto_one_numeric(source, &me, RPL_ENDOFLINKS,
-                     string_is_empty(mask) ? "*" : mask);
+                     string_default(mask, "*"));
 }
 
 static void
