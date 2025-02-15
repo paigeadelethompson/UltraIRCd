@@ -75,7 +75,7 @@ enum { AUTH_BUFSIZE = 512 };
 enum { AUTH_PORTNUM = 113 };
 
 /**
- * @enum auth_report_type
+ * @enum auth_report_type_t
  * @brief Enumerates the different types of reports generated during the authentication process.
  *
  * This enumeration defines constants representing various reports that may occur during
@@ -83,7 +83,7 @@ enum { AUTH_PORTNUM = 113 };
  * message to be conveyed to the user or server, indicating the progress or outcome of
  * DNS and ident lookups.
  */
-enum auth_report_type
+typedef enum
 {
   REPORT_DO_DNS,  /**< Indicates the initiation of hostname lookup. */
   REPORT_FIN_DNS,  /**< Indicates the successful completion of hostname lookup. */
@@ -94,7 +94,7 @@ enum auth_report_type
   REPORT_IP_MISMATCH,  /**< Indicates a mismatch between forward and reverse DNS. */
   REPORT_HOST_TOOLONG,  /**< Indicates that the hostname is too long. */
   REPORT_HOST_INVALID,  /**< Indicates that the hostname contains illegal characters. */
-};
+} auth_report_type_t;
 
 /**
  * @brief Array of header messages for different authentication reports.
@@ -121,10 +121,10 @@ static const char *const auth_report_headers[] =
  * report type. The report type indexes into the auth_report_headers array.
  *
  * @param client Pointer to the Client structure.
- * @param report An authentication report type (from the auth_report_type enumeration).
+ * @param report An authentication report type (from the auth_report_type_t enumeration).
  */
 static inline void
-auth_send_header(struct Client *client, enum auth_report_type report)
+auth_send_header(struct Client *client, auth_report_type_t report)
 {
   sendto_one_notice(client, &me, "%s", auth_report_headers[report]);
 }
@@ -246,7 +246,7 @@ static void
 auth_dns_callback(void *vptr, const struct io_addr *addr, const char *name, size_t namelength)
 {
   struct AuthRequest *const auth = vptr;
-  enum auth_report_type report_type;
+  auth_report_type_t report;
 
   assert(auth->client);
   assert(auth->client->connection);
@@ -254,20 +254,20 @@ auth_dns_callback(void *vptr, const struct io_addr *addr, const char *name, size
   auth->dns_pending = false;
 
   if (namelength == 0)
-    report_type = REPORT_FAIL_DNS;
+    report = REPORT_FAIL_DNS;
   else if (namelength > HOSTLEN)
-    report_type = REPORT_HOST_TOOLONG;
+    report = REPORT_HOST_TOOLONG;
   else if (address_match(addr, &auth->client->addr, true, false, 0) == false)
-    report_type = REPORT_IP_MISMATCH;
+    report = REPORT_IP_MISMATCH;
   else if (auth_verify_hostname(name) == false)
-    report_type = REPORT_HOST_INVALID;
+    report = REPORT_HOST_INVALID;
   else
   {
-    report_type = REPORT_FIN_DNS;
+    report = REPORT_FIN_DNS;
     strlcpy(auth->client->host, name, sizeof(auth->client->host));
   }
 
-  auth_send_header(auth->client, report_type);
+  auth_send_header(auth->client, report);
   auth_release_client(auth);
 }
 
