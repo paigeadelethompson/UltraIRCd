@@ -112,7 +112,7 @@ hook_container_unregister(const char *name)
  * by each hook, allowing the chain to continue or stop based on the hooks' outcomes.
  *
  * @param container Pointer to the HookContainer structure.
- * @param ... Variable arguments passed to the hook functions.
+ * @param data Pointer to data passed to each hook function.
  * @return hook_flow_t The flow control signal indicating how the hook chain execution was concluded.
  */
 hook_flow_t
@@ -121,8 +121,8 @@ hook_dispatch(struct HookContainer *container, void *data)
   list_node_t *node = container->chain.head;
   while (node)
   {
-    HCFUNC hook_func = node->data;
-    hook_flow_t flow = hook_func(data);
+    hook_function_t function = node->data;
+    hook_flow_t flow = function(data);
 
     switch (flow)
     {
@@ -175,12 +175,12 @@ hook_container_find(const char *name)
  * for flexible control over the hook's placement based on the priority.
  *
  * @param container Pointer to the HookContainer structure.
- * @param hook Address of the hook function.
+ * @param function Address of the hook function.
  * @param priority Priority level to insert the hook in the chain.
  * @return list_node_t* Pointer to the list_node_t of the installed hook.
  */
 list_node_t *
-hook_install(struct HookContainer *container, HCFUNC hook, hook_priority_t priority)
+hook_install(struct HookContainer *container, hook_function_t function, hook_priority_t priority)
 {
   unsigned int length = list_length(&container->chain);
   unsigned int insert_position = 0;
@@ -222,7 +222,7 @@ hook_install(struct HookContainer *container, HCFUNC hook, hook_priority_t prior
   }
 
   list_node_t *node = io_calloc(sizeof(*node));
-  list_add_at(hook, insert_position, node, &container->chain);
+  list_add_at(function, insert_position, node, &container->chain);
 
   return node;
 }
@@ -234,12 +234,12 @@ hook_install(struct HookContainer *container, HCFUNC hook, hook_priority_t prior
  * with the given hook container. The memory allocated for the hook node is freed.
  *
  * @param container Pointer to the HookContainer structure.
- * @param hook Address of the hook function to uninstall.
+ * @param function Address of the hook function to uninstall.
  */
 void
-hook_uninstall(struct HookContainer *container, HCFUNC hook)
+hook_uninstall(struct HookContainer *container, hook_function_t function)
 {
-  list_node_t *node = list_find_remove(&container->chain, hook);
+  list_node_t *node = list_find_remove(&container->chain, function);
   if (node)
     list_free_node(node);
 }

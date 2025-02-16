@@ -69,12 +69,16 @@ typedef enum
 } hook_flow_t;
 
 /**
- * @typedef HCFUNC
- * @brief Typedef for function pointers used as hook callbacks.
- * @param va_list Argument list passed to the hook function.
- * @return hook_flow_t Flow control signal for the hook chain execution.
+ * @typedef hook_function_t
+ * @brief Function pointer type for hook functions.
+ *
+ * A hook function receives a pointer to data and returns a hook_flow_t,
+ * which directs the hook chain execution.
+ *
+ * @param data Pointer to data passed to the hook.
+ * @return hook_flow_t Flow control signal.
  */
-typedef hook_flow_t (*HCFUNC)(void *);
+typedef hook_flow_t (*hook_function_t)(void *);
 
 /**
  * @struct HookContainer
@@ -93,7 +97,7 @@ struct HookContainer
 extern struct HookContainer *hook_container_register(const char *);
 extern hook_flow_t hook_dispatch(struct HookContainer *, void *);
 extern struct HookContainer *hook_container_find(const char *);
-extern list_node_t *hook_install(struct HookContainer *, HCFUNC, hook_priority_t);
-extern void hook_uninstall(struct HookContainer *, HCFUNC);
+extern list_node_t *hook_install(struct HookContainer *, hook_function_t, hook_priority_t);
+extern void hook_uninstall(struct HookContainer *, hook_function_t);
 extern void hook_container_unregister(const char *);
 #endif  /* INCLUDED_hook_h */
