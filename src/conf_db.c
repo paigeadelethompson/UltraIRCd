@@ -27,12 +27,10 @@
 #include "stdinc.h"
 #include "log.h"
 #include "memory.h"
-#include "io_string.h"
 #include "conf.h"
 #include "conf_db.h"
 #include "conf_gecos.h"
 #include "conf_resv.h"
-#include "send.h"
 
 void
 save_kline_database(const char *filename)
