@@ -43,9 +43,9 @@ AC_CHECK_HEADERS_ONCE([
 
 AC_SEARCH_LIBS([crypt], [crypt])
 
-# Set -Werror=unknown-warning-option for clang so subsequent
-# AX_APPEND_COMPILE_FLAGS executions work properly.
+# Force Clang to error on unknown warning options so AX_CHECK_COMPILE_FLAG detects unsupported flags.
 AX_APPEND_COMPILE_FLAGS([-Werror=unknown-warning-option])
+
 # Disable -Wformat-truncation specifically for gcc.
 AX_APPEND_COMPILE_FLAGS([-Wno-format-truncation])
 
