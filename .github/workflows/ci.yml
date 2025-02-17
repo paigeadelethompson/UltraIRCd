@@ -24,6 +24,14 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+    - name: Install dependencies
+      run: |
+        if [[ "$RUNNER_OS" == "Linux" ]]; then
+          sudo apt-get update
+          sudo apt-get install -y libjansson-dev
+        elif [[ "$RUNNER_OS" == "macOS" ]]; then
+          brew install jansson
+        fi
     - name: configure
       run: ./configure --enable-warnings
     - name: make

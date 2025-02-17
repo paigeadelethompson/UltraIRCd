@@ -20,6 +20,10 @@ jobs:
           ref: aaa2e26b6e468112665ad7b15d144574a969b411
           repository: progval/irctest
 
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libjansson-dev
       - name: configure
         run: ./configure --prefix=$HOME/.local/
       - name: make
