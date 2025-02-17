@@ -33,7 +33,7 @@ jobs:
           brew install jansson
         fi
     - name: configure
-      run: ./configure --enable-warnings
+      run: ./configure --enable-warnings || (cat config.log; false)
     - name: make
       run: make -j$( (nproc || sysctl -n hw.logicalcpu || echo 1) 2>/dev/null)
     - name: make install
