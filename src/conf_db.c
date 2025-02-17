@@ -50,12 +50,19 @@ save_kline_database(const char *filename)
       if (arec->type != CONF_KLINE || !IsConfDatabase(arec->conf))
         continue;
 
-      json_t *entry = json_object();
-      json_object_set_new(entry, "user", json_string(arec->conf->user));
-      json_object_set_new(entry, "host", json_string(arec->conf->host));
-      json_object_set_new(entry, "reason", json_string(arec->conf->reason));
-      json_object_set_new(entry, "issued", json_integer(arec->conf->setat));
-      json_object_set_new(entry, "expires", json_integer(arec->conf->until));
+      json_error_t error;
+      json_t *entry = json_pack_ex(&error, 0, "{s:s, s:s, s:s, s:I, s:I}",
+                                   "user", arec->conf->user,
+                                   "host", arec->conf->host,
+                                   "reason", arec->conf->reason,
+                                   "issued", arec->conf->setat,
+                                   "expires", arec->conf->until);
+      if (entry == NULL)
+      {
+        log_write(LOG_TYPE_IRCD, "Error packing kline: line %d, column %d, position %d: %s",
+                  error.line, error.column, error.position, error.text);
+        continue;
+      }
 
       json_array_append_new(kline_array, entry);
     }
@@ -138,11 +145,18 @@ save_dline_database(const char *filename)
       if (arec->type != CONF_DLINE || !IsConfDatabase(arec->conf))
         continue;
 
-      json_t *entry = json_object();
-      json_object_set_new(entry, "host", json_string(arec->conf->host));
-      json_object_set_new(entry, "reason", json_string(arec->conf->reason));
-      json_object_set_new(entry, "issued", json_integer(arec->conf->setat));
-      json_object_set_new(entry, "expires", json_integer(arec->conf->until));
+      json_error_t error;
+      json_t *entry = json_pack_ex(&error, 0, "{s:s, s:s, s:I, s:I}",
+                                   "host", arec->conf->host,
+                                   "reason", arec->conf->reason,
+                                   "issued", arec->conf->setat,
+                                   "expires", arec->conf->until);
+      if (entry == NULL)
+      {
+        log_write(LOG_TYPE_IRCD, "Error packing dline: line %d, column %d, position %d: %s",
+                  error.line, error.column, error.position, error.text);
+        continue;
+      }
 
       json_array_append_new(dline_array, entry);
     }
@@ -220,11 +234,18 @@ save_resv_database(const char *filename)
     if (resv->in_database == false)
       continue;
 
-    json_t *entry = json_object();
-    json_object_set_new(entry, "mask", json_string(resv->mask));
-    json_object_set_new(entry, "reason", json_string(resv->reason));
-    json_object_set_new(entry, "issued", json_integer(resv->setat));
-    json_object_set_new(entry, "expires", json_integer(resv->expire));
+    json_error_t error;
+    json_t *entry = json_pack_ex(&error, 0, "{s:s, s:s, s:I, s:I}",
+                                 "mask", resv->mask,
+                                 "reason", resv->reason,
+                                 "issued", resv->setat,
+                                 "expires", resv->expire);
+    if (entry == NULL)
+    {
+      log_write(LOG_TYPE_IRCD, "Error packing resv: line %d, column %d, position %d: %s",
+                error.line, error.column, error.position, error.text);
+      continue;
+    }
 
     json_array_append_new(resv_array, entry);
   }
@@ -235,11 +256,18 @@ save_resv_database(const char *filename)
     if (resv->in_database == false)
       continue;
 
-    json_t *entry = json_object();
-    json_object_set_new(entry, "mask", json_string(resv->mask));
-    json_object_set_new(entry, "reason", json_string(resv->reason));
-    json_object_set_new(entry, "issued", json_integer(resv->setat));
-    json_object_set_new(entry, "expires", json_integer(resv->expire));
+    json_error_t error;
+    json_t *entry = json_pack_ex(&error, 0, "{s:s, s:s, s:I, s:I}",
+                                 "mask", resv->mask,
+                                 "reason", resv->reason,
+                                 "issued", resv->setat,
+                                 "expires", resv->expire);
+    if (entry == NULL)
+    {
+      log_write(LOG_TYPE_IRCD, "Error packing resv: line %d, column %d, position %d: %s",
+                error.line, error.column, error.position, error.text);
+      continue;
+    }
 
     json_array_append_new(resv_array, entry);
   }
@@ -312,11 +340,18 @@ save_xline_database(const char *filename)
     if (gecos->in_database == false)
       continue;
 
-    json_t *entry = json_object();
-    json_object_set_new(entry, "mask", json_string(gecos->mask));
-    json_object_set_new(entry, "reason", json_string(gecos->reason));
-    json_object_set_new(entry, "issued", json_integer(gecos->setat));
-    json_object_set_new(entry, "expires", json_integer(gecos->expire));
+    json_error_t error;
+    json_t *entry = json_pack_ex(&error, 0, "{s:s, s:s, s:I, s:I}",
+                                 "mask", gecos->mask,
+                                 "reason", gecos->reason,
+                                 "issued", gecos->setat,
+                                 "expires", gecos->expire);
+    if (entry == NULL)
+    {
+      log_write(LOG_TYPE_IRCD, "Error packing xline: line %d, column %d, position %d: %s",
+                error.line, error.column, error.position, error.text);
+      continue;
+    }
 
     json_array_append_new(xline_array, entry);
   }
