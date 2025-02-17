@@ -1,7 +1,6 @@
 /*
  *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (c) 1996-2009 by Andrew Church <achurch@achurch.org>
  *  Copyright (c) 2012-2025 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -26,29 +25,6 @@
 
 #ifndef INCLUDED_conf_db_h
 #define INCLUDED_conf_db_h
-
-#include "io.h"
-
-enum { KLINE_DB_VERSION = 1 };
-
-struct dbFILE
-{
-  char mode;  /**< 'r' for reading, 'w' for writing */
-  FILE *fp;  /**< The file pointer itself */
-  char filename[IO_PATH_MAX + 1];  /**< Name of the database file */
-  char tempname[IO_PATH_MAX + 1];  /**< Name of the temporary file (for writing) */
-};
-
-extern bool read_bool(bool *, struct dbFILE *);
-extern bool write_bool(bool, struct dbFILE *);
-extern bool read_uint16(uint16_t *, struct dbFILE *);
-extern bool write_uint16(uint16_t, struct dbFILE *);
-extern bool read_uint32(uint32_t *, struct dbFILE *);
-extern bool write_uint32(uint32_t, struct dbFILE *);
-extern bool read_uint64(uint64_t *, struct dbFILE *);
-extern bool write_uint64(uint64_t, struct dbFILE *);
-extern bool read_string(char **, struct dbFILE *);
-extern bool write_string(const char *, struct dbFILE *);
 
 extern void load_kline_database(const char *);
 extern void save_kline_database(const char *);

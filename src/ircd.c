@@ -28,6 +28,7 @@
  * components, sets up event handlers, and manages server configurations.
  */
 
+#include <jansson.h>
 #include "stdinc.h"
 #include "io_getopt.h"
 #include "io_pidfile.h"
@@ -382,6 +383,9 @@ main(int argc, char *argv[])
   /* Save server boot time right away, so getrusage works correctly */
   io_time_set_error_callback(ircd_time_failure);
   io_time_init();
+
+  /* Configure libjansson to use io_calloc and io_free. */
+  json_set_alloc_funcs(io_calloc, io_free);
 
   /*
    * Calculate the seed using multiple sources of entropy

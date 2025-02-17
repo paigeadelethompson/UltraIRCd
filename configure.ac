@@ -23,6 +23,7 @@ LIBTOOL="$LIBTOOL --silent"
 # Checks for libraries.
 AX_GCC_STACK_PROTECT_CC
 AX_GCC_STACK_PROTECT_LIB
+AX_LIBRARY_JANSSON
 AX_LIBRARY_NET
 
 # Checks for typedefs, structures, and compiler characteristics.

@@ -57,10 +57,10 @@
 /* files */
 #define SPATH     BINPATH "/ircd"  /* ircd executable */
 #define CPATH     ETCPATH "/ircd.conf"  /* ircd.conf file */
-#define KPATH     LIBPATH "/kline.db"  /* kline file */
-#define RESVPATH  LIBPATH "/resv.db"  /* resv file */
-#define DLPATH    LIBPATH "/dline.db"  /* dline file */
-#define XPATH     LIBPATH "/xline.db"  /* xline file */
+#define KPATH     LIBPATH "/kline.json"  /* kline file */
+#define RESVPATH  LIBPATH "/resv.json"  /* resv file */
+#define DLPATH    LIBPATH "/dline.json"  /* dline file */
+#define XPATH     LIBPATH "/xline.json"  /* xline file */
 #define LPATH     LOGPATH "/ircd.log"  /* ircd logfile */
 #define PPATH     RUNPATH "/ircd.pid"  /* pid file */
 
