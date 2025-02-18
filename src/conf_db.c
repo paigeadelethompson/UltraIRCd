@@ -53,8 +53,8 @@ save_kline_database(const char *filename)
                                    "user", arec->conf->user,
                                    "host", arec->conf->host,
                                    "reason", arec->conf->reason,
-                                   "issued", arec->conf->setat,
-                                   "expires", arec->conf->until);
+                                   "created_at", arec->conf->setat,
+                                   "expires_at", arec->conf->until);
       if (entry == NULL)
       {
         log_write(LOG_TYPE_IRCD, "Error packing kline: line %d, column %d, position %d: %s",
@@ -98,13 +98,13 @@ load_kline_database(const char *filename)
   json_array_foreach(k_lines, index, entry)
   {
     const char *user, *host, *reason;
-    uint64_t issued, expires;
+    uint64_t created_at, expires_at;
     int res = json_unpack_ex(entry, &error, 0, "{s:s, s:s, s:s, s:I, s:I}",
                              "user", &user,
                              "host", &host,
                              "reason", &reason,
-                             "issued", &issued,
-                             "expires", &expires);
+                             "created_at", &created_at,
+                             "expires_at", &expires_at);
 
     if (res)
     {
@@ -117,8 +117,8 @@ load_kline_database(const char *filename)
     conf->user = io_strdup(user);
     conf->host = io_strdup(host);
     conf->reason = io_strdup(reason);
-    conf->setat = issued;
-    conf->until = expires;
+    conf->setat = created_at;
+    conf->until = expires_at;
 
     SetConfDatabase(conf);
     add_conf_by_address(CONF_KLINE, conf);
@@ -147,8 +147,8 @@ save_dline_database(const char *filename)
       json_t *entry = json_pack_ex(&error, 0, "{s:s, s:s, s:I, s:I}",
                                    "host", arec->conf->host,
                                    "reason", arec->conf->reason,
-                                   "issued", arec->conf->setat,
-                                   "expires", arec->conf->until);
+                                   "created_at", arec->conf->setat,
+                                   "expires_at", arec->conf->until);
       if (entry == NULL)
       {
         log_write(LOG_TYPE_IRCD, "Error packing dline: line %d, column %d, position %d: %s",
@@ -192,12 +192,12 @@ load_dline_database(const char *filename)
   json_array_foreach(d_lines, index, entry)
   {
     const char *host, *reason;
-    uint64_t issued, expires;
+    uint64_t created_at, expires_at;
     int res = json_unpack_ex(entry, &error, 0, "{s:s, s:s, s:I, s:I}",
                              "host", &host,
                              "reason", &reason,
-                             "issued", &issued,
-                             "expires", &expires);
+                             "created_at", &created_at,
+                             "expires_at", &expires_at);
     if (res)
     {
       log_write(LOG_TYPE_IRCD, "Error unpacking dline at index %zu: line %d, column %d, position %d: %s",
@@ -208,8 +208,8 @@ load_dline_database(const char *filename)
     struct MaskItem *conf = conf_make(CONF_DLINE);
     conf->host = io_strdup(host);
     conf->reason = io_strdup(reason);
-    conf->setat = issued;
-    conf->until = expires;
+    conf->setat = created_at;
+    conf->until = expires_at;
 
     SetConfDatabase(conf);
     add_conf_by_address(CONF_DLINE, conf);
@@ -236,8 +236,8 @@ save_resv_database(const char *filename)
     json_t *entry = json_pack_ex(&error, 0, "{s:s, s:s, s:I, s:I}",
                                  "mask", resv->mask,
                                  "reason", resv->reason,
-                                 "issued", resv->setat,
-                                 "expires", resv->expire);
+                                 "created_at", resv->created_at,
+                                 "expires_at", resv->expires_at);
     if (entry == NULL)
     {
       log_write(LOG_TYPE_IRCD, "Error packing resv: line %d, column %d, position %d: %s",
@@ -258,8 +258,8 @@ save_resv_database(const char *filename)
     json_t *entry = json_pack_ex(&error, 0, "{s:s, s:s, s:I, s:I}",
                                  "mask", resv->mask,
                                  "reason", resv->reason,
-                                 "issued", resv->setat,
-                                 "expires", resv->expire);
+                                 "created_at", resv->created_at,
+                                 "expires_at", resv->expires_at);
     if (entry == NULL)
     {
       log_write(LOG_TYPE_IRCD, "Error packing resv: line %d, column %d, position %d: %s",
@@ -302,12 +302,12 @@ load_resv_database(const char *filename)
   json_array_foreach(resv_array, index, entry)
   {
     const char *mask, *reason;
-    uint64_t issued, expires;
+    uint64_t created_at, expires_at;
     int res = json_unpack_ex(entry, &error, 0, "{s:s, s:s, s:I, s:I}",
                              "mask", &mask,
                              "reason", &reason,
-                             "issued", &issued,
-                             "expires", &expires);
+                             "created_at", &created_at,
+                             "expires_at", &expires_at);
     if (res)
     {
       log_write(LOG_TYPE_IRCD, "Error unpacking resv at index %zu: line %d, column %d, position %d: %s",
@@ -316,8 +316,8 @@ load_resv_database(const char *filename)
     }
 
     struct ResvItem *resv = resv_make(mask, reason, NULL);
-    resv->setat = issued;
-    resv->expire = expires;
+    resv->created_at = created_at;
+    resv->expires_at = expires_at;
     resv->in_database = true;
   }
 
@@ -342,8 +342,8 @@ save_xline_database(const char *filename)
     json_t *entry = json_pack_ex(&error, 0, "{s:s, s:s, s:I, s:I}",
                                  "mask", gecos->mask,
                                  "reason", gecos->reason,
-                                 "issued", gecos->setat,
-                                 "expires", gecos->expire);
+                                 "created_at", gecos->created_at,
+                                 "expires_at", gecos->expires_at);
     if (entry == NULL)
     {
       log_write(LOG_TYPE_IRCD, "Error packing xline: line %d, column %d, position %d: %s",
@@ -386,12 +386,12 @@ load_xline_database(const char *filename)
   json_array_foreach(x_lines, index, entry)
   {
     const char *mask, *reason;
-    uint64_t issued, expires;
+    uint64_t created_at, expires_at;
     int res = json_unpack_ex(entry, &error, 0, "{s:s, s:s, s:I, s:I}",
                              "mask", &mask,
                              "reason", &reason,
-                             "issued", &issued,
-                             "expires", &expires);
+                             "created_at", &created_at,
+                             "expires_at", &expires_at);
     if (res)
     {
       log_write(LOG_TYPE_IRCD, "Error unpacking xline at index %zu: line %d, column %d, position %d: %s",
@@ -402,8 +402,8 @@ load_xline_database(const char *filename)
     struct GecosItem *gecos = gecos_make();
     gecos->mask = io_strdup(mask);
     gecos->reason = io_strdup(reason);
-    gecos->setat = issued;
-    gecos->expire = expires;
+    gecos->created_at = created_at;
+    gecos->expires_at = expires_at;
     gecos->in_database = true;
   }
 

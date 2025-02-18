@@ -149,8 +149,8 @@ resv_find(const char *name, int (*compare)(const char *, const char *))
   LIST_FOREACH_SAFE(node, node_next, list->head)
   {
     struct ResvItem *resv = node->data;
-    if (resv->expire &&
-        (resv->expire <= io_time_get(IO_TIME_REALTIME_SEC)))
+    if (resv->expires_at &&
+        (resv->expires_at <= io_time_get(IO_TIME_REALTIME_SEC)))
       resv_delete(resv, true);
     else if (compare(resv->mask, name) == 0)
       return resv;
@@ -220,8 +220,8 @@ resv_expire(void)
     LIST_FOREACH_SAFE(node, node_next, (*list)->head)
     {
       struct ResvItem *resv = node->data;
-      if (resv->expire &&
-          (resv->expire <= io_time_get(IO_TIME_REALTIME_SEC)))
+      if (resv->expires_at &&
+          (resv->expires_at <= io_time_get(IO_TIME_REALTIME_SEC)))
         resv_delete(resv, true);
     }
   }

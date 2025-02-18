@@ -73,12 +73,12 @@ resv_handle(struct Client *source, const struct aline_ctx *aline)
   }
 
   resv = resv_make(aline->mask, aline->reason, NULL);
-  resv->setat = io_time_get(IO_TIME_REALTIME_SEC);
+  resv->created_at = io_time_get(IO_TIME_REALTIME_SEC);
   resv->in_database = true;
 
   if (aline->duration)
   {
-    resv->expire = resv->setat + aline->duration;
+    resv->expires_at = resv->created_at + aline->duration;
 
     if (IsClient(source))
       sendto_one_notice(source, &me, ":Added temporary %ju min. RESV [%s]",

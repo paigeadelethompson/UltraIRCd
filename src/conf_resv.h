@@ -33,8 +33,8 @@ struct ResvItem
   list_t exempt_list;
   char *mask;
   char *reason;
-  uintmax_t expire;
-  uintmax_t setat;
+  uintmax_t created_at;
+  uintmax_t expires_at;
   bool in_database;
 };
 

@@ -31,8 +31,8 @@ struct GecosItem
   list_node_t node;
   char *mask;
   char *reason;
-  uintmax_t expire;
-  uintmax_t setat;
+  uintmax_t created_at;
+  uintmax_t expires_at;
   bool in_database;
 };
 
