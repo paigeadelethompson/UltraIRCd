@@ -33,7 +33,12 @@ jobs:
           brew install jansson
         fi
     - name: configure
-      run: ./configure --enable-warnings || (cat config.log; false)
+      run: |
+        if [[ "$RUNNER_OS" == "macOS" ]]; then
+          export LDFLAGS="${LDFLAGS} -L/opt/homebrew/lib"
+          export CFLAGS="${CFLAGS} -I/opt/homebrew/include"
+        fi
+        ./configure --enable-warnings || (cat config.log; false)
     - name: make
       run: make -j$( (nproc || sysctl -n hw.logicalcpu || echo 1) 2>/dev/null)
     - name: make install
