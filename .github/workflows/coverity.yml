@@ -25,6 +25,11 @@ jobs:
       env:
         TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
 
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libjansson-dev
+
     - name: Configure and build with cov-build
       run: |
         export PATH=$(pwd)/cov-analysis-linux64/bin:$PATH
