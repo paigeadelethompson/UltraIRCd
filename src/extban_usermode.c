@@ -43,25 +43,20 @@ extban_usermode_matches(struct Client *client, struct Channel *channel, struct B
     {
       case '+':
         action = USER_MODE_ACTION_ADD;
-        break;
+        continue;
       case '-':
         action = USER_MODE_ACTION_DEL;
-        break;
+        continue;
       default:
       {
         const struct UserMode *mode = user_mode_find(*m);
-        if (mode)
-        {
-          switch (action)
-          {
-            case USER_MODE_ACTION_ADD:
-              modes_add |= mode->mode_bit;
-              break;
-            case USER_MODE_ACTION_DEL:
-              modes_del |= mode->mode_bit;
-              break;
-          }
-        }
+        if (mode == NULL)
+          continue;
+
+        if (action == USER_MODE_ACTION_ADD)
+          modes_add |= mode->mode_bit;
+        else
+          modes_del |= mode->mode_bit;
       }
     }
   }
