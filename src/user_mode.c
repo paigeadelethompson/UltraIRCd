@@ -289,6 +289,16 @@ user_mode_set_flag(struct Client *client, uint64_t mode_flag)
 }
 
 bool
+user_mode_unset_flag(struct Client *client, uint64_t mode_flag)
+{
+  if (mode_flag == 0)
+    return false;
+
+  client->umodes &= ~mode_flag;
+  return true;
+}
+
+bool
 user_mode_set_flag_exec(struct Client *client, uint64_t mode_flag, user_mode_source_t source)
 {
   bool success = true;
@@ -349,16 +359,6 @@ user_mode_unset_flag_exec(struct Client *client, uint64_t mode_flag, user_mode_s
 }
 
 bool
-user_mode_unset_flag(struct Client *client, uint64_t mode_flag)
-{
-  if (mode_flag == 0)
-    return false;
-
-  client->umodes &= ~mode_flag;
-  return true;
-}
-
-bool
 user_mode_has_flag(const struct Client *client, uint64_t mode_flag)
 {
   return (client->umodes & mode_flag) != 0;
@@ -375,6 +375,16 @@ user_mode_set_mode(struct Client *client, const struct UserMode *mode)
 }
 
 bool
+user_mode_unset_mode(struct Client *client, const struct UserMode *mode)
+{
+  if (mode == NULL || mode->mode_bit == 0)
+    return false;
+
+  client->umodes &= ~mode->mode_bit;
+  return true;
+}
+
+bool
 user_mode_set_mode_exec(struct Client *client, const struct UserMode *mode, user_mode_source_t source)
 {
   if (mode == NULL || mode->mode_bit == 0)
@@ -384,16 +394,6 @@ user_mode_set_mode_exec(struct Client *client, const struct UserMode *mode, user
     return false;
 
   client->umodes |= mode->mode_bit;
-  return true;
-}
-
-bool
-user_mode_unset_mode(struct Client *client, const struct UserMode *mode)
-{
-  if (mode == NULL || mode->mode_bit == 0)
-    return false;
-
-  client->umodes &= ~mode->mode_bit;
   return true;
 }
 
