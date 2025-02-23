@@ -177,7 +177,7 @@ class_delete_marked(void)
   }
 }
 
-static void *
+static patricia_tree_t *
 class_ip_limit_trie(struct ClassItem *class, void *addr)
 {
   if (((struct sockaddr *)addr)->sa_family == AF_INET6)

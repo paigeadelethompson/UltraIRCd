@@ -34,7 +34,7 @@ static list_t ipcache_list;
 static patricia_tree_t *ipcache_trie_v6;
 static patricia_tree_t *ipcache_trie_v4;
 
-static void *
+static patricia_tree_t *
 ipcache_get_trie(void *addr)
 {
   if (((struct sockaddr *)addr)->sa_family == AF_INET6)
