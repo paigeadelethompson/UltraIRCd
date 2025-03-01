@@ -246,7 +246,7 @@ user_register_local(struct Client *client)
   if (conf_check_client(client) == false)
     return;
 
-  const struct MaskItem *const conf = client->connection->confs.head->data;
+  const struct MaskItem *const conf = list_peek_head(&client->connection->confs);
   if (IsNeedIdentd(conf) && !HasFlag(client, FLAGS_GOTID))
   {
     sendto_one_notice(client, &me, ":*** Notice -- You need to install identd to use this server");

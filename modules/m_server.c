@@ -167,8 +167,7 @@ server_estab(struct Client *client_p)
 
   if (IsUnknown(client_p))
   {
-    const struct MaskItem *const conf = client_p->connection->confs.head->data;
-
+    const struct MaskItem *const conf = list_peek_head(&client_p->connection->confs);
     sendto_one(client_p, "PASS %s", conf->spasswd);
 
     sendto_one(client_p, "CAPAB :%s", capab_get(NULL, true));
@@ -593,7 +592,7 @@ ms_sid(struct Client *source, int parc, char *parv[])
    * See if the newly found server is behind a guaranteed
    * leaf. If so, close the link.
    */
-  const struct MaskItem *conf = source->from->connection->confs.head->data;
+  const struct MaskItem *conf = list_peek_head(&source->from->connection->confs);
   bool hlined = list_find_cmp(&conf->hub_list , parv[1], match) != NULL;
   bool llined = list_find_cmp(&conf->leaf_list, parv[1], match) != NULL;
 

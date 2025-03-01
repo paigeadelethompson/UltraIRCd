@@ -625,3 +625,39 @@ list_to_array(const list_t *list)
 
   return array;
 }
+
+/**
+ * @brief Peeks at the data of the head node of a double-linked list without removing the node.
+ *
+ * This function returns a pointer to the data stored in the head node (the first node)
+ * of the specified double-linked list. If the list is empty, it returns NULL.
+ *
+ * @param list Pointer to the double-linked list to peek at.
+ * @return Pointer to the data of the head node, or NULL if the list is empty.
+ */
+void *
+list_peek_head(const list_t *list)
+{
+  if (list_is_empty(list))
+    return NULL;
+
+  return list->head->data;
+}
+
+/**
+ * @brief Peeks at the data of the tail node of a double-linked list without removing the node.
+ *
+ * This function returns a pointer to the data stored in the tail node (the last node)
+ * of the specified double-linked list. If the list is empty, it returns NULL.
+ *
+ * @param list Pointer to the double-linked list to peek at.
+ * @return Pointer to the data of the tail node, or NULL if the list is empty.
+ */
+void *
+list_peek_tail(const list_t *list)
+{
+  if (list_is_empty(list))
+    return NULL;
+
+  return list->tail->data;
+}

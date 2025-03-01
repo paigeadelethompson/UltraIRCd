@@ -115,6 +115,8 @@ extern void list_move_node(list_node_t *, list_t *, list_t *);
 extern void list_remove(list_node_t *, list_t *);
 extern bool list_add_at(void *, unsigned int, list_node_t *, list_t *);
 extern bool list_is_empty(const list_t *);
+extern void *list_peek_head(const list_t *);
+extern void *list_peek_tail(const list_t *);
 extern void *list_remove_at(unsigned int, list_t *);
 extern void **list_to_array(const list_t *);
 extern list_node_t *list_find(list_t *, const void *);

@@ -133,7 +133,7 @@ whowas_make(void)
 {
   if (list_length(&whowas_list) &&
       list_length(&whowas_list) >= ConfigGeneral.whowas_history_length)
-    whowas_free(whowas_list.tail->data);  /* Free oldest item. */
+    whowas_free(list_peek_tail(&whowas_list));  /* Free oldest item. */
 
   struct Whowas *whowas = io_calloc(sizeof(*whowas));
   return whowas;
@@ -152,7 +152,7 @@ whowas_trim(void)
 {
   while (list_length(&whowas_list) &&
          list_length(&whowas_list) >= ConfigGeneral.whowas_history_length)
-    whowas_free(whowas_list.tail->data);
+    whowas_free(list_peek_tail(&whowas_list));
 }
 
 /**

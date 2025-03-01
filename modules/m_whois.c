@@ -103,7 +103,6 @@ static void
 whois_send(struct Client *source, struct Client *target)
 {
   list_node_t *node;
-  const struct ServicesTag *svstag = NULL;
 
   sendto_one_numeric(source, &me, RPL_WHOISUSER,
                      target->name, target->username, target->host, target->info);
@@ -169,9 +168,7 @@ whois_send(struct Client *source, struct Client *target)
   {
     if (user_mode_has_flag(target, UMODE_HIDDEN) == false || user_mode_has_flag(source, UMODE_OPER))
     {
-      if (target->svstags.head)
-        svstag = target->svstags.head->data;
-
+      const struct ServicesTag *svstag = list_peek_head(&target->svstags);
       if (svstag == NULL || svstag->numeric != RPL_WHOISOPERATOR)
       {
         const char *text;
@@ -188,8 +185,7 @@ whois_send(struct Client *source, struct Client *target)
 
   LIST_FOREACH(node, target->svstags.head)
   {
-    svstag = node->data;
-
+    const struct ServicesTag *svstag = node->data;
     if (svstag->numeric == RPL_WHOISOPERATOR)
       if (user_mode_has_flag(target, UMODE_HIDDEN) && user_mode_has_flag(source, UMODE_OPER) == false)
         continue;

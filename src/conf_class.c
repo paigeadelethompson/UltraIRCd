@@ -84,19 +84,14 @@ class_init(void)
 const struct ClassItem *
 class_get_ptr(const list_t *const list)
 {
-  const list_node_t *const node = list->head;
+  const struct MaskItem *conf = list_peek_head(list);
+  if (conf == NULL)
+    return class_default;
 
-  if (node)
-  {
-    const struct MaskItem *const conf = node->data;
+  assert(conf->class);
+  assert(conf->type & (CONF_OPER | CONF_CLIENT | CONF_SERVER));
 
-    assert(conf->class);
-    assert(conf->type & (CONF_OPER | CONF_CLIENT | CONF_SERVER));
-
-    return conf->class;
-  }
-
-  return class_default;
+  return conf->class;
 }
 
 const char *
@@ -256,7 +251,7 @@ class_ip_limit_rebuild(struct ClassItem *class)
   LIST_FOREACH(node, local_client_list.head)
   {
     struct Client *client = node->data;
-    struct MaskItem *conf = client->connection->confs.tail->data;
+    struct MaskItem *conf = list_peek_tail(&client->connection->confs);
 
     if (conf->type == CONF_CLIENT)
       if (conf->class == class)

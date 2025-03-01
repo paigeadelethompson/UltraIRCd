@@ -75,7 +75,7 @@ invite_add(struct Channel *channel, struct Client *client)
   /* Delete last link in chain if the list is max length */
   while (list_length(&client->connection->invited) &&
          list_length(&client->connection->invited) >= ConfigChannel.max_invites)
-    invite_del(client->connection->invited.tail->data);
+    invite_del(list_peek_tail(&client->connection->invited));
 
   /* Add client to channel invite list */
   list_add(invite, &invite->chan_node, &channel->invites);
