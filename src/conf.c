@@ -890,11 +890,8 @@ operator_find(const struct Client *client, const char *name)
 static void
 conf_set_defaults(void)
 {
-  /*
-   * Verify init_class() ran, this should be an unnecessary check
-   * but it's not much work.
-   */
-  assert(class_default == class_get_list()->tail->data);
+  /* Verify class_init() ran. */
+  assert(class_default == list_peek_tail(class_get_list()));
 
   ConfigServerInfo.network_name = io_strdup(NETWORK_NAME_DEFAULT);
   ConfigServerInfo.network_description = io_strdup(NETWORK_DESCRIPTION_DEFAULT);
@@ -1121,18 +1118,12 @@ get_oper_name(const struct Client *client)
 
   if (MyConnect(client))
   {
-    const list_node_t *const node = client->connection->confs.head;
-
-    if (node)
+    const struct MaskItem *conf = list_peek_head(&client->connection->confs);
+    if (conf && (conf->type == CONF_OPER))
     {
-      const struct MaskItem *const conf = node->data;
-
-      if (conf->type == CONF_OPER)
-      {
-        snprintf(buf, sizeof(buf), "%s!%s@%s{%s}", client->name,
-                 client->username, client->host, conf->name);
-        return buf;
-      }
+      snprintf(buf, sizeof(buf), "%s!%s@%s{%s}",
+               client->name, client->username, client->host, conf->name);
+      return buf;
     }
 
     /*
