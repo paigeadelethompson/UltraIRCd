@@ -61,8 +61,8 @@ set_user_mode(struct Client *source, const int parc, char *parv[])
 
   if (source != target)
   {
-     sendto_one_numeric(source, &me, ERR_USERSDONTMATCH);
-     return;
+    sendto_one_numeric(source, &me, ERR_USERSDONTMATCH);
+    return;
   }
 
   if (parc < 3)
