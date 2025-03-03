@@ -43,7 +43,7 @@ ms_encap(struct Client *source, int parc, char *parv[])
 {
   char buf[IRCD_BUFSIZE];
   char *bufptr = buf;
-  unsigned int cur_len = 0, len;
+  size_t cur_len = 0, len;
 
   for (unsigned int i = 1; i < (unsigned int)parc - 1; ++i)
   {
