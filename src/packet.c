@@ -261,11 +261,8 @@ flood_recalc(fde_t *F, void *data_)
    * a client who is flooding an extra 2 per second
    */
   if (HasFlag(client, FLAGS_FLOODDONE))
-    client->connection->sent_parsed -= 2;
+    client->connection->sent_parsed = IO_MAX(client->connection->sent_parsed - 2, 0);
   else
-    client->connection->sent_parsed = 0;
-
-  if (client->connection->sent_parsed < 0)
     client->connection->sent_parsed = 0;
 
   parse_client_queued(client);

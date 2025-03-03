@@ -272,6 +272,12 @@ struct Connection
   unsigned int join_leave_count;  /**< Count of JOIN/LEAVE in less than MIN_JOIN_LEAVE_TIME seconds */
   unsigned int oper_warn_count_down;  /**< Warn opers of this possible spambot every time this gets to 0 */
   unsigned int received_number_of_privmsgs;
+  /* Anti-flood stuff. We track how many messages were parsed and how
+   * many we were allowed in the current second, and apply a simple
+   * decay to avoid flooding.
+   *   -- adrian
+   */
+  unsigned int sent_parsed;  /**< How many messages we've parsed in this second */
 
   struct ListTask  *list_task;
 
@@ -298,14 +304,6 @@ struct Connection
   list_t invited;  /**< Chain of invite pointer blocks */
 
   fde_t *fd;  /**< Pointer to fdlist.c:fd_table[] */
-
-  /* Anti-flood stuff. We track how many messages were parsed and how
-   * many we were allowed in the current second, and apply a simple
-   * decay to avoid flooding.
-   *   -- adrian
-   */
-  int sent_parsed;  /**< How many messages we've parsed in this second */
-
   char *password;  /**< Password supplied by the client/server */
 };
 
