@@ -733,14 +733,6 @@ can_join(struct Client *client, struct Channel *channel, const char *key)
   return 0;
 }
 
-bool
-member_has_flags(const struct ChannelMember *member, const unsigned int flags)
-{
-  if (member && (member->flags & flags))
-    return true;
-  return false;
-}
-
 struct ChannelMember *
 member_find_link(const struct Client *client, const struct Channel *channel)
 {

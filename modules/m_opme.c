@@ -95,7 +95,7 @@ mo_opme(struct Client *source, int parc, char *parv[])
   sendto_servers(NULL, 0, 0, ":%s GLOBOPS :%s used OPME on channel %s",
                  me.id, get_oper_name(source), channel->name);
 
-  AddMemberFlag(member, CHFL_CHANOP);
+  member_set_flags(member, CHFL_CHANOP);
   sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s +o %s",
                        me.name, channel->name, source->name);
   sendto_servers(NULL, 0, 0, ":%s TMODE %ju %s +o %s", me.id, channel->creation_time,

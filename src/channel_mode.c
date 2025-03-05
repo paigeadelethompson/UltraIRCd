@@ -618,14 +618,14 @@ chm_flag(struct Client *client, struct Channel *channel, int parc, int *parn, ch
     if (member_has_flags(member, mode->flag))
       return;  /* No redundant mode changes */
 
-    AddMemberFlag(member, mode->flag);
+    member_set_flags(member, mode->flag);
   }
   else if (dir == MODE_DEL)  /* setting - */
   {
     if (member_has_flags(member, mode->flag) == false)
       return;  /* No redundant mode changes */
 
-    DelMemberFlag(member, mode->flag);
+    member_unset_flags(member, mode->flag);
   }
 
   mode_changes[mode_count].letter = mode->letter;

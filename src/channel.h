@@ -30,9 +30,6 @@
 #include "extban.h"
 #include "address.h"
 
-#define AddMemberFlag(x, y) ((x)->flags |=  (y))
-#define DelMemberFlag(x, y) ((x)->flags &= ~(y))
-
 /**
  * @enum channel_send_perm_t
  * @brief Enum for representing the send permission of a client in a channel.
@@ -138,7 +135,6 @@ extern void remove_ban(struct Ban *, list_t *);
 extern bool channel_check_name(const char *, bool);
 extern bool find_bmask(struct Client *, struct Channel*, const list_t *, struct Extban *);
 extern bool is_banned(struct Channel *, struct Client *, struct Extban *);
-extern bool member_has_flags(const struct ChannelMember *, const unsigned int);
 extern int channel_prefix_to_rank(const char);
 extern int member_highest_rank(const struct ChannelMember *);
 extern unsigned int channel_prefix_to_flag(const char);
@@ -150,4 +146,24 @@ extern const list_t *channel_get_list(void);
 extern const char *channel_modes(const struct Channel *, const struct Client *, bool);
 extern const char *channel_rank_to_prefix(const int);
 extern const char *member_get_prefix(const struct ChannelMember *, bool);
+
+static inline bool
+member_has_flags(const struct ChannelMember *member, unsigned int flags)
+{
+  return member && (member->flags & flags) != 0;
+}
+
+static inline void
+member_set_flags(struct ChannelMember *member, unsigned int flags)
+{
+  if (member)
+    member->flags |= flags;
+}
+
+static inline void
+member_unset_flags(struct ChannelMember *member, unsigned int flags)
+{
+  if (member)
+    member->flags &= ~flags;
+}
 #endif  /* INCLUDED_channel_h */
