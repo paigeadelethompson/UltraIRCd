@@ -75,7 +75,7 @@ typedef enum
 static whois_channel_visibility_t
 whois_channel_visibility_get(struct Channel *channel, struct Client *source, struct Client *target)
 {
-  if (PubChannel(channel) && user_mode_has_flag(target, UMODE_HIDECHANS) == false)
+  if (channel_is_public(channel) && user_mode_has_flag(target, UMODE_HIDECHANS) == false)
     return WHOIS_CHANNEL_VISIBILITY_FULL;
 
   if (source == target || member_find_link(source, channel))
@@ -83,7 +83,7 @@ whois_channel_visibility_get(struct Channel *channel, struct Client *source, str
 
   if (user_mode_has_flag(source, UMODE_OPER))
   {
-    if (!PubChannel(channel))
+    if (!channel_is_public(channel))
       return WHOIS_CHANNEL_VISIBILITY_LIMITED;
     /* user_mode_has_flag(target, UMODE_HIDECHANS) == true */
     return WHOIS_CHANNEL_VISIBILITY_HIDDEN;

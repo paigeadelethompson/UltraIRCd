@@ -667,7 +667,7 @@ m_nick(struct Client *source, int parc, char *parv[])
 
     if (member_highest_rank(member) < CHACCESS_VOICE)
     {
-      if (HasCMode(member->channel, MODE_NONICKCHANGE))
+      if (channel_has_mode(member->channel, MODE_NONICKCHANGE))
       {
         sendto_one_numeric(source, &me, ERR_NONICKCHANGE, member->channel->name);
         return;

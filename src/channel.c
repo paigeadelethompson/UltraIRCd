@@ -437,9 +437,9 @@ channel_free(struct Channel *channel)
 static const char *
 channel_pub_or_secret(const struct Channel *channel)
 {
-  if (HasCMode(channel, MODE_SECRET))
+  if (channel_has_mode(channel, MODE_SECRET))
     return "@";
-  if (HasCMode(channel, MODE_PRIVATE))
+  if (channel_has_mode(channel, MODE_PRIVATE))
     return "*";
   return "=";
 }
@@ -457,7 +457,7 @@ channel_send_namereply(struct Client *client, struct Channel *channel)
 
   assert(IsClient(client));
 
-  if (PubChannel(channel) || is_member)
+  if (channel_is_public(channel) || is_member)
   {
     char buf[IRCD_BUFSIZE];
     char *bufptr = buf;
@@ -706,16 +706,16 @@ is_banned(struct Channel *channel, struct Client *client, struct Extban *extban)
 static int
 can_join(struct Client *client, struct Channel *channel, const char *key)
 {
-  if (HasCMode(channel, MODE_SECUREONLY) && user_mode_has_flag(client, UMODE_SECURE) == false)
+  if (channel_has_mode(channel, MODE_SECUREONLY) && user_mode_has_flag(client, UMODE_SECURE) == false)
     return ERR_SECUREONLYCHAN;
 
-  if (HasCMode(channel, MODE_REGONLY) && user_mode_has_flag(client, UMODE_REGISTERED) == false)
+  if (channel_has_mode(channel, MODE_REGONLY) && user_mode_has_flag(client, UMODE_REGISTERED) == false)
     return ERR_NEEDREGGEDNICK;
 
-  if (HasCMode(channel, MODE_OPERONLY) && user_mode_has_flag(client, UMODE_OPER) == false)
+  if (channel_has_mode(channel, MODE_OPERONLY) && user_mode_has_flag(client, UMODE_OPER) == false)
     return ERR_OPERONLYCHAN;
 
-  if (HasCMode(channel, MODE_INVITEONLY))
+  if (channel_has_mode(channel, MODE_INVITEONLY))
     if (invite_find(channel, client) == NULL)
       if (find_bmask(client, channel, &channel->invexlist, NULL) == false)
         return ERR_INVITEONLYCHAN;
@@ -818,13 +818,13 @@ channel_send_qualifies(struct Channel *channel, struct Client *client, struct Ch
     }
   }
 
-  if (HasCMode(channel, MODE_NOCTRL) && msg_has_ctrls(message))
+  if (channel_has_mode(channel, MODE_NOCTRL) && msg_has_ctrls(message))
   {
     *error = "control codes are not permitted";
     return CHANNEL_SEND_PERM_FORBIDDEN;
   }
 
-  if (HasCMode(channel, MODE_NOCTCP))
+  if (channel_has_mode(channel, MODE_NOCTCP))
   {
     if (*message == '\001' && strncmp(message + 1, "ACTION ", 7))
     {
@@ -843,25 +843,25 @@ channel_send_qualifies(struct Channel *channel, struct Client *client, struct Ch
     return CHANNEL_SEND_PERM_FORBIDDEN;
   }
 
-  if (member == NULL && HasCMode(channel, MODE_NOPRIVMSGS))
+  if (member == NULL && channel_has_mode(channel, MODE_NOPRIVMSGS))
   {
     *error = "external messages are not permitted";
     return CHANNEL_SEND_PERM_FORBIDDEN;
   }
 
-  if (HasCMode(channel, MODE_MODERATED))
+  if (channel_has_mode(channel, MODE_MODERATED))
   {
     *error = "channel is moderated (+m)";
     return CHANNEL_SEND_PERM_FORBIDDEN;
   }
 
-  if (HasCMode(channel, MODE_MODREG) && user_mode_has_flag(client, UMODE_REGISTERED) == false)
+  if (channel_has_mode(channel, MODE_MODREG) && user_mode_has_flag(client, UMODE_REGISTERED) == false)
   {
     *error = "you need to identify to a registered nick";
     return CHANNEL_SEND_PERM_FORBIDDEN;
   }
 
-  if (HasCMode(channel, MODE_NONOTICE) && notice)
+  if (channel_has_mode(channel, MODE_NONOTICE) && notice)
   {
     *error = "NOTICEs are not permitted";
     return CHANNEL_SEND_PERM_FORBIDDEN;
@@ -1062,8 +1062,7 @@ channel_join_list(struct Client *client, char *chan_list, char *key_list)
      */
     if (flags == CHFL_CHANOP)
     {
-      AddCMode(channel, MODE_TOPICLIMIT);
-      AddCMode(channel, MODE_NOPRIVMSGS);
+      channel_set_mode(channel, MODE_TOPICLIMIT | MODE_NOPRIVMSGS);
 
       sendto_servers(NULL, 0, 0, ":%s SJOIN %ju %s +nt :@%s",
                      me.id, channel->creation_time, channel->name, client->id);

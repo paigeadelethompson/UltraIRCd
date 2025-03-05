@@ -120,13 +120,6 @@ enum
   MODE_NOINVITE     = 1 << 19,  /**< Clients may not use INVITE on this channel */
 };
 
-#define HasCMode(x, y) ((x)->mode.mode &   (y))
-#define AddCMode(x, y) ((x)->mode.mode |=  (y))
-#define DelCMode(x, y) ((x)->mode.mode &= ~(y))
-
-/* name invisible */
-#define PubChannel(x)           (((x)->mode.mode & (MODE_PRIVATE | MODE_SECRET)) == 0)
-
 struct ChModeChange
 {
   char letter;
@@ -161,4 +154,28 @@ extern void channel_mode_init(void);
 extern void channel_mode_set(struct Client *, struct Channel *, int, char *[]);
 extern void clear_ban_cache_list(list_t *);
 extern const char *add_id(struct Client *, struct Channel *, const char *, list_t *, unsigned int);
+
+static inline bool
+channel_has_mode(const struct Channel *channel, unsigned int mode)
+{
+  return (channel->mode.mode & mode) != 0;
+}
+
+static inline void
+channel_set_mode(struct Channel *channel, unsigned int mode)
+{
+  channel->mode.mode |= mode;
+}
+
+static inline void
+channel_unset_mode(struct Channel *channel, unsigned int mode)
+{
+  channel->mode.mode &= ~mode;
+}
+
+static inline bool
+channel_is_public(const struct Channel *channel)
+{
+  return channel_has_mode(channel, MODE_PRIVATE | MODE_SECRET) == false;
+}
 #endif  /* INCLUDED_channel_mode_h */

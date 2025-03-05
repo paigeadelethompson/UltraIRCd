@@ -112,7 +112,7 @@ who_send(struct Client *source, const struct Client *target,
       {
         member = node->data;
 
-        if (PubChannel(member->channel) || source == target || member_find_link(source, member->channel))
+        if (channel_is_public(member->channel) || source == target || member_find_link(source, member->channel))
           break;
         member = NULL;
       }
@@ -375,7 +375,7 @@ who_on_channel(struct Client *source, struct Channel *channel, const struct WhoQ
 
   if (user_mode_has_flag(source, UMODE_ADMIN) || member_find_link(source, channel))
     is_member = true;
-  else if (HasCMode(channel, MODE_SECRET))
+  else if (channel_has_mode(channel, MODE_SECRET))
     return;
 
   list_node_t *node;

@@ -71,7 +71,7 @@ m_topic(struct Client *source, int parc, char *parv[])
       return;
     }
 
-    if (HasCMode(channel, MODE_TOPICLIMIT) && member_highest_rank(member) < CHACCESS_HALFOP)
+    if (channel_has_mode(channel, MODE_TOPICLIMIT) && member_highest_rank(member) < CHACCESS_HALFOP)
     {
       sendto_one_numeric(source, &me, ERR_CHANOPRIVSNEEDED, channel->name);
       return;
@@ -89,7 +89,7 @@ m_topic(struct Client *source, int parc, char *parv[])
   }
   else  /* Only asking for topic */
   {
-    if (HasCMode(channel, MODE_SECRET) && member_find_link(source, channel) == NULL)
+    if (channel_has_mode(channel, MODE_SECRET) && member_find_link(source, channel) == NULL)
     {
       sendto_one_numeric(source, &me, ERR_NOTONCHANNEL, channel->name);
       return;

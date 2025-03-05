@@ -123,7 +123,7 @@ add_id(struct Client *client, struct Channel *channel, const char *banid, list_t
                             list_length(&channel->invexlist);
 
     /* Don't let local clients overflow the b/e/I lists */
-    if (num_mask >= ((HasCMode(channel, MODE_EXTLIMIT)) ? ConfigChannel.max_bans_large : ConfigChannel.max_bans))
+    if (num_mask >= ((channel_has_mode(channel, MODE_EXTLIMIT)) ? ConfigChannel.max_bans_large : ConfigChannel.max_bans))
     {
       sendto_one_numeric(client, &me, ERR_BANLISTFULL, channel->name, banid);
       return NULL;
@@ -289,7 +289,7 @@ channel_modes(const struct Channel *channel, const struct Client *client, bool p
   *bufptr++ = '+';
 
   for (const struct chan_mode *tab = cmode_tab; tab->letter; ++tab)
-    if (tab->mode && HasCMode(channel, tab->mode))
+    if (tab->mode && channel_has_mode(channel, tab->mode))
       *bufptr++ = tab->letter;
 
   if (channel->mode.limit)
@@ -463,17 +463,17 @@ chm_simple(struct Client *client, struct Channel *channel, int parc, int *parn, 
 
   if (dir == MODE_ADD)  /* setting + */
   {
-    if (MyClient(client) && HasCMode(channel, mode->mode))
+    if (MyClient(client) && channel_has_mode(channel, mode->mode))
       return;
 
-    AddCMode(channel, mode->mode);
+    channel_set_mode(channel, mode->mode);
   }
   else if (dir == MODE_DEL)  /* setting - */
   {
-    if (MyClient(client) && !HasCMode(channel, mode->mode))
+    if (MyClient(client) && !channel_has_mode(channel, mode->mode))
       return;
 
-    DelCMode(channel, mode->mode);
+    channel_unset_mode(channel, mode->mode);
   }
 
   mode_changes[mode_count].letter = mode->letter;

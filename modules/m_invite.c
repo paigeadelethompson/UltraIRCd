@@ -51,11 +51,11 @@ send_invite(struct Client *source, struct Client *target, struct Channel *channe
     sendto_one(target, ":%s!%s@%s INVITE %s :%s",
                source->name, source->username, source->host, target->name, channel->name);
 
-    if (HasCMode(channel, MODE_INVITEONLY))
+    if (channel_has_mode(channel, MODE_INVITEONLY))
       invite_add(channel, target);  /* Add the invite if channel is +i */
   }
 
-  if (HasCMode(channel, MODE_INVITEONLY))
+  if (channel_has_mode(channel, MODE_INVITEONLY))
     sendto_channel_local(NULL, channel, CHACCESS_HALFOP, 0, CAP_INVITE_NOTIFY,
                          ":%s NOTICE %%%s :%s is inviting %s to %s.",
                          me.name, channel->name, source->name, target->name, channel->name);
@@ -133,7 +133,7 @@ m_invite(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  if (HasCMode(channel, MODE_NOINVITE))
+  if (channel_has_mode(channel, MODE_NOINVITE))
   {
     sendto_one_numeric(source, &me, ERR_NOINVITE, target->name, channel->name);
     return;

@@ -70,7 +70,7 @@ m_knock(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  if (!HasCMode(channel, MODE_INVITEONLY))
+  if (!channel_has_mode(channel, MODE_INVITEONLY))
   {
     sendto_one_numeric(source, &me, ERR_CHANOPEN, channel->name);
     return;
@@ -78,7 +78,7 @@ m_knock(struct Client *source, int parc, char *parv[])
 
   if (MyClient(source))
   {
-    if (HasCMode(channel, MODE_NOKNOCK))
+    if (channel_has_mode(channel, MODE_NOKNOCK))
     {
       sendto_one_numeric(source, &me, ERR_CANNOTKNOCK, channel->name, "knocks are not allowed (+K)");
       return;

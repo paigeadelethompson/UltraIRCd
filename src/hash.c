@@ -537,7 +537,7 @@ list_allow_channel(const char *name, const struct ListTask *lt)
 static void
 list_one_channel(struct Client *client, struct Channel *channel)
 {
-  if (HasCMode(channel, MODE_SECRET) &&
+  if (channel_has_mode(channel, MODE_SECRET) &&
       !(user_mode_has_flag(client, UMODE_ADMIN) || member_find_link(client, channel)))
     return;
 

@@ -91,7 +91,7 @@ m_kick(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  if (HasCMode(channel, MODE_NOKICK))
+  if (channel_has_mode(channel, MODE_NOKICK))
   {
     sendto_one_numeric(source, &me, ERR_CANNOTKICK, channel->name, target->name);
     return;
