@@ -240,35 +240,13 @@ user_mode_change(struct Client *client, char mode_char, user_mode_source_t sourc
 user_mode_result_t
 user_mode_set(struct Client *client, char mode_char, user_mode_source_t source)
 {
-  struct UserMode *mode = user_mode_find(mode_char);
-  if (mode == NULL)
-    return USER_MODE_RESULT_MODE_NOT_FOUND;
-
-  if (user_mode_check_policy(mode, client, source, USER_MODE_ACTION_ADD) == false)
-    return USER_MODE_RESULT_POLICY_VIOLATION;
-
-  if (mode->set_callback && mode->set_callback(client, source) == false)
-    return USER_MODE_RESULT_CALLBACK_FAILED;
-
-  user_mode_set_flag(client, mode->mode_bit);
-  return USER_MODE_SUCCESS;
+  return user_mode_change(client, mode_char, source, USER_MODE_ACTION_ADD);
 }
 
 user_mode_result_t
 user_mode_unset(struct Client *client, char mode_char, user_mode_source_t source)
 {
-  struct UserMode *mode = user_mode_find(mode_char);
-  if (mode == NULL)
-    return USER_MODE_RESULT_MODE_NOT_FOUND;
-
-  if (user_mode_check_policy(mode, client, source, USER_MODE_ACTION_DEL) == false)
-    return USER_MODE_RESULT_POLICY_VIOLATION;
-
-  if (mode->unset_callback && mode->unset_callback(client, source) == false)
-    return USER_MODE_RESULT_CALLBACK_FAILED;
-
-  user_mode_unset_flag(client, mode->mode_bit);
-  return USER_MODE_SUCCESS;
+  return user_mode_change(client, mode_char, source, USER_MODE_ACTION_DEL);
 }
 
 bool
