@@ -150,20 +150,18 @@ extern const char *member_get_prefix(const struct ChannelMember *, bool);
 static inline bool
 member_has_flags(const struct ChannelMember *member, unsigned int flags)
 {
-  return member && (member->flags & flags) != 0;
+  return (member->flags & flags) != 0;
 }
 
 static inline void
 member_set_flags(struct ChannelMember *member, unsigned int flags)
 {
-  if (member)
-    member->flags |= flags;
+  member->flags |= flags;
 }
 
 static inline void
 member_unset_flags(struct ChannelMember *member, unsigned int flags)
 {
-  if (member)
-    member->flags &= ~flags;
+  member->flags &= ~flags;
 }
 #endif  /* INCLUDED_channel_h */
