@@ -218,14 +218,14 @@ comm_checktimeouts(void *unused)
  *               may be called now, or it may be called later.
  */
 void
-comm_connect_tcp(fde_t *F, const struct io_addr *caddr, unsigned short port, const struct io_addr *baddr,
+comm_connect_tcp(fde_t *F, const struct io_addr *caddr, uint16_t port, const struct io_addr *baddr,
                  void (*callback)(fde_t *, int, void *), void *data, uintmax_t timeout)
 {
   assert(callback);
 
   F->connect.addr = *caddr;
-  /* The cast is hacky, but safe - port offset is same on v4 and v6 */
-  ((struct sockaddr_in *)&F->connect.addr)->sin_port = htons(port);
+  address_set_port(&F->connect.addr, port);
+
   F->connect.callback = callback;
   F->connect.data = data;
 

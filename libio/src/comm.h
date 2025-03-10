@@ -54,7 +54,7 @@ extern void comm_select(void);
 extern void comm_settimeout(fde_t *, uintmax_t, void (*)(fde_t *, void *), void *);
 extern void comm_setflush(fde_t *, uintmax_t, void (*)(fde_t *, void *), void *);
 extern void comm_checktimeouts(void *);
-extern void comm_connect_tcp(fde_t *, const struct io_addr *, unsigned short, const struct io_addr *, void (fde_t *, int, void *), void *, uintmax_t);
+extern void comm_connect_tcp(fde_t *, const struct io_addr *, uint16_t, const struct io_addr *, void (fde_t *, int, void *), void *, uintmax_t);
 extern bool comm_ignore_errno(int);
 extern int comm_get_sockerr(fde_t *);
 extern int comm_socket(int, int, int);

@@ -508,12 +508,8 @@ auth_connect_callback(fde_t *F, int error, void *data_)
     return;
   }
 
-  struct sockaddr_in6 *v6 = (struct sockaddr_in6 *)&us;
-  uint16_t uport = ntohs(v6->sin6_port);
-
-  v6 = (struct sockaddr_in6 *)&them;
-  uint16_t tport = ntohs(v6->sin6_port);
-
+  uint16_t uport = address_get_port(&us);
+  uint16_t tport = address_get_port(&them);
   char authbuf[16];
   ssize_t len = snprintf(authbuf, sizeof(authbuf), "%u, %u\r\n", tport, uport);
 
@@ -548,7 +544,7 @@ auth_start_query(struct AuthRequest *auth)
   assert(auth->client->connection);
 
   /* Open a socket of the same type as the client socket */
-  int fd = comm_socket(auth->client->addr.ss.ss_family, SOCK_STREAM, 0);
+  int fd = comm_socket(address_get_family(&auth->client->addr), SOCK_STREAM, 0);
   if (fd == -1)
   {
     log_write(LOG_TYPE_IRCD, "creating auth stream socket %s: %s",
@@ -574,8 +570,7 @@ auth_start_query(struct AuthRequest *auth)
 
   address_strip_ipv4(&localaddr);
 
-  struct sockaddr_in6 *v6 = (struct sockaddr_in6 *)&localaddr;
-  v6->sin6_port = htons(0);
+  address_set_port(&localaddr, 0);
 
   comm_connect_tcp(auth->fd, &auth->client->addr, AUTH_PORTNUM, &localaddr,
                    auth_connect_callback, auth, 4);

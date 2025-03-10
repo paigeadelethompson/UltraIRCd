@@ -58,4 +58,85 @@ extern uint32_t hash_ipv4(const struct io_addr *, int);
 extern uint32_t hash_ipv6(const struct io_addr *, int);
 extern uint32_t hash_text(const char *);
 extern uint32_t get_mask_hash(const char *);
+
+static inline bool
+address_is_ipv4(const struct io_addr *addr)
+{
+  return addr->ss.ss_family == AF_INET;
+}
+
+static inline bool
+address_is_ipv6(const struct io_addr *addr)
+{
+  return addr->ss.ss_family == AF_INET6;
+}
+
+static inline bool
+address_is_ipv4_mapped(const struct io_addr *addr)
+{
+  if (address_is_ipv6(addr) == false)
+    return false;
+
+  const struct sockaddr_in6 *v6 = (const struct sockaddr_in6 *)&addr->ss;
+  return IN6_IS_ADDR_V4MAPPED(&v6->sin6_addr);
+}
+
+static inline bool
+address_is_unspecified(const struct io_addr *addr)
+{
+  if (address_is_ipv4(addr))
+  {
+    const struct sockaddr_in *v4 = (const struct sockaddr_in *)&addr->ss;
+    return v4->sin_addr.s_addr == INADDR_ANY;
+  }
+  else if (address_is_ipv6(addr))
+  {
+    const struct sockaddr_in6 *v6 = (const struct sockaddr_in6 *)&addr->ss;
+    return IN6_IS_ADDR_UNSPECIFIED(&v6->sin6_addr);
+  }
+
+  return false;
+}
+
+static inline int
+address_get_family(const struct io_addr *addr)
+{
+  return addr->ss.ss_family;
+}
+
+static inline uint16_t
+address_get_port(const struct io_addr *addr)
+{
+  if (address_is_ipv4(addr))
+  {
+    const struct sockaddr_in *v4 = (const struct sockaddr_in *)&addr->ss;
+    return ntohs(v4->sin_port);
+  }
+  else if (address_is_ipv6(addr))
+  {
+    const struct sockaddr_in6 *v6 = (const struct sockaddr_in6 *)&addr->ss;
+    return ntohs(v6->sin6_port);
+  }
+
+  return 0;
+}
+
+static inline bool
+address_set_port(struct io_addr *addr, uint16_t port)
+{
+  if (address_is_ipv4(addr))
+  {
+    struct sockaddr_in *v4 = (struct sockaddr_in *)&addr->ss;
+    v4->sin_port = htons(port);
+    return true;
+  }
+  else if (address_is_ipv6(addr))
+  {
+    struct sockaddr_in6 *v6 = (struct sockaddr_in6 *)&addr->ss;
+    v6->sin6_port = htons(port);
+    return true;
+  }
+
+  return false;
+}
 #endif  /* INCLUDED_address_h */

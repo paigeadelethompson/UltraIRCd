@@ -105,7 +105,7 @@ find_conf_by_address(const char *name, const struct io_addr *addr, unsigned int 
   if (addr)
   {
     /* Check for IPV6 matches... */
-    if (addr->ss.ss_family == AF_INET6)
+    if (address_is_ipv6(addr))
     {
       for (int b = 128; b >= 0; b -= 16)
       {
@@ -128,7 +128,7 @@ find_conf_by_address(const char *name, const struct io_addr *addr, unsigned int 
         }
       }
     }
-    else if (addr->ss.ss_family == AF_INET)
+    else if (address_is_ipv4(addr))
     {
       for (int b = 32; b >= 0; b -= 8)
       {

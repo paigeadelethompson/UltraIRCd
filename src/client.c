@@ -560,7 +560,7 @@ client_get_name(const struct Client *client, enum addr_mask_type type)
                client->name, client->username, client->sockhost);
       break;
     case MASK_IP:
-      if (client->addr.ss.ss_family == AF_INET)
+      if (address_is_ipv4(&client->addr))
         snprintf(buf, sizeof(buf), "%s[%s@255.255.255.255]",
                  client->name, client->username);
       else

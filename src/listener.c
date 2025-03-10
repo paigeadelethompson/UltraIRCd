@@ -307,7 +307,7 @@ listener_finalize(struct Listener *listener)
   /*
    * At first, open a new socket
    */
-  int fd = comm_socket(listener->addr.ss.ss_family, SOCK_STREAM, 0);
+  int fd = comm_socket(address_get_family(&listener->addr), SOCK_STREAM, 0);
   if (fd == -1)
   {
     log_write(LOG_TYPE_IRCD, "opening listener socket %s: %s",
@@ -317,8 +317,7 @@ listener_finalize(struct Listener *listener)
 
   const socklen_t opt = 1;
 #ifdef IPV6_V6ONLY
-  if (listener->addr.ss.ss_family == AF_INET6 &&
-      IN6_IS_ADDR_UNSPECIFIED(&((struct sockaddr_in6 *)&listener->addr)->sin6_addr))
+  if (address_is_ipv6(&listener->addr) && address_is_unspecified(&listener->addr))
   {
     if (setsockopt(fd, IPPROTO_IPV6, IPV6_V6ONLY, &opt, sizeof(opt)))
     {

@@ -401,7 +401,7 @@ server_connect(struct MaskItem *conf, struct Client *initiator)
   log_write(LOG_TYPE_IRCD, "Connect to %s[%s] @%s", conf->name, conf->host, buf);
 
   /* Create a socket for the server connection */
-  int fd = comm_socket(conf->addr->ss.ss_family, SOCK_STREAM, 0);
+  int fd = comm_socket(address_get_family(conf->addr), SOCK_STREAM, 0);
   if (fd == -1)
   {
     /* Eek, failure to create the socket */

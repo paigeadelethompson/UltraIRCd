@@ -234,7 +234,7 @@ cloak_mac_and_compose(const struct io_addr *addr)
   size_t addr_len;
 
   /* Determine the address pointer and length based on the address family (IPv4 or IPv6). */
-  if (addr->ss.ss_family == AF_INET6)
+  if (address_is_ipv6(addr))
   {
     const struct sockaddr_in6 *const v6 = (const struct sockaddr_in6 *const)addr;
     addr_ptr = &v6->sin6_addr;
@@ -294,9 +294,9 @@ cloak_compute(const struct io_addr *addr)
   struct io_addr tmp;
   memcpy(&tmp, addr, sizeof(tmp));
 
-  if (addr->ss.ss_family == AF_INET6)
+  if (address_is_ipv6(addr))
     address_mask(&tmp, config->cidr_len_ipv6);
-  else /* (addr->ss.ss_family == AF_INET) == true */
+  else /* address_is_ipv4(addr) == true */
     address_mask(&tmp, config->cidr_len_ipv4);
 
   return cloak_mac_and_compose(&tmp);

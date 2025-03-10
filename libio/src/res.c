@@ -156,7 +156,7 @@ start_resolver(void)
 
   if (ResolverFileDescriptor == NULL)
   {
-    int fd = comm_socket(reslib_nsaddr_list[0].ss.ss_family, SOCK_DGRAM, 0);
+    int fd = comm_socket(address_get_family(&reslib_nsaddr_list[0]), SOCK_DGRAM, 0);
     if (fd == -1)
       return;
 
@@ -300,7 +300,7 @@ do_query_number(dns_callback_fnc callback, void *ctx, const struct io_addr *addr
 {
   char ipbuf[128] = "";
 
-  if (addr->ss.ss_family == AF_INET)
+  if (address_is_ipv4(addr))
   {
     const struct sockaddr_in *v4 = (const struct sockaddr_in *)addr;
     const uint8_t *cp = (const uint8_t *)&v4->sin_addr.s_addr;
@@ -309,8 +309,9 @@ do_query_number(dns_callback_fnc callback, void *ctx, const struct io_addr *addr
              (unsigned int)(cp[3]), (unsigned int)(cp[2]),
              (unsigned int)(cp[1]), (unsigned int)(cp[0]));
   }
-  else if (addr->ss.ss_family == AF_INET6)
+  else
   {
+    assert(address_is_ipv6(addr));
     const struct sockaddr_in6 *v6 = (const struct sockaddr_in6 *)addr;
     const uint8_t *cp = (const uint8_t *)&v6->sin6_addr.s6_addr;
 
@@ -569,7 +570,7 @@ res_readreply(fde_t *F, void *data)
       /*
        * Lookup the 'authoritative' name that we were given for the ip#.
        */
-      if (request->addr.ss.ss_family == AF_INET6)
+      if (address_is_ipv6(&request->addr))
         gethost_byname_type(request->callback, request->callback_ctx, request->name, T_AAAA);
       else
         gethost_byname_type(request->callback, request->callback_ctx, request->name, T_A);

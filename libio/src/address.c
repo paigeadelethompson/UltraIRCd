@@ -271,7 +271,7 @@ void
 address_strip_ipv4(struct io_addr *addr)
 {
   /* Check if the address family is not IPv6. */
-  if (addr->ss.ss_family != AF_INET6)
+  if (address_is_ipv6(addr) == false)
   {
     /* If the address is not IPv6, set length for IPv4 and return. */
     addr->ss_len = sizeof(struct sockaddr_in);
@@ -279,7 +279,7 @@ address_strip_ipv4(struct io_addr *addr)
   }
 
   /* Check if the address is an IPv6-mapped IPv4 address. */
-  if (IN6_IS_ADDR_V4MAPPED(&((struct sockaddr_in6 *)addr)->sin6_addr))
+  if (address_is_ipv4_mapped(addr))
   {
     /* If IPv6-mapped IPv4, extract IPv4 portion and update address. */
     struct sockaddr_in6 v6;
@@ -317,7 +317,7 @@ address_strip_ipv4(struct io_addr *addr)
 void
 address_mask(struct io_addr *addr, int bits)
 {
-  if (addr->ss.ss_family != AF_INET6)
+  if (address_is_ipv4(addr))
   {
     /* Calculate the IPv4 mask based on the prefix length. */
     const int mask = ~((1 << (32 - bits)) - 1);
@@ -328,6 +328,7 @@ address_mask(struct io_addr *addr, int bits)
   }
   else
   {
+    assert(address_is_ipv6(addr));
     /* Calculate the number of full octets and remaining bits. */
     const unsigned int n = bits / 8;
     const unsigned int m = bits % 8;
@@ -363,10 +364,10 @@ bool
 address_match(const struct io_addr *addr, const struct io_addr *mask, bool exact, bool port, int bits)
 {
   /* Check if address families are the same */
-  if (addr->ss.ss_family != mask->ss.ss_family)
+  if (address_get_family(addr) != address_get_family(mask))
     return false;
 
-  if (addr->ss.ss_family == AF_INET)
+  if (address_is_ipv4(addr))
   {
     const struct sockaddr_in *const sin1 = (const struct sockaddr_in *)addr;
     const struct sockaddr_in *const sin2 = (const struct sockaddr_in *)mask;
@@ -378,8 +379,9 @@ address_match(const struct io_addr *addr, const struct io_addr *mask, bool exact
       return sin1->sin_addr.s_addr == sin2->sin_addr.s_addr;
     return address_match_ipv4(addr, mask, bits);
   }
-  else if (addr->ss.ss_family == AF_INET6)
+  else
   {
+    assert(address_is_ipv6(addr));
     const struct sockaddr_in6 *const sin1 = (const struct sockaddr_in6 *)addr;
     const struct sockaddr_in6 *const sin2 = (const struct sockaddr_in6 *)mask;
 
