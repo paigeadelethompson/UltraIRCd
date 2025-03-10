@@ -168,10 +168,7 @@ add_connection(struct Listener *listener, struct io_addr *addr, int fd)
    * so we have something valid to put into error messages...
    */
   client->addr = *addr;
-
-  getnameinfo((const struct sockaddr *)&client->addr,
-              client->addr.ss_len, client->sockhost,
-              sizeof(client->sockhost), NULL, 0, NI_NUMERICHOST);
+  address_to_string(&client->addr, client->sockhost, sizeof(client->sockhost));
 
   if (client->sockhost[0] == ':' &&
       client->sockhost[1] == ':')
@@ -292,9 +289,7 @@ static bool
 listener_finalize(struct Listener *listener)
 {
   char buf[HOSTIPLEN + 1];
-
-  getnameinfo((const struct sockaddr *)&listener->addr, listener->addr.ss_len,
-              buf, sizeof(buf), NULL, 0, NI_NUMERICHOST);
+  address_to_string(&listener->addr, buf, sizeof(buf));
 
   if (buf[0] == ':' && buf[1] == ':')
   {
@@ -461,8 +456,6 @@ listener_release(struct Listener *listener)
 void
 listener_add(int port, const char *vhost_ip, unsigned int flags)
 {
-  struct addrinfo hints, *res;
-  char portname[PORTNAMELEN + 1];
   static short int pass = 0; /* if ipv6 and no address specified we need to
 				have two listeners; one for each protocol. */
 
@@ -472,33 +465,18 @@ listener_add(int port, const char *vhost_ip, unsigned int flags)
   if (!(port > 0 && port <= 0xFFFF))
     return;
 
-  /* Set up the hints structure */
-  memset(&hints, 0, sizeof(hints));
-  hints.ai_family = AF_UNSPEC;
-  hints.ai_socktype = SOCK_STREAM;
-  /* Get us ready for a bind() and don't bother doing dns lookup */
-  hints.ai_flags = AI_PASSIVE | AI_NUMERICHOST;
-
-  snprintf(portname, sizeof(portname), "%d", port);
-
-  getaddrinfo("::", portname, &hints, &res);
-  assert(res);
-
   struct io_addr vaddr;
-  memcpy((struct sockaddr *)&vaddr, res->ai_addr, res->ai_addrlen);
-  vaddr.ss_len = res->ai_addrlen;
-  freeaddrinfo(res);
+  if (address_from_string("::", &vaddr) == false)
+    return;
+
+  address_set_port(&vaddr, port);
 
   if (!string_is_empty(vhost_ip))
   {
-    if (getaddrinfo(vhost_ip, portname, &hints, &res))
+    if (address_from_string(vhost_ip, &vaddr) == false)
       return;
 
-    assert(res);
-
-    memcpy((struct sockaddr *)&vaddr, res->ai_addr, res->ai_addrlen);
-    vaddr.ss_len = res->ai_addrlen;
-    freeaddrinfo(res);
+    address_set_port(&vaddr, port);
   }
   else if (pass == 0)
   {

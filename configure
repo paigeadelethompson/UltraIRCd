@@ -15621,7 +15621,7 @@ printf "%s\n" "$ssp_cv_lib" >&6; }
   fi
 
 
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for library containing json_load_file" >&5
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for library containing json_load_file" >&5
 printf %s "checking for library containing json_load_file... " >&6; }
 if test ${ac_cv_search_json_load_file+y}
 then :
@@ -15685,164 +15685,13 @@ ac_res=$ac_cv_search_json_load_file
 if test "$ac_res" != no
 then :
   test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
-  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: Found jansson library" >&5
-printf "%s\n" "Found jansson library" >&6; }
+
 else case e in #(
   e) as_fn_error $? "jansson library not found. Please install the jansson development package." "$LINENO" 5 ;;
 esac
 fi
 
 
-
-  ac_fn_c_check_func "$LINENO" "getaddrinfo" "ac_cv_func_getaddrinfo"
-if test "x$ac_cv_func_getaddrinfo" = xyes
-then :
-
-else case e in #(
-  e) { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for library containing getaddrinfo" >&5
-printf %s "checking for library containing getaddrinfo... " >&6; }
-if test ${ac_cv_search_getaddrinfo+y}
-then :
-  printf %s "(cached) " >&6
-else case e in #(
-  e) ac_func_search_save_LIBS=$LIBS
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.
-   The 'extern "C"' is for builds by C++ compilers;
-   although this is not generally supported in C code supporting it here
-   has little cost and some practical benefit (sr 110532).  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char getaddrinfo (void);
-int
-main (void)
-{
-return getaddrinfo ();
-  ;
-  return 0;
-}
-_ACEOF
-for ac_lib in '' nsl
-do
-  if test -z "$ac_lib"; then
-    ac_res="none required"
-  else
-    ac_res=-l$ac_lib
-    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
-  fi
-  if ac_fn_c_try_link "$LINENO"
-then :
-  ac_cv_search_getaddrinfo=$ac_res
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.beam \
-    conftest$ac_exeext
-  if test ${ac_cv_search_getaddrinfo+y}
-then :
-  break
-fi
-done
-if test ${ac_cv_search_getaddrinfo+y}
-then :
-
-else case e in #(
-  e) ac_cv_search_getaddrinfo=no ;;
-esac
-fi
-rm conftest.$ac_ext
-LIBS=$ac_func_search_save_LIBS ;;
-esac
-fi
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_getaddrinfo" >&5
-printf "%s\n" "$ac_cv_search_getaddrinfo" >&6; }
-ac_res=$ac_cv_search_getaddrinfo
-if test "$ac_res" != no
-then :
-  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
-
-fi
- ;;
-esac
-fi
-
-  ac_fn_c_check_func "$LINENO" "getnameinfo" "ac_cv_func_getnameinfo"
-if test "x$ac_cv_func_getnameinfo" = xyes
-then :
-
-else case e in #(
-  e) { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for library containing getnameinfo" >&5
-printf %s "checking for library containing getnameinfo... " >&6; }
-if test ${ac_cv_search_getnameinfo+y}
-then :
-  printf %s "(cached) " >&6
-else case e in #(
-  e) ac_func_search_save_LIBS=$LIBS
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.
-   The 'extern "C"' is for builds by C++ compilers;
-   although this is not generally supported in C code supporting it here
-   has little cost and some practical benefit (sr 110532).  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char getnameinfo (void);
-int
-main (void)
-{
-return getnameinfo ();
-  ;
-  return 0;
-}
-_ACEOF
-for ac_lib in '' nsl
-do
-  if test -z "$ac_lib"; then
-    ac_res="none required"
-  else
-    ac_res=-l$ac_lib
-    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
-  fi
-  if ac_fn_c_try_link "$LINENO"
-then :
-  ac_cv_search_getnameinfo=$ac_res
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.beam \
-    conftest$ac_exeext
-  if test ${ac_cv_search_getnameinfo+y}
-then :
-  break
-fi
-done
-if test ${ac_cv_search_getnameinfo+y}
-then :
-
-else case e in #(
-  e) ac_cv_search_getnameinfo=no ;;
-esac
-fi
-rm conftest.$ac_ext
-LIBS=$ac_func_search_save_LIBS ;;
-esac
-fi
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_getnameinfo" >&5
-printf "%s\n" "$ac_cv_search_getnameinfo" >&6; }
-ac_res=$ac_cv_search_getnameinfo
-if test "$ac_res" != no
-then :
-  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
-
-fi
- ;;
-esac
-fi
 
   { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for library containing socket" >&5
 printf %s "checking for library containing socket... " >&6; }
@@ -16251,8 +16100,7 @@ then :
 fi
 
 
-# Set -Werror=unknown-warning-option for clang so subsequent
-# AX_APPEND_COMPILE_FLAGS executions work properly.
+# Force Clang to error on unknown warning options so AX_CHECK_COMPILE_FLAG detects unsupported flags.
 
 
 
@@ -16335,6 +16183,7 @@ esac
 fi
 
 done
+
 
 # Disable -Wformat-truncation specifically for gcc.
 

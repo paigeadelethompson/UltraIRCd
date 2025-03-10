@@ -460,44 +460,22 @@ conf_dns_callback(void *vptr, const struct io_addr *addr, const char *name, size
 void
 conf_dns_lookup(struct MaskItem *conf)
 {
-  struct addrinfo hints, *res;
+  if (address_from_string(conf->host, conf->addr))
+    return;
 
   /*
-   * Do name lookup now on hostnames given and store the
-   * ip numbers in conf structure.
+   * By this point conf->host possibly is not a numerical network address. Do a nameserver
+   * lookup of the conf host. If the conf entry is currently doing a ns lookup do nothing.
    */
-  memset(&hints, 0, sizeof(hints));
-
-  hints.ai_family = AF_UNSPEC;
-  hints.ai_socktype = SOCK_STREAM;
-
-  /* Get us ready for a bind() and don't bother doing dns lookup */
-  hints.ai_flags = AI_PASSIVE | AI_NUMERICHOST;
-
-  if (getaddrinfo(conf->host, NULL, &hints, &res))
-  {
-    /*
-     * By this point conf->host possibly is not a numerical network address. Do a nameserver
-     * lookup of the conf host. If the conf entry is currently doing a ns lookup do nothing.
-     */
-    if (conf->dns_pending)
-      return;
-
-    conf->dns_pending = true;
-
-    if (conf->aftype == AF_INET)
-      gethost_byname_type(conf_dns_callback, conf, conf->host, T_A);
-    else
-      gethost_byname_type(conf_dns_callback, conf, conf->host, T_AAAA);
+  if (conf->dns_pending)
     return;
-  }
 
-  assert(res);
+  conf->dns_pending = true;
 
-  memcpy(conf->addr, res->ai_addr, res->ai_addrlen);
-  conf->addr->ss_len = res->ai_addrlen;
-
-  freeaddrinfo(res);
+  if (conf->aftype == AF_INET)
+    gethost_byname_type(conf_dns_callback, conf, conf->host, T_A);
+  else
+    gethost_byname_type(conf_dns_callback, conf, conf->host, T_AAAA);
 }
 
 /* map_to_list()

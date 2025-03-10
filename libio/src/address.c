@@ -520,3 +520,50 @@ get_mask_hash(const char *text)
       hp = p + 1;
   return hash_text(text);
 }
+
+bool
+address_from_string(const char *str, struct io_addr *addr)
+{
+  memset(addr, 0, sizeof(*addr));
+
+  if (strchr(str, ':'))
+  {
+    struct sockaddr_in6 *v6 = (struct sockaddr_in6 *)&addr->ss;
+    v6->sin6_family = AF_INET6;
+    if (inet_pton(AF_INET6, str, &v6->sin6_addr) != 1)
+      return false;
+
+    addr->ss_len = sizeof(struct sockaddr_in6);
+  }
+  else
+  {
+    struct sockaddr_in *v4 = (struct sockaddr_in *)&addr->ss;
+    v4->sin_family = AF_INET;
+    if (inet_pton(AF_INET, str, &v4->sin_addr) != 1)
+      return false;
+
+    addr->ss_len = sizeof(struct sockaddr_in);
+  }
+
+  return true;
+}
+
+bool
+address_to_string(const struct io_addr *addr, char *buf, size_t buflen)
+{
+  if (address_is_ipv4(addr))
+  {
+    const struct sockaddr_in *v4 = (const struct sockaddr_in *)&addr->ss;
+    if (inet_ntop(AF_INET, &v4->sin_addr, buf, buflen))
+      return true;
+  }
+  else
+  {
+    assert(address_is_ipv6(addr));
+    const struct sockaddr_in6 *v6 = (const struct sockaddr_in6 *)&addr->ss;
+    if (inet_ntop(AF_INET6, &v6->sin6_addr, buf, buflen))
+      return true;
+  }
+
+  return false;
+}

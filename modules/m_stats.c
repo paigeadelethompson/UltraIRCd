@@ -470,9 +470,8 @@ stats_dns_servers(struct Client *client, int parc, char *parv[])
   for (unsigned int i = 0; i < reslib_nscount; ++i)
   {
     char buf[HOSTIPLEN + 1];
-    getnameinfo((const struct sockaddr *)&reslib_nsaddr_list[i], reslib_nsaddr_list[i].ss_len,
-                buf, sizeof(buf), NULL, 0, NI_NUMERICHOST);
-    sendto_one_numeric(client, &me, RPL_STATSALINE, buf);
+    if (address_to_string(&reslib_nsaddr_list[i], buf, sizeof(buf)))
+      sendto_one_numeric(client, &me, RPL_STATSALINE, buf);
   }
 }
 

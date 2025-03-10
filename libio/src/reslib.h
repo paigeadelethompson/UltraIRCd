@@ -76,6 +76,7 @@
 #define NS_INT32SZ 4  /**< #/bytes of data in a uint32_t */
 #define NS_CMPRSFLGS 0xc0  /**< Flag bits indicating name compression. */
 #define NS_MAXCDNAME 255  /**< maximum compressed domain name */
+#define NS_DEFAULTPORT	53
 #define QUERY 0
 #define NO_ERRORS 0
 #define SERVFAIL 2  /**< Server failure. */

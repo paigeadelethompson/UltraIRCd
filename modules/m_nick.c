@@ -348,23 +348,12 @@ uid_from_server(struct Client *source, int parc, char *parv[])
   strlcpy(client_p->account, parv[10], sizeof(client_p->account));
   strlcpy(client_p->info, parv[11], sizeof(client_p->info));
 
-  struct addrinfo hints, *res = NULL;
-  memset(&hints, 0, sizeof(hints));
-  hints.ai_family = AF_UNSPEC;
-  hints.ai_flags = AI_PASSIVE | AI_NUMERICHOST;
-
-  if (getaddrinfo(client_p->sockhost, NULL, &hints, &res) == 0)
+  if (address_from_string(client_p->sockhost, &client_p->addr))
   {
-    memcpy(&client_p->addr, res->ai_addr, res->ai_addrlen);
-    client_p->addr.ss_len = res->ai_addrlen;
-
     struct ip_entry *ipcache = ipcache_record_find_or_add(&client_p->addr);
     ++ipcache->count_remote;
     AddFlag(client_p, FLAGS_IPHASH);
   }
-
-  if (res)
-    freeaddrinfo(res);
 
   hash_add_client(client_p);
   hash_add_id(client_p);

@@ -1879,8 +1879,6 @@ connect_entry: CONNECT
   block_state.timeout.value = CONNECTTIMEOUT;
 } '{' connect_items '}' ';'
 {
-  struct addrinfo hints, *res;
-
   if (conf_parser_ctx.pass != 2)
     break;
 
@@ -1921,23 +1919,13 @@ connect_entry: CONNECT
 
   if (block_state.bind.buf[0])
   {
-    memset(&hints, 0, sizeof(hints));
-
-    hints.ai_family   = AF_UNSPEC;
-    hints.ai_socktype = SOCK_STREAM;
-    hints.ai_flags    = AI_PASSIVE | AI_NUMERICHOST;
-
-    if (getaddrinfo(block_state.bind.buf, NULL, &hints, &res))
+    struct io_addr tmp;
+    if (address_from_string(block_state.bind.buf, &tmp) == false)
       log_write(LOG_TYPE_IRCD, "Invalid netmask for server bind(%s)", block_state.bind.buf);
     else
     {
-      assert(res);
-
       conf->bind = io_calloc(sizeof(*conf->bind));
-
-      memcpy(conf->bind, res->ai_addr, res->ai_addrlen);
-      conf->bind->ss_len = res->ai_addrlen;
-      freeaddrinfo(res);
+      memcpy(conf->bind, &tmp, sizeof(tmp));
     }
   }
 

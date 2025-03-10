@@ -92,24 +92,11 @@ mr_webirc(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  struct addrinfo hints, *res;
-  memset(&hints, 0, sizeof(hints));
-
-  hints.ai_family = AF_UNSPEC;
-  hints.ai_socktype = SOCK_STREAM;
-  hints.ai_flags = AI_PASSIVE | AI_NUMERICHOST;
-
-  if (getaddrinfo(addr, NULL, &hints, &res))
+  if (address_from_string(addr, &source->addr) == false)
   {
     client_exit(source, "Invalid WebIRC IP address");
     return;
   }
-
-  assert(res);
-
-  memcpy(&source->addr, res->ai_addr, res->ai_addrlen);
-  source->addr.ss_len = res->ai_addrlen;
-  freeaddrinfo(res);
 
   strlcpy(source->sockhost, addr, sizeof(source->sockhost));
 

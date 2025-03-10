@@ -396,8 +396,7 @@ server_connect(struct MaskItem *conf, struct Client *initiator)
   }
 
   char buf[HOSTIPLEN + 1];
-  getnameinfo((const struct sockaddr *)conf->addr, conf->addr->ss_len,
-              buf, sizeof(buf), NULL, 0, NI_NUMERICHOST);
+  address_to_string(conf->addr, buf, sizeof(buf));
   log_write(LOG_TYPE_IRCD, "Connect to %s[%s] @%s", conf->name, conf->host, buf);
 
   /* Create a socket for the server connection */

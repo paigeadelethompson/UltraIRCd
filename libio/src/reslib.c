@@ -120,23 +120,15 @@ static int reslib_mklower(int);
 static void
 reslib_add_nameserver(const char *arg)
 {
-  struct addrinfo hints, *res;
-
   /* Done max number of nameservers? */
   if (reslib_nscount >= RESLIB_MAXNS)
     return;
 
-  memset(&hints, 0, sizeof(hints));
-  hints.ai_family = PF_UNSPEC;
-  hints.ai_socktype = SOCK_DGRAM;
-  hints.ai_flags = AI_PASSIVE | AI_NUMERICHOST;
-
-  if (getaddrinfo(arg, "domain", &hints, &res))
+  if (address_from_string(arg, &reslib_nsaddr_list[reslib_nscount]) == false)
     return;
 
-  memcpy(&reslib_nsaddr_list[reslib_nscount].ss, res->ai_addr, res->ai_addrlen);
-  reslib_nsaddr_list[reslib_nscount++].ss_len = res->ai_addrlen;
-  freeaddrinfo(res);
+  address_set_port(&reslib_nsaddr_list[reslib_nscount], NS_DEFAULTPORT);
+  reslib_nscount++;
 }
 
 /* parse_resvconf()
