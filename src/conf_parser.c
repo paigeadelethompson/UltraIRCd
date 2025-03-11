@@ -5328,7 +5328,7 @@ yyreduce:
     else
     {
       conf->bind = io_calloc(sizeof(*conf->bind));
-      memcpy(conf->bind, &tmp, sizeof(tmp));
+      address_copy(conf->bind, &tmp);
     }
   }
 

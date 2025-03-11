@@ -141,4 +141,10 @@ address_set_port(struct io_addr *addr, uint16_t port)
 
   return false;
 }
+
+static inline void
+address_copy(struct io_addr *dst, const struct io_addr *src)
+{
+  memcpy(dst, src, sizeof(*dst));
+}
 #endif  /* INCLUDED_address_h */

@@ -58,7 +58,8 @@ listener_make(const int port, const struct io_addr *addr)
 {
   struct Listener *listener = io_calloc(sizeof(*listener));
   listener->port = port;
-  listener->addr = *addr;
+  address_copy(&listener->addr, addr);
+
   list_add(listener, &listener->node, &listener_list);
 
   return listener;
@@ -167,7 +168,7 @@ add_connection(struct Listener *listener, struct io_addr *addr, int fd)
    * copy address to 'sockhost' as a string, copy it to host too
    * so we have something valid to put into error messages...
    */
-  client->addr = *addr;
+  address_copy(&client->addr, addr);
   address_to_string(&client->addr, client->sockhost, sizeof(client->sockhost));
 
   if (client->sockhost[0] == ':' &&

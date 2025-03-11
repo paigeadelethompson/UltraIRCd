@@ -292,7 +292,7 @@ cloak_compute(const struct io_addr *addr)
     return NULL;
 
   struct io_addr tmp;
-  memcpy(&tmp, addr, sizeof(tmp));
+  address_copy(&tmp, addr);
 
   if (address_is_ipv6(addr))
     address_mask(&tmp, config->cidr_len_ipv6);
