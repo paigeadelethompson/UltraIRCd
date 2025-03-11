@@ -447,7 +447,7 @@ conf_dns_callback(void *vptr, const struct io_addr *addr, const char *name, size
   conf->dns_pending = false;
 
   if (addr)
-    *conf->addr = *addr;
+    address_copy(conf->addr, addr);
   else
     conf->dns_failed = true;
 }

@@ -340,7 +340,7 @@ do_query_number(dns_callback_fnc callback, void *ctx, const struct io_addr *addr
   {
     request = make_request(callback, ctx);
     request->type = T_PTR;
-    request->addr = *addr;
+    address_copy(&request->addr, addr);
   }
 
   query_name(ipbuf, C_IN, T_PTR, request);
