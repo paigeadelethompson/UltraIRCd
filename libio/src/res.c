@@ -499,12 +499,15 @@ static void
 res_readreply(fde_t *F, void *data)
 {
   unsigned char buf[sizeof(HEADER) + MAXPACKET];
-  ssize_t rc;
   struct io_addr addr;
-  socklen_t len = sizeof(addr);
 
-  while ((rc = recvfrom(F->fd, buf, sizeof(buf), 0, (struct sockaddr *)&addr, &len)) != -1)
+  while (true)
   {
+    socklen_t len = sizeof(addr);
+    ssize_t rc = recvfrom(F->fd, buf, sizeof(buf), 0, (struct sockaddr *)&addr, &len);
+    if (rc == -1)
+      break;
+
     if (rc <= (ssize_t)sizeof(HEADER))
       continue;
 
