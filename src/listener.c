@@ -54,7 +54,7 @@ listener_get_list(void)
 }
 
 static struct Listener *
-listener_make(const int port, const struct io_addr *addr)
+listener_make(const uint16_t port, const struct io_addr *addr)
 {
   struct Listener *listener = io_calloc(sizeof(*listener));
   listener->port = port;
@@ -82,7 +82,7 @@ listener_get_name(const struct Listener *listener)
 {
   static char buf[HOSTLEN + HOSTIPLEN + PORTNAMELEN + 4];  /* +4 for [,/,],\0 */
 
-  snprintf(buf, sizeof(buf), "%s[%s/%u]", me.name,
+  snprintf(buf, sizeof(buf), "%s[%s/%hu]", me.name,
            listener->name, listener->port);
   return buf;
 }
@@ -380,7 +380,7 @@ listener_finalize(struct Listener *listener)
 }
 
 static struct Listener *
-listener_find(int port, struct io_addr *addr)
+listener_find(uint16_t port, struct io_addr *addr)
 {
   struct Listener *last_closed = NULL;
 
@@ -455,7 +455,7 @@ listener_release(struct Listener *listener)
  * the format "255.255.255.255"
  */
 void
-listener_add(int port, const char *vhost_ip, unsigned int flags)
+listener_add(uint16_t port, const char *vhost_ip, unsigned int flags)
 {
   static short int pass = 0; /* if ipv6 and no address specified we need to
 				have two listeners; one for each protocol. */
@@ -463,7 +463,7 @@ listener_add(int port, const char *vhost_ip, unsigned int flags)
   /*
    * if no or invalid port in conf line, don't bother
    */
-  if (!(port > 0 && port <= 0xFFFF))
+  if (port == 0)
     return;
 
   struct io_addr vaddr;

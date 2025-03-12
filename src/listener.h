@@ -45,7 +45,7 @@ struct Listener
   list_node_t node;  /**< List node; linked into listener_list */
   bool active;  /**< Current state of listener */
   fde_t *fd;  /**< File descriptor */
-  int port;  /**< Listener IP port */
+  uint16_t port;  /**< Listener IP port */
   int ref_count;  /**< Number of connection references */
   struct io_addr addr;  /**< Holds an IPv6 or IPv4 address */
   char *name;  /**< Holds an IPv6 or IPv4 address in string representation */
@@ -53,7 +53,7 @@ struct Listener
 };
 
 extern bool listener_has_flag(const struct Listener *, unsigned int);
-extern void listener_add(int, const char *, unsigned int);
+extern void listener_add(uint16_t, const char *, unsigned int);
 extern void listener_release(struct Listener *);
 extern void listener_close_marked(void);
 extern void listener_count_memory(unsigned int *, size_t *);
