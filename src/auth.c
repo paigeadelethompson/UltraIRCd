@@ -446,15 +446,16 @@ auth_read_reply(fde_t *F, void *data_)
 
   if (string_is_empty(username))
   {
-    auth_send_header(auth->client, REPORT_FAIL_ID);
     ++ServerStats.is_abad;
+    auth_send_header(auth->client, REPORT_FAIL_ID);
   }
   else
   {
     strlcpy(auth->client->username, username, sizeof(auth->client->username));
     AddFlag(auth->client, FLAGS_GOTID);
-    auth_send_header(auth->client, REPORT_FIN_ID);
+
     ++ServerStats.is_asuc;
+    auth_send_header(auth->client, REPORT_FIN_ID);
   }
 
   auth_release_client(auth);
