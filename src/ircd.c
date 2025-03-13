@@ -380,7 +380,6 @@ main(int argc, char *argv[])
 
   io_rlimit_set_max_nofile();
 
-  /* Save server boot time right away, so getrusage works correctly */
   io_time_set_error_callback(ircd_time_failure);
   io_time_init();
 
