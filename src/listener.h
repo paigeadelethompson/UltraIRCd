@@ -44,7 +44,6 @@ struct Listener
 {
   list_node_t node;  /**< List node; linked into listener_list */
   fde_t *fd;  /**< File descriptor */
-  uint16_t port;  /**< Listener IP port */
   int ref_count;  /**< Number of connection references */
   struct io_addr addr;  /**< Holds an IPv6 or IPv4 address */
   char *name;  /**< Holds an IPv6 or IPv4 address in string representation */
@@ -58,6 +57,12 @@ extern void listener_close_marked(void);
 extern void listener_count_memory(unsigned int *, size_t *);
 extern const list_t *listener_get_list(void);
 extern const char *listener_get_name(const struct Listener *);
+
+static inline uint16_t
+listener_get_port(const struct Listener *listener)
+{
+  return address_get_port(&listener->addr);
+}
 
 static inline bool
 listener_is_active(const struct Listener *listener)

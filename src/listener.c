@@ -54,10 +54,9 @@ listener_get_list(void)
 }
 
 static struct Listener *
-listener_make(const uint16_t port, const struct io_addr *addr)
+listener_make(const struct io_addr *addr)
 {
   struct Listener *listener = io_calloc(sizeof(*listener));
-  listener->port = port;
   address_copy(&listener->addr, addr);
 
   list_add(listener, &listener->node, &listener_list);
@@ -82,8 +81,8 @@ listener_get_name(const struct Listener *listener)
 {
   static char buf[HOSTLEN + HOSTIPLEN + PORTNAMELEN + 4];  /* +4 for [,/,],\0 */
 
-  snprintf(buf, sizeof(buf), "%s[%s/%hu]", me.name,
-           listener->name, listener->port);
+  snprintf(buf, sizeof(buf), "%s[%s/%hu]",
+           me.name, listener->name, listener_get_port(listener));
   return buf;
 }
 
@@ -380,7 +379,7 @@ listener_finalize(struct Listener *listener)
 }
 
 static struct Listener *
-listener_find(uint16_t port, struct io_addr *addr)
+listener_find(struct io_addr *addr)
 {
   struct Listener *last_closed = NULL;
 
@@ -388,7 +387,7 @@ listener_find(uint16_t port, struct io_addr *addr)
   LIST_FOREACH(node, listener_list.head)
   {
     struct Listener *listener = node->data;
-    if ((port == listener->port) && memcmp(addr, &listener->addr, sizeof(*addr)) == 0)
+    if (memcmp(addr, &listener->addr, sizeof(*addr)) == 0)
     {
       /* Try to return an open listener, otherwise reuse a closed one */
       if (listener_is_active(listener))
@@ -483,7 +482,7 @@ listener_add(uint16_t port, const char *vhost_ip, unsigned int flags)
 
   pass = 0;
 
-  struct Listener *listener = listener_find(port, &vaddr);
+  struct Listener *listener = listener_find(&vaddr);
   if (listener)
   {
     listener->flags = flags;
@@ -496,7 +495,7 @@ listener_add(uint16_t port, const char *vhost_ip, unsigned int flags)
   }
   else
   {
-    listener = listener_make(port, &vaddr);
+    listener = listener_make(&vaddr);
     listener->flags = flags;
   }
 
