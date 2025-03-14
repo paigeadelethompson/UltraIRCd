@@ -391,11 +391,8 @@ listener_find(uint16_t port, struct io_addr *addr)
     if ((port == listener->port) && memcmp(addr, &listener->addr, sizeof(*addr)) == 0)
     {
       /* Try to return an open listener, otherwise reuse a closed one */
-      if (listener->fd)
-      {
-        assert(listener->fd->flags.open);
+      if (listener_is_active(listener))
         last_closed = listener;
-      }
       else
         return listener;
     }
@@ -417,8 +414,6 @@ listener_close(struct Listener *listener)
     fd_close(listener->fd);
     listener->fd = NULL;
   }
-
-  listener->active = false;
 
   if (listener->ref_count)
     return;
@@ -444,7 +439,7 @@ listener_release(struct Listener *listener)
 {
   assert(listener->ref_count > 0);
 
-  if (--listener->ref_count == 0 && listener->active == false)
+  if (--listener->ref_count == 0)
     listener_close(listener);
 }
 
@@ -505,8 +500,6 @@ listener_add(uint16_t port, const char *vhost_ip, unsigned int flags)
     listener->flags = flags;
   }
 
-  if (listener_finalize(listener))
-    listener->active = true;
-  else
+  if (listener_finalize(listener) == false)
     listener_close(listener);
 }
