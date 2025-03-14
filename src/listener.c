@@ -439,7 +439,7 @@ listener_release(struct Listener *listener)
 {
   assert(listener->ref_count > 0);
 
-  if (--listener->ref_count == 0)
+  if (--listener->ref_count == 0 && listener_is_active(listener) == false)
     listener_close(listener);
 }
 
