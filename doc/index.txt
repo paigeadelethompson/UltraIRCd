@@ -1,7 +1,6 @@
 Documentation for ircd-hybrid
 -----------------------------
 
-CIDR.txt		- Description of CIDR in IPv4
 Doxyfile		- Configuration file for generating documentation
 			  with Doxygen
 index.txt		- This file
