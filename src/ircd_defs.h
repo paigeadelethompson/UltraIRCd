@@ -43,7 +43,6 @@
 #define NICKLEN         30  /**< Maximum size of a nickname that the server will handle. Do not change; configurable in ircd.conf. */
 #define USERLEN         10  /**< Maximum size of a username. */
 #define ACCOUNTLEN      NICKLEN  /**< Maximum size of an account name, equal to NICKLEN. */
-#define PORTNAMELEN     6  /**< Length of port name, e.g., ":31337". */
 #define HOSTIPLEN       45  /**< Maximum length of a string representation of an IP address. */
 
 #define PASSWDLEN       128  /**< Maximum length of a password. */

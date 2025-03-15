@@ -861,7 +861,7 @@ stats_ports(struct Client *client, int parc, char *parv[])
 
     if (user_mode_has_flag(client, UMODE_ADMIN) && ConfigServerHide.hide_server_ips == 0)
       sendto_one_numeric(client, &me, RPL_STATSPLINE,
-                         'P', listener_get_port(listener), listener->name, listener->ref_count, buf,
+                         'P', listener_get_port(listener), listener_get_name(listener), listener->ref_count, buf,
                          listener_is_active(listener) ? "active" : "disabled");
     else
       sendto_one_numeric(client, &me, RPL_STATSPLINE,

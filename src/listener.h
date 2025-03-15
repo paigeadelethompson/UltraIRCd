@@ -56,7 +56,12 @@ extern void listener_release(struct Listener *);
 extern void listener_close_marked(void);
 extern void listener_count_memory(unsigned int *, size_t *);
 extern const list_t *listener_get_list(void);
-extern const char *listener_get_name(const struct Listener *);
+
+static inline const char *
+listener_get_name(const struct Listener *listener)
+{
+  return listener->name;
+}
 
 static inline uint16_t
 listener_get_port(const struct Listener *listener)

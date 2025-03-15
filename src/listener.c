@@ -72,20 +72,6 @@ listener_free(struct Listener *listener)
   io_free(listener);
 }
 
-/*
- * listener_get_name - return displayable listener name and port
- * returns "host.foo.org/6667" for a given listener
- */
-const char *
-listener_get_name(const struct Listener *listener)
-{
-  static char buf[HOSTLEN + HOSTIPLEN + PORTNAMELEN + 4];  /* +4 for [,/,],\0 */
-
-  snprintf(buf, sizeof(buf), "%s[%s/%hu]",
-           me.name, listener->name, listener_get_port(listener));
-  return buf;
-}
-
 bool
 listener_has_flag(const struct Listener *listener, unsigned int flags)
 {
@@ -230,8 +216,8 @@ listener_accept_connection(fde_t *F, void *data_)
       ++ServerStats.is_ref;
 
       static uintmax_t rate = 0;
-      sendto_clients_ratelimited(&rate, "All connections in use. (%s)",
-                                 listener_get_name(listener));
+      sendto_clients_ratelimited(&rate, "All connections in use. (%s/%hu)",
+                                 listener_get_name(listener), listener_get_port(listener));
 
       if (!(listener->flags & LISTENER_TLS))
         send(fd, ALLINUSE_WARNING, sizeof(ALLINUSE_WARNING) - 1, 0);
@@ -305,8 +291,8 @@ listener_finalize(struct Listener *listener)
   int fd = comm_socket(address_get_family(&listener->addr), SOCK_STREAM, 0);
   if (fd == -1)
   {
-    log_write(LOG_TYPE_IRCD, "opening listener socket %s: %s",
-              listener_get_name(listener), strerror(errno));
+    log_write(LOG_TYPE_IRCD, "opening listener socket %s/%hu: %s",
+              listener_get_name(listener), listener_get_port(listener), strerror(errno));
     return false;
   }
 
@@ -316,8 +302,8 @@ listener_finalize(struct Listener *listener)
   {
     if (setsockopt(fd, IPPROTO_IPV6, IPV6_V6ONLY, &opt, sizeof(opt)))
     {
-      log_write(LOG_TYPE_IRCD, "setting IPV6_V6ONLY for listener %s: %s",
-                listener_get_name(listener), strerror(errno));
+      log_write(LOG_TYPE_IRCD, "setting IPV6_V6ONLY for listener %s/%hu: %s",
+                listener_get_name(listener), listener_get_port(listener), strerror(errno));
       close(fd);
       return false;
     }
@@ -326,8 +312,8 @@ listener_finalize(struct Listener *listener)
 
   if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)))
   {
-    log_write(LOG_TYPE_IRCD, "setting SO_REUSEADDR for listener %s: %s",
-              listener_get_name(listener), strerror(errno));
+    log_write(LOG_TYPE_IRCD, "setting SO_REUSEADDR for listener %s/%hu: %s",
+              listener_get_name(listener), listener_get_port(listener), strerror(errno));
     close(fd);
     return false;
   }
@@ -338,16 +324,16 @@ listener_finalize(struct Listener *listener)
    */
   if (bind(fd, (const struct sockaddr *)&listener->addr, listener->addr.ss_len))
   {
-    log_write(LOG_TYPE_IRCD, "binding listener socket %s: %s",
-              listener_get_name(listener), strerror(errno));
+    log_write(LOG_TYPE_IRCD, "binding listener socket %s/%hu: %s",
+              listener_get_name(listener), listener_get_port(listener), strerror(errno));
     close(fd);
     return false;
   }
 
   if (listen(fd, LISTEN_BACKLOG))
   {
-    log_write(LOG_TYPE_IRCD, "listen failed for %s: %s",
-              listener_get_name(listener), strerror(errno));
+    log_write(LOG_TYPE_IRCD, "listen failed for %s/%hu: %s",
+              listener_get_name(listener), listener_get_port(listener), strerror(errno));
     close(fd);
     return false;
   }
