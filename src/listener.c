@@ -369,9 +369,9 @@ listener_find(const struct io_addr *addr)
     {
       /* Try to return an open listener, otherwise reuse a closed one */
       if (listener_is_active(listener))
-        last_closed = listener;
-      else
         return listener;
+
+      last_closed = listener;
     }
   }
 
