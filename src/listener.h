@@ -44,7 +44,7 @@ struct Listener
 {
   list_node_t node;  /**< List node; linked into listener_list */
   fde_t *fd;  /**< File descriptor */
-  int ref_count;  /**< Number of connection references */
+  unsigned int ref_count;  /**< Number of connection references */
   struct io_addr addr;  /**< Holds an IPv6 or IPv4 address */
   char *name;  /**< Holds an IPv6 or IPv4 address in string representation */
   unsigned int flags;  /**< Listener flags (tls, hidden, server, client, defer) */
