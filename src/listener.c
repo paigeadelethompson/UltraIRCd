@@ -134,7 +134,7 @@ ssl_handshake(fde_t *F, void *data_)
  * any client list yet.
  */
 static void
-add_connection(struct Listener *listener, struct io_addr *addr, int fd)
+add_connection(struct Listener *listener, const struct io_addr *addr, int fd)
 {
   struct Client *client = client_make(NULL);
 
@@ -357,7 +357,7 @@ listener_finalize(struct Listener *listener)
 }
 
 static struct Listener *
-listener_find(struct io_addr *addr)
+listener_find(const struct io_addr *addr)
 {
   struct Listener *last_closed = NULL;
 
