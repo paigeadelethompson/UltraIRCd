@@ -561,7 +561,7 @@ conf_free(struct MaskItem *conf)
   io_free(conf);
 }
 
-/* attach_iline()
+/* conf_attach_auth()
  *
  * inputs       - client pointer
  *              - conf pointer
@@ -569,7 +569,7 @@ conf_free(struct MaskItem *conf)
  * side effects - do actual attach
  */
 static int
-attach_iline(struct Client *client, struct MaskItem *conf)
+conf_attach_auth(struct Client *client, struct MaskItem *conf)
 {
   const struct ClassItem *const class = conf->class;
   bool a_limit_reached = false;
@@ -643,7 +643,7 @@ verify_access(struct Client *client)
     AddFlag(client, FLAGS_SPOOF);
   }
 
-  return attach_iline(client, conf);
+  return conf_attach_auth(client, conf);
 }
 
 /* check_client()
