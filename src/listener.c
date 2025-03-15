@@ -433,25 +433,19 @@ listener_add(uint16_t port, const char *vhost_ip, unsigned int flags)
   if (port == 0)
     return;
 
-  struct io_addr vaddr;
-  if (address_from_string("::", &vaddr) == false)
-    return;
-
   /* If ipv6 and no address specified we need to have two listeners; one for each protocol. */
-  static bool ipv4_listener_added = false;
   if (string_is_empty(vhost_ip))
   {
-    if (ipv4_listener_added == false)
-    {
-      ipv4_listener_added = true;
-      listener_add(port, "0.0.0.0", flags);
-    }
+    listener_add(port, "0.0.0.0", flags);
+    listener_add(port, "::", flags);
+    return;
   }
-  else if (address_from_string(vhost_ip, &vaddr) == false)
+
+  struct io_addr vaddr;
+  if (address_from_string(vhost_ip, &vaddr) == false)
     return;
 
   address_set_port(&vaddr, port);
-  ipv4_listener_added = false;
 
   struct Listener *listener = listener_find(&vaddr);
   if (listener == NULL)
