@@ -429,12 +429,7 @@ listener_release(struct Listener *listener)
 void
 listener_add(uint16_t port, const char *vhost_ip, unsigned int flags)
 {
-  static short int pass = 0; /* if ipv6 and no address specified we need to
-				have two listeners; one for each protocol. */
-
-  /*
-   * if no or invalid port in conf line, don't bother
-   */
+  /* If no or invalid port in conf line, don't bother. */
   if (port == 0)
     return;
 
@@ -442,40 +437,30 @@ listener_add(uint16_t port, const char *vhost_ip, unsigned int flags)
   if (address_from_string("::", &vaddr) == false)
     return;
 
-  address_set_port(&vaddr, port);
-
-  if (!string_is_empty(vhost_ip))
+  /* If ipv6 and no address specified we need to have two listeners; one for each protocol. */
+  static bool ipv4_listener_added = false;
+  if (string_is_empty(vhost_ip))
   {
-    if (address_from_string(vhost_ip, &vaddr) == false)
-      return;
-
-    address_set_port(&vaddr, port);
-  }
-  else if (pass == 0)
-  {
-    /* add the ipv4 listener if we havent already */
-    pass = 1;
-    listener_add(port, "0.0.0.0", flags);
-  }
-
-  pass = 0;
-
-  struct Listener *listener = listener_find(&vaddr);
-  if (listener)
-  {
-    listener->flags = flags;
-
-    if (listener->fd)
+    if (ipv4_listener_added == false)
     {
-      assert(listener->fd->flags.open);
-      return;
+      ipv4_listener_added = true;
+      listener_add(port, "0.0.0.0", flags);
     }
   }
-  else
-  {
+  else if (address_from_string(vhost_ip, &vaddr) == false)
+    return;
+
+  address_set_port(&vaddr, port);
+  ipv4_listener_added = false;
+
+  struct Listener *listener = listener_find(&vaddr);
+  if (listener == NULL)
     listener = listener_make(&vaddr);
-    listener->flags = flags;
-  }
+
+  listener->flags = flags;
+
+  if (listener_is_active(listener))
+    return;
 
   if (listener_finalize(listener) == false)
     listener_close(listener);
