@@ -223,7 +223,7 @@ comm_connect_tcp(fde_t *F, const struct io_addr *caddr, uint16_t port, const str
 {
   assert(callback);
 
-  F->connect.addr = *caddr;
+  address_copy(&F->connect.addr, caddr);
   address_set_port(&F->connect.addr, port);
 
   F->connect.callback = callback;
