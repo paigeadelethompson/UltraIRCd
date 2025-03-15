@@ -427,7 +427,7 @@ listener_release(struct Listener *listener)
  * the format "255.255.255.255"
  */
 void
-listener_add(uint16_t port, const char *addr_string, unsigned int flags)
+listener_add(uint16_t port, const char *addr_string, listener_flag_t flags)
 {
   /* If no or invalid port in conf line, don't bother. */
   if (port == 0)
