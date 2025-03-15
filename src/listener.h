@@ -50,7 +50,6 @@ struct Listener
   unsigned int flags;  /**< Listener flags (tls, hidden, server, client, defer) */
 };
 
-extern bool listener_has_flag(const struct Listener *, unsigned int);
 extern void listener_add(uint16_t, const char *, unsigned int);
 extern void listener_release(struct Listener *);
 extern void listener_close_marked(void);
@@ -67,6 +66,12 @@ static inline uint16_t
 listener_get_port(const struct Listener *listener)
 {
   return address_get_port(&listener->addr);
+}
+
+static inline bool
+listener_has_flag(const struct Listener *listener, unsigned int flags)
+{
+  return listener->flags & flags;
 }
 
 static inline bool
