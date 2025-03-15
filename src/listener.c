@@ -427,29 +427,29 @@ listener_release(struct Listener *listener)
  * the format "255.255.255.255"
  */
 void
-listener_add(uint16_t port, const char *vhost_ip, unsigned int flags)
+listener_add(uint16_t port, const char *addr_string, unsigned int flags)
 {
   /* If no or invalid port in conf line, don't bother. */
   if (port == 0)
     return;
 
   /* If ipv6 and no address specified we need to have two listeners; one for each protocol. */
-  if (string_is_empty(vhost_ip))
+  if (string_is_empty(addr_string))
   {
     listener_add(port, "0.0.0.0", flags);
     listener_add(port, "::", flags);
     return;
   }
 
-  struct io_addr vaddr;
-  if (address_from_string(vhost_ip, &vaddr) == false)
+  struct io_addr addr;
+  if (address_from_string(addr_string, &addr) == false)
     return;
 
-  address_set_port(&vaddr, port);
+  address_set_port(&addr, port);
 
-  struct Listener *listener = listener_find(&vaddr);
+  struct Listener *listener = listener_find(&addr);
   if (listener == NULL)
-    listener = listener_make(&vaddr);
+    listener = listener_make(&addr);
 
   listener->flags = flags;
 
