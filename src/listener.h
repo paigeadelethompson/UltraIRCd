@@ -30,14 +30,14 @@
 #include "address.h"
 
 /** Listener flags */
-enum
+typedef enum
 {
   LISTENER_TLS    = 1 << 0,  /**< Listener accepts only TLS connections */
   LISTENER_HIDDEN = 1 << 1,  /**< Listener doesn't show up in '/stats P', except for server administrators */
   LISTENER_SERVER = 1 << 2,  /**< Listener accepts only server connections */
   LISTENER_CLIENT = 1 << 3,  /**< Listener accepts only client connections */
   LISTENER_DEFER  = 1 << 4,  /**< Listener has the TCP_DEFER_ACCEPT/SO_ACCEPTFILTER socket option enabled */
-};
+} listener_flag_t;
 
 /** Entry for a single listener/port */
 struct Listener
@@ -45,7 +45,7 @@ struct Listener
   list_node_t node;  /**< List node; linked into listener_list */
   struct io_addr addr;  /**< Holds an IPv6 or IPv4 address */
   char *name;  /**< Holds an IPv6 or IPv4 address in string representation */
-  unsigned int flags;  /**< Listener flags (tls, hidden, server, client, defer) */
+  listener_flag_t flags;  /**< Listener flags (tls, hidden, server, client, defer) */
   fde_t *fd;  /**< File descriptor (NULL if inactive) */
   unsigned int ref_count;  /**< Number of connection references */
 };
@@ -69,7 +69,7 @@ listener_get_port(const struct Listener *listener)
 }
 
 static inline bool
-listener_has_flag(const struct Listener *listener, unsigned int flags)
+listener_has_flag(const struct Listener *listener, listener_flag_t flags)
 {
   return listener->flags & flags;
 }
