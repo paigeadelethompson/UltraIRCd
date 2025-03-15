@@ -120,7 +120,7 @@ find_conf_by_address(const char *name, const struct io_addr *addr, unsigned int 
                          arec->Mask.ipa.bits) &&
               (!username || !cmpfunc(arec->username, username)) &&
               (IsNeedPassword(arec->conf) || arec->conf->passwd == NULL ||
-               match_conf_password(password, arec->conf)))
+               conf_match_password(password, arec->conf)))
           {
             hprecv = arec->precedence;
             hprec = arec->conf;
@@ -143,7 +143,7 @@ find_conf_by_address(const char *name, const struct io_addr *addr, unsigned int 
                          arec->Mask.ipa.bits) &&
               (!username || !cmpfunc(arec->username, username)) &&
               (IsNeedPassword(arec->conf) || arec->conf->passwd == NULL ||
-               match_conf_password(password, arec->conf)))
+               conf_match_password(password, arec->conf)))
           {
             hprecv = arec->precedence;
             hprec = arec->conf;
@@ -168,7 +168,7 @@ find_conf_by_address(const char *name, const struct io_addr *addr, unsigned int 
             !cmpfunc(arec->Mask.hostname, name) &&
             (!username || !cmpfunc(arec->username, username)) &&
             (IsNeedPassword(arec->conf) || arec->conf->passwd == NULL ||
-             match_conf_password(password, arec->conf)))
+             conf_match_password(password, arec->conf)))
         {
           hprecv = arec->precedence;
           hprec = arec->conf;
@@ -190,7 +190,7 @@ find_conf_by_address(const char *name, const struct io_addr *addr, unsigned int 
           !cmpfunc(arec->Mask.hostname, name) &&
           (!username || !cmpfunc(arec->username, username)) &&
           (IsNeedPassword(arec->conf) || arec->conf->passwd == NULL ||
-           match_conf_password(password, arec->conf)))
+           conf_match_password(password, arec->conf)))
       {
         hprecv = arec->precedence;
         hprec = arec->conf;
@@ -1356,7 +1356,7 @@ conf_error_report(const char *msg)
             conffilebuf, lineno, msg, p);
 }
 
-/* match_conf_password()
+/* conf_match_password()
  *
  * inputs       - pointer to given password
  *              - pointer to Conf
@@ -1364,7 +1364,7 @@ conf_error_report(const char *msg)
  * side effects - none
  */
 bool
-match_conf_password(const char *password, const struct MaskItem *conf)
+conf_match_password(const char *password, const struct MaskItem *conf)
 {
   if (string_is_empty(password) || string_is_empty(conf->passwd))
     return false;

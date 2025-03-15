@@ -321,7 +321,7 @@ server_check(const char *name, struct Client *client_p)
     if (!irccmp(conf->host, client_p->host) ||
         !irccmp(conf->host, client_p->sockhost))
     {
-      if (match_conf_password(client_p->connection->password, conf) == false)
+      if (conf_match_password(client_p->connection->password, conf) == false)
         return SERVER_CHECK_INVALID_PASSWORD;
 
       if (!string_is_empty(conf->certfp))

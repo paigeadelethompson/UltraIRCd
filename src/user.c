@@ -301,7 +301,7 @@ user_register_local(struct Client *client)
   /* Password check */
   if (!string_is_empty(conf->passwd))
   {
-    if (match_conf_password(client->connection->password, conf) == false)
+    if (conf_match_password(client->connection->password, conf) == false)
     {
       sendto_one_numeric(client, &me, ERR_PASSWDMISMATCH);
       client_exit(client, "Bad Password");

@@ -86,7 +86,7 @@ mr_webirc(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  if (match_conf_password(pass, conf) == false)
+  if (conf_match_password(pass, conf) == false)
   {
     client_exit(source, "Invalid WebIRC password");
     return;

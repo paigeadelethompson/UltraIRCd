@@ -140,7 +140,7 @@ m_oper(struct Client *source, int parc, char *parv[])
     }
   }
 
-  if (match_conf_password(password, conf) == false)
+  if (conf_match_password(password, conf) == false)
   {
     failed_oper_notice(source, ERR_PASSWDMISMATCH, opername, "password mismatch");
     return;
