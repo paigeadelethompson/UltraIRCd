@@ -1737,9 +1737,9 @@ char *yytext;
     YY_FATAL_ERROR("input in flex scanner failed");
 
 
-unsigned int lineno = 1;
-char linebuf[IRCD_BUFSIZE];
-char conffilebuf[IRCD_BUFSIZE];
+unsigned int conf_line_number = 1;
+char conf_line_text[IRCD_BUFSIZE];
+char conf_file_name[IRCD_BUFSIZE];
 
 enum { MAX_INCLUDE_DEPTH = 5 };
 static unsigned int include_stack_ptr;
@@ -1747,9 +1747,9 @@ static unsigned int include_stack_ptr;
 static struct included_file
 {
   YY_BUFFER_STATE state;
-  unsigned int lineno;
+  unsigned int conf_line_number;
   FILE *file;
-  char conffile[IRCD_BUFSIZE];
+  char conf_file_name[IRCD_BUFSIZE];
 } include_stack[MAX_INCLUDE_DEPTH];
 
 
@@ -2066,7 +2066,7 @@ case 4:
 /* rule 4 can match eol */
 YY_RULE_SETUP
 #line 93 "conf_lexer.l"
-{ ++lineno; }
+{ ++conf_line_number; }
 	YY_BREAK
 case YY_STATE_EOF(IN_COMMENT):
 #line 94 "conf_lexer.l"
@@ -2081,7 +2081,7 @@ case 6:
 /* rule 6 can match eol */
 YY_RULE_SETUP
 #line 97 "conf_lexer.l"
-{ strlcpy(linebuf, yytext + 1, sizeof(linebuf)); ++lineno; yyless(1); }
+{ strlcpy(conf_line_text, yytext + 1, sizeof(conf_line_text)); ++conf_line_number; yyless(1); }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
@@ -4366,14 +4366,14 @@ conf_include(void)
   }
 
   struct included_file *file = &include_stack[include_stack_ptr++];
-  file->lineno = lineno;
+  file->conf_line_number = conf_line_number;
   file->file = conf_parser_ctx.conf_file;
   file->state = YY_CURRENT_BUFFER;
-  strlcpy(file->conffile, conffilebuf, sizeof(file->conffile));
+  strlcpy(file->conf_file_name, conf_file_name, sizeof(file->conf_file_name));
 
-  lineno = 1;
+  conf_line_number = 1;
   conf_parser_ctx.conf_file = tmp_fbfile_in;
-  strlcpy(conffilebuf, filenamebuf, sizeof(conffilebuf));
+  strlcpy(conf_file_name, filenamebuf, sizeof(conf_file_name));
 
   yy_switch_to_buffer(yy_create_buffer(NULL, YY_BUF_SIZE));
 }
@@ -4386,7 +4386,7 @@ conf_eof(void)
 {
   if (include_stack_ptr == 0)
   {
-    lineno = 1;
+    conf_line_number = 1;
     return true;
   }
 
@@ -4400,13 +4400,13 @@ conf_eof(void)
   yy_delete_buffer(YY_CURRENT_BUFFER);
   yy_switch_to_buffer(file->state);
 
-  /* switch lineno */
-  lineno = file->lineno;
+  /* switch conf_line_number */
+  conf_line_number = file->conf_line_number;
 
   /* switch file */
   conf_parser_ctx.conf_file = file->file;
 
-  strlcpy(conffilebuf, file->conffile, sizeof(conffilebuf));
+  strlcpy(conf_file_name, file->conf_file_name, sizeof(conf_file_name));
   return false;
 
   /*

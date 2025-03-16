@@ -77,9 +77,9 @@ struct config_serverinfo_entry ConfigServerInfo;
 struct config_admin_entry ConfigAdminInfo;
 struct conf_parser_context conf_parser_ctx;
 
-extern unsigned int lineno;
-extern char linebuf[];
-extern char conffilebuf[IRCD_BUFSIZE];
+extern unsigned int conf_line_number;
+extern char conf_line_text[];
+extern char conf_file_name[IRCD_BUFSIZE];
 extern int yyparse(); /* defined in y.tab.c */
 
 /* struct MaskItem *find_conf_by_address(const char *, struct io_addr *,
@@ -985,7 +985,7 @@ conf_validate(void)
 static void
 conf_read(FILE *file)
 {
-  lineno = 1;
+  conf_line_number = 1;
 
   conf_set_defaults();  /* Set default values prior to conf parsing */
 
@@ -1278,7 +1278,7 @@ conf_read_files(bool cold)
    *
    *  - Gozem 2002-07-21
    */
-  strlcpy(conffilebuf, ConfigGeneral.configfile, sizeof(conffilebuf));
+  strlcpy(conf_file_name, ConfigGeneral.configfile, sizeof(conf_file_name));
 
   if (cold == false)
     conf_clear();
@@ -1339,21 +1339,21 @@ yyerror(const char *msg)
   if (conf_parser_ctx.pass != 1)
     return;
 
-  const char *p = stripws(linebuf);
+  const char *p = stripws(conf_line_text);
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE, "\"%s\", line %u: %s: %s",
-                 conffilebuf, lineno, msg, p);
+                 conf_file_name, conf_line_number, msg, p);
   log_write(LOG_TYPE_IRCD, "\"%s\", line %u: %s: %s",
-            conffilebuf, lineno, msg, p);
+            conf_file_name, conf_line_number, msg, p);
 }
 
 void
 conf_error_report(const char *msg)
 {
-  const char *p = stripws(linebuf);
+  const char *p = stripws(conf_line_text);
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE, "\"%s\", line %u: %s: %s",
-                 conffilebuf, lineno, msg, p);
+                 conf_file_name, conf_line_number, msg, p);
   log_write(LOG_TYPE_IRCD, "\"%s\", line %u: %s: %s",
-            conffilebuf, lineno, msg, p);
+            conf_file_name, conf_line_number, msg, p);
 }
 
 /* conf_match_password()
