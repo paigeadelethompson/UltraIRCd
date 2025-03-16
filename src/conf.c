@@ -1303,14 +1303,14 @@ conf_read_files(bool cold)
   isupport_add("TOPICLEN", "%d", ConfigServerInfo.max_topic_length);
 }
 
-/* conf_add_class_to_conf()
+/* conf_assign_class()
  *
  * inputs       - pointer to config item
  * output       - NONE
  * side effects - Add a class pointer to a conf
  */
 void
-conf_add_class_to_conf(struct MaskItem *conf, const char *name)
+conf_assign_class(struct MaskItem *conf, const char *name)
 {
   if (string_is_empty(name) || (conf->class = class_find(name, true)) == NULL)
   {

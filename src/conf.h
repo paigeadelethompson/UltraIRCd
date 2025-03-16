@@ -306,7 +306,7 @@ extern struct config_serverinfo_entry ConfigServerInfo;
 extern struct config_admin_entry ConfigAdminInfo;
 
 extern void cleanup_tklines(void *);
-extern void conf_add_class_to_conf(struct MaskItem *, const char *);
+extern void conf_assign_class(struct MaskItem *, const char *);
 extern void conf_detach(struct Client *, enum maskitem_type);
 extern void conf_dns_lookup(struct MaskItem *);
 extern void conf_error_report(const char *);

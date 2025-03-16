@@ -3960,7 +3960,7 @@ yyreduce:
     conf->port  = block_state.port.value;
     conf->htype = address_parse_netmask(conf->host, conf->addr, &conf->bits);
 
-    conf_add_class_to_conf(conf, block_state.class.buf);
+    conf_assign_class(conf, block_state.class.buf);
   }
 }
 #line 3967 "conf_parser.c"
@@ -4724,7 +4724,7 @@ yyreduce:
     conf->flags = block_state.flags.value;
     conf->port = block_state.port.value;
 
-    conf_add_class_to_conf(conf, block_state.class.buf);
+    conf_assign_class(conf, block_state.class.buf);
     add_conf_by_address(CONF_CLIENT, conf);
   }
 }
@@ -5332,7 +5332,7 @@ yyreduce:
     }
   }
 
-  conf_add_class_to_conf(conf, block_state.class.buf);
+  conf_assign_class(conf, block_state.class.buf);
   conf_dns_lookup(conf);
 }
 #line 5339 "conf_parser.c"

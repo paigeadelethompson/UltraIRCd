@@ -969,7 +969,7 @@ oper_entry: OPERATOR
     conf->port  = block_state.port.value;
     conf->htype = address_parse_netmask(conf->host, conf->addr, &conf->bits);
 
-    conf_add_class_to_conf(conf, block_state.class.buf);
+    conf_assign_class(conf, block_state.class.buf);
   }
 };
 
@@ -1495,7 +1495,7 @@ auth_entry: IRCD_AUTH
     conf->flags = block_state.flags.value;
     conf->port = block_state.port.value;
 
-    conf_add_class_to_conf(conf, block_state.class.buf);
+    conf_assign_class(conf, block_state.class.buf);
     add_conf_by_address(CONF_CLIENT, conf);
   }
 };
@@ -1929,7 +1929,7 @@ connect_entry: CONNECT
     }
   }
 
-  conf_add_class_to_conf(conf, block_state.class.buf);
+  conf_assign_class(conf, block_state.class.buf);
   conf_dns_lookup(conf);
 };
 
