@@ -24,43 +24,44 @@
  */
 
 #include "stdinc.h"
+#include "address.h"
+#include "fdlist.h"
 #include "io_string.h"
 #include "io_time.h"
-#include "defaults.h"
 #include "list.h"
+#include "log.h"
+#include "memory.h"
+#include "misc.h"
+#include "module.h"
+#include "res.h"
+#include "reslib.h"
+#include "defaults.h"
 #include "ircd_defs.h"
 #include "parse.h"
+#include "channel.h"
+#include "channel_mode.h"
+#include "cloak.h"
 #include "conf.h"
+#include "conf_class.h"
 #include "conf_cluster.h"
+#include "conf_db.h"
 #include "conf_gecos.h"
+#include "conf_parser.h"
 #include "conf_pseudo.h"
 #include "conf_resv.h"
 #include "conf_service.h"
 #include "conf_shared.h"
-#include "server.h"
-#include "channel.h"
 #include "client.h"
-#include "ircd.h"
-#include "listener.h"
-#include "address.h"
-#include "module.h"
-#include "numeric.h"
-#include "fdlist.h"
-#include "log.h"
-#include "send.h"
-#include "memory.h"
-#include "reslib.h"
-#include "res.h"
-#include "user.h"
-#include "channel_mode.h"
-#include "misc.h"
-#include "conf_db.h"
-#include "conf_class.h"
-#include "motd.h"
 #include "ipcache.h"
+#include "ircd.h"
 #include "isupport.h"
+#include "listener.h"
+#include "motd.h"
+#include "numeric.h"
+#include "send.h"
+#include "server.h"
+#include "user.h"
 #include "whowas.h"
-#include "cloak.h"
 
 /* Hashtable stuff...now external as it's used in m_stats.c */
 list_t atable[ADDRESS_HASHSIZE];
@@ -80,7 +81,6 @@ struct conf_parser_context conf_parser_ctx;
 extern unsigned int conf_line_number;
 extern char conf_line_text[];
 extern char conf_file_name[IRCD_BUFSIZE];
-extern int yyparse(); /* defined in y.tab.c */
 
 /* struct MaskItem *find_conf_by_address(const char *, struct io_addr *,
  *                                         int type, int fam, const char *username)
