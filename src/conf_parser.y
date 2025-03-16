@@ -24,6 +24,8 @@
  */
 
 
+%define parse.error verbose
+
 %{
 
 #include "stdinc.h"
