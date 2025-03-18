@@ -143,6 +143,13 @@ address_set_port(struct io_addr *addr, uint16_t port)
 }
 
 static inline void
+address_clear(struct io_addr *addr)
+{
+  if (addr)
+    memset(addr, 0, sizeof(*addr));
+}
+
+static inline void
 address_copy(struct io_addr *dst, const struct io_addr *src)
 {
   memcpy(dst, src, sizeof(*dst));

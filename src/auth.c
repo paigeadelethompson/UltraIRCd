@@ -564,9 +564,9 @@ auth_start_query(struct AuthRequest *auth)
    * make the auth request.
    */
   struct io_addr localaddr;
-  socklen_t locallen = sizeof(localaddr);
-  memset(&localaddr, 0, locallen);
+  address_clear(&localaddr);
 
+  socklen_t locallen = sizeof(localaddr);
   getsockname(auth->client->connection->fd->fd, (struct sockaddr *)&localaddr, &locallen);
 
   address_strip_ipv4(&localaddr);

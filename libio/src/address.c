@@ -248,8 +248,7 @@ address_parse_ipv4_netmask(const char *text, struct io_addr *addr, int *b)
 int
 address_parse_netmask(const char *text, struct io_addr *addr, int *b)
 {
-  if (addr)
-    memset(addr, 0, sizeof(*addr));
+  address_clear(addr);
 
   if (strchr(text, '.'))
     return address_parse_ipv4_netmask(text, addr, b);
@@ -524,7 +523,7 @@ get_mask_hash(const char *text)
 bool
 address_from_string(const char *str, struct io_addr *addr)
 {
-  memset(addr, 0, sizeof(*addr));
+  address_clear(addr);
 
   if (strchr(str, ':'))
   {

@@ -383,7 +383,7 @@ comm_accept(fde_t *F, struct io_addr *addr)
     return -1;
   }
 
-  memset(addr, 0, sizeof(*addr));
+  address_clear(addr);
 
   /*
    * Next, do the accept(). if we get an error, we should drop the
