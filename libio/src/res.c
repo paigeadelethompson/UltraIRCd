@@ -219,7 +219,7 @@ send_res_msg(const unsigned char *msg, int len, unsigned int rcount)
 
   for (unsigned int i = 0; i < max_queries; ++i)
     sendto(ResolverFileDescriptor->fd, msg, len, 0,
-           (struct sockaddr *)&reslib_nsaddr_list[i], reslib_nsaddr_list[i].ss_len);
+           (struct sockaddr *)&reslib_nsaddr_list[i], address_length(&reslib_nsaddr_list[i]));
 }
 
 /*
@@ -450,7 +450,6 @@ proc_answer(struct reslist *request, HEADER *header, unsigned char *buf, unsigne
         if (rd_length != sizeof(struct in_addr))
           return false;
 
-        request->addr.ss_len = sizeof(struct sockaddr_in);
         v4 = (struct sockaddr_in *)&request->addr;
         v4->sin_family = AF_INET;
         memcpy(&v4->sin_addr, current, sizeof(struct in_addr));
@@ -463,7 +462,6 @@ proc_answer(struct reslist *request, HEADER *header, unsigned char *buf, unsigne
         if (rd_length != sizeof(struct in6_addr))
           return false;
 
-        request->addr.ss_len = sizeof(struct sockaddr_in6);
         v6 = (struct sockaddr_in6 *)&request->addr;
         v6->sin6_family = AF_INET6;
         memcpy(&v6->sin6_addr, current, sizeof(struct in6_addr));

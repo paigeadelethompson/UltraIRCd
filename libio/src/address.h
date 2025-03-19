@@ -45,7 +45,6 @@ enum { ADDRESS_HASHSIZE = 0x1000 }; /* XXX */
 struct io_addr
 {
   struct sockaddr_storage ss;  /**< Underlying sockaddr_storage structure. */
-  socklen_t ss_len;  /**< Length of the sockaddr_storage. */
 };
 
 extern void address_strip_ipv4(struct io_addr *);
@@ -140,6 +139,17 @@ address_set_port(struct io_addr *addr, uint16_t port)
   }
 
   return false;
+}
+
+static inline socklen_t
+address_length(const struct io_addr *addr)
+{
+  if (address_is_ipv4(addr))
+    return sizeof(struct sockaddr_in);
+  if (address_is_ipv6(addr))
+    return sizeof(struct sockaddr_in6);
+
+  return 0;
 }
 
 static inline void

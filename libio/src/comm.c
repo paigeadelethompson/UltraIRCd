@@ -236,7 +236,7 @@ comm_connect_tcp(fde_t *F, const struct io_addr *caddr, uint16_t port, const str
    * virtual host IP, for completeness.
    *   -- adrian
    */
-  if (baddr && bind(F->fd, (const struct sockaddr *)baddr, baddr->ss_len) < 0)
+  if (baddr && bind(F->fd, (const struct sockaddr *)baddr, address_length(baddr)) < 0)
   {
     /* Failure, call the callback with COMM_ERR_BIND */
     comm_connect_callback(F, COMM_ERR_BIND);
@@ -298,7 +298,7 @@ comm_connect_tryconnect(fde_t *F, void *unused)
     return;
 
   /* Try the connect() */
-  int retval = connect(F->fd, (struct sockaddr *)&F->connect.addr, F->connect.addr.ss_len);
+  int retval = connect(F->fd, (struct sockaddr *)&F->connect.addr, address_length(&F->connect.addr));
 
   /* Error? */
   if (retval < 0)

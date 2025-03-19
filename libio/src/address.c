@@ -271,32 +271,24 @@ address_strip_ipv4(struct io_addr *addr)
 {
   /* Check if the address family is not IPv6. */
   if (address_is_ipv6(addr) == false)
-  {
-    /* If the address is not IPv6, set length for IPv4 and return. */
-    addr->ss_len = sizeof(struct sockaddr_in);
     return;
-  }
 
   /* Check if the address is an IPv6-mapped IPv4 address. */
-  if (address_is_ipv4_mapped(addr))
-  {
-    /* If IPv6-mapped IPv4, extract IPv4 portion and update address. */
-    struct sockaddr_in6 v6;
-    struct sockaddr_in *v4 = (struct sockaddr_in *)addr;
+  if (address_is_ipv4_mapped(addr) == false)
+    return;
 
-    memcpy(&v6, addr, sizeof(v6));
-    memset(v4, 0, sizeof(struct sockaddr_in));
+  /* If IPv6-mapped IPv4, extract IPv4 portion and update address. */
+  struct sockaddr_in6 v6;
+  struct sockaddr_in *v4 = (struct sockaddr_in *)addr;
 
-    /* Copy the IPv4 portion from the IPv6-mapped address to the input address. */
-    memcpy(&v4->sin_addr, &v6.sin6_addr.s6_addr[12], sizeof(v4->sin_addr));
+  memcpy(&v6, addr, sizeof(v6));
+  memset(v4, 0, sizeof(struct sockaddr_in));
 
-    /* Update address family and length to indicate IPv4. */
-    addr->ss.ss_family = AF_INET;
-    addr->ss_len = sizeof(struct sockaddr_in);
-  }
-  else
-    /* If the address is not an IPv6-mapped IPv4 address, set length for IPv6. */
-    addr->ss_len = sizeof(struct sockaddr_in6);
+  /* Copy the IPv4 portion from the IPv6-mapped address to the input address. */
+  memcpy(&v4->sin_addr, &v6.sin6_addr.s6_addr[12], sizeof(v4->sin_addr));
+
+  /* Update address family and length to indicate IPv4. */
+  addr->ss.ss_family = AF_INET;
 }
 
 /**
@@ -529,22 +521,18 @@ address_from_string(const char *str, struct io_addr *addr)
   {
     struct sockaddr_in6 *v6 = (struct sockaddr_in6 *)&addr->ss;
     v6->sin6_family = AF_INET6;
-    if (inet_pton(AF_INET6, str, &v6->sin6_addr) != 1)
-      return false;
-
-    addr->ss_len = sizeof(struct sockaddr_in6);
+    if (inet_pton(AF_INET6, str, &v6->sin6_addr) == 1)
+      return true;
   }
   else
   {
     struct sockaddr_in *v4 = (struct sockaddr_in *)&addr->ss;
     v4->sin_family = AF_INET;
-    if (inet_pton(AF_INET, str, &v4->sin_addr) != 1)
-      return false;
-
-    addr->ss_len = sizeof(struct sockaddr_in);
+    if (inet_pton(AF_INET, str, &v4->sin_addr) == 1)
+      return true;
   }
 
-  return true;
+  return false;
 }
 
 bool

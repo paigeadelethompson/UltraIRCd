@@ -314,7 +314,7 @@ listener_finalize(struct Listener *listener)
    * Bind a port to listen for new connections if port is non-null,
    * else assume it is already open and try get something from it.
    */
-  if (bind(fd, (const struct sockaddr *)&listener->addr, listener->addr.ss_len))
+  if (bind(fd, (const struct sockaddr *)&listener->addr, address_length(&listener->addr)))
   {
     log_write(LOG_TYPE_IRCD, "binding listener socket %s/%hu: %s",
               listener_get_name(listener), listener_get_port(listener), strerror(errno));
