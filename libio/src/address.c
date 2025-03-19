@@ -269,10 +269,6 @@ address_parse_netmask(const char *text, struct io_addr *addr, int *b)
 void
 address_strip_ipv4(struct io_addr *addr)
 {
-  /* Check if the address family is not IPv6. */
-  if (address_is_ipv6(addr) == false)
-    return;
-
   /* Check if the address is an IPv6-mapped IPv4 address. */
   if (address_is_ipv4_mapped(addr) == false)
     return;
