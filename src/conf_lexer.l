@@ -395,7 +395,6 @@ static void
 conf_include(void)
 {
   char *p;
-  char filenamebuf[IRCD_BUFSIZE];
 
   if ((p = strchr(yytext, '<')) == NULL)
     *strchr(p = strchr(yytext, '"') + 1, '"') = '\0';
@@ -409,16 +408,17 @@ conf_include(void)
     return;
   }
 
+  char include_path[IRCD_BUFSIZE];
   if (*p == '/')  /* if it is an absolute path */
-    snprintf(filenamebuf, sizeof(filenamebuf), "%s", p);
+    snprintf(include_path, sizeof(include_path), "%s", p);
   else
-    snprintf(filenamebuf, sizeof(filenamebuf), "%s/%s", ETCPATH, p);
+    snprintf(include_path, sizeof(include_path), "%s/%s", ETCPATH, p);
 
-  FILE *tmp_fbfile_in = fopen(filenamebuf, "r");
-  if (tmp_fbfile_in == NULL)
+  FILE *include_file = fopen(include_path, "r");
+  if (include_file == NULL)
   {
     log_write(LOG_TYPE_IRCD, "Unable to read configuration file '%s': %s",
-         filenamebuf, strerror(errno));
+              include_path, strerror(errno));
     return;
   }
 
@@ -429,8 +429,8 @@ conf_include(void)
   strlcpy(file->conf_file_name, conf_file_name, sizeof(file->conf_file_name));
 
   conf_line_number = 1;
-  conf_parser_ctx.conf_file = tmp_fbfile_in;
-  strlcpy(conf_file_name, filenamebuf, sizeof(conf_file_name));
+  conf_parser_ctx.conf_file = include_file;
+  strlcpy(conf_file_name, include_path, sizeof(conf_file_name));
 
   yy_switch_to_buffer(yy_create_buffer(NULL, YY_BUF_SIZE));
 }
