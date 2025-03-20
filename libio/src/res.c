@@ -79,7 +79,7 @@ struct reslist
 {
   list_node_t node;                           /**< Doubly linked list node. */
   unsigned int id;                           /**< Request ID (from request header). */
-  char type;                                 /**< Current request type. */
+  unsigned int type;                         /**< Current request type. */
   char retries;                              /**< Retry counter */
   unsigned int sends;                        /**< Number of sends (>1 means resent). */
   uintmax_t sentat;                          /**< Timestamp we last sent this request. */
@@ -393,8 +393,6 @@ proc_answer(struct reslist *request, HEADER *header, unsigned char *buf, unsigne
   unsigned char *current = buf + sizeof(HEADER); /* current position in buf */
   unsigned int type = 0;       /* answer type */
   unsigned int rd_length = 0;
-  struct sockaddr_in *v4;      /* conversion */
-  struct sockaddr_in6 *v6;
 
   for (; header->qdcount > 0; --header->qdcount)
   {
@@ -441,34 +439,14 @@ proc_answer(struct reslist *request, HEADER *header, unsigned char *buf, unsigne
     switch (type)
     {
       case T_A:
-        if (request->type != T_A)
-          return false;
-
-        /*
-         * Check for invalid rd_length or too many addresses
-         */
-        if (rd_length != sizeof(struct in_addr))
-          return false;
-
-        v4 = (struct sockaddr_in *)&request->addr;
-        v4->sin_family = AF_INET;
-        memcpy(&v4->sin_addr, current, sizeof(struct in_addr));
-        return true;
-
       case T_AAAA:
-        if (request->type != T_AAAA)
+        if (request->type != type)
           return false;
 
-        if (rd_length != sizeof(struct in6_addr))
-          return false;
-
-        v6 = (struct sockaddr_in6 *)&request->addr;
-        v6->sin6_family = AF_INET6;
-        memcpy(&v6->sin6_addr, current, sizeof(struct in6_addr));
-        return true;
+        return address_from_bytes(&request->addr, type == T_A ? AF_INET : AF_INET6, current, rd_length);
 
       case T_PTR:
-        if (request->type != T_PTR)
+        if (request->type != type)
           return false;
 
         n = reslib_dn_expand(buf, eob, current, hostbuf, sizeof(hostbuf));
