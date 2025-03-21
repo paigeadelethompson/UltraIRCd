@@ -75,8 +75,16 @@ listener_free(struct Listener *listener)
 void
 listener_count_memory(unsigned int *count, size_t *bytes)
 {
-  (*count) = list_length(&listener_list);
-  (*bytes) = list_length(&listener_list) * sizeof(struct Listener);
+  *count = *bytes = 0;
+
+  list_node_t *node;
+  LIST_FOREACH(node, listener_list.head)
+  {
+    const struct Listener *const listener = node->data;
+    ++*count;
+    *bytes += sizeof(*listener);
+    *bytes += strlen(listener->name) + 1;
+  }
 }
 
 /*
