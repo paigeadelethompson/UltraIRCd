@@ -16497,15 +16497,15 @@ if test ${CFLAGS+y}
 then :
 
   case " $CFLAGS " in #(
-  *" -g -O0 "*) :
-    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CFLAGS already contains -g -O0"; } >&5
-  (: CFLAGS already contains -g -O0) 2>&5
+  *" -g3 -O0 "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CFLAGS already contains -g3 -O0"; } >&5
+  (: CFLAGS already contains -g3 -O0) 2>&5
   ac_status=$?
   printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; } ;; #(
   *) :
 
-     as_fn_append CFLAGS " -g -O0"
+     as_fn_append CFLAGS " -g3 -O0"
      { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CFLAGS=\"\$CFLAGS\""; } >&5
   (: CFLAGS="$CFLAGS") 2>&5
   ac_status=$?
@@ -16516,7 +16516,7 @@ esac
 
 else case e in #(
   e)
-  CFLAGS=-g -O0
+  CFLAGS=-g3 -O0
   { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CFLAGS=\"\$CFLAGS\""; } >&5
   (: CFLAGS="$CFLAGS") 2>&5
   ac_status=$?
