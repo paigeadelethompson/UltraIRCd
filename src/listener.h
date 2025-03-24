@@ -71,7 +71,7 @@ listener_get_port(const struct Listener *listener)
 static inline bool
 listener_has_flag(const struct Listener *listener, listener_flag_t flags)
 {
-  return listener->flags & flags;
+  return listener && (listener->flags & flags);
 }
 
 static inline bool
