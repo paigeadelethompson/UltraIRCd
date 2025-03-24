@@ -2,6 +2,8 @@
 * The `general::max_away_length` configuration directive has been added, allowing
   servers to specify the maximum length of a `AWAY` message that the server will
   accept from a client.
+* The `general::disable_dns` configuration directive has been added, allowing
+  servers to disable DNS lookups
 
 
 #### Noteworthy changes in version 8.2.46 (2025-01-22)

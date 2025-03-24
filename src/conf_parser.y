@@ -177,6 +177,7 @@ reset_block_state(void)
 %token  DESCRIPTION
 %token  DIE
 %token  DISABLE_AUTH
+%token  DISABLE_DNS
 %token  DISABLE_FAKE_CHANNELS
 %token  DISABLE_REMOTE_COMMANDS
 %token  DLINE_MIN_CIDR
@@ -2289,6 +2290,7 @@ general_item:       general_away_count |
                     general_throttle_time |
                     general_ping_cookie |
                     general_disable_auth |
+                    general_disable_dns |
                     general_dline_min_cidr |
                     general_dline_min_cidr6 |
                     general_kline_min_cidr |
@@ -2496,6 +2498,11 @@ general_ping_cookie: PING_COOKIE '=' TBOOL ';'
 general_disable_auth: DISABLE_AUTH '=' TBOOL ';'
 {
   ConfigGeneral.disable_auth = yylval.number;
+};
+
+general_disable_dns: DISABLE_DNS '=' TBOOL ';'
+{
+  ConfigGeneral.disable_dns = yylval.number;
 };
 
 general_throttle_count: THROTTLE_COUNT '=' NUMBER ';'

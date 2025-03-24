@@ -600,14 +600,17 @@ auth_start(struct Client *client)
   assert(client);
   assert(client->connection);
 
-  auth_send_header(client, REPORT_DO_DNS);
-
-  auth->dns_pending = true;
+  if (ConfigGeneral.disable_dns == 0)
+  {
+    auth_send_header(client, REPORT_DO_DNS);
+    auth->dns_pending = true;
+    gethost_byaddr(auth_dns_callback, auth, &client->addr);
+  }
 
   if (ConfigGeneral.disable_auth == 0)
     auth_start_query(auth);
 
-  gethost_byaddr(auth_dns_callback, auth, &client->addr);
+  auth_release_client(auth);
 }
 
 /**
