@@ -11,6 +11,7 @@ Ensure the following tools and libraries are installed on your system before com
 - **Lex** with `noyywrap` support
 - **Libtool**
 - **GNU make** or a compatible make utility
+- **Jansson**
 
 ## Installation Procedure
 
