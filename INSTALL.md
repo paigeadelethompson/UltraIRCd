@@ -79,7 +79,7 @@ The `configure` script accepts several optional parameters for further customiza
   This modifies `CFLAGS` to include debugging information and disable optimizations. Specifically, it:
   - Removes any existing optimization flags (e.g., `-O2`, `-O3`, `-Os`).
   - Removes any existing debug level flags (e.g., `-g1`, `-g2`, `-g3`).
-  - Adds `-g` to include standard debugging information.
+  - Adds `-g3` to include standard debugging information.
   - Adds `-O0` to disable all optimizations, ensuring the generated code closely matches the source code for easier debugging.
 
 - `--enable-efence` - Enable linking with the Electric Fence (`efence`) memory debugger library. By default, this is disabled. To enable it:
