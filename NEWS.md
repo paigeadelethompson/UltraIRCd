@@ -4,6 +4,8 @@
   accept from a client.
 * The `general::disable_dns` configuration directive has been added, allowing
   servers to disable DNS lookups
+* K-lines, D-lines, X-lines, and RESVs are no longer stored in binary database format.
+  These entries are now stored in JSON format using libjansson.
 
 
 #### Noteworthy changes in version 8.2.46 (2025-01-22)
