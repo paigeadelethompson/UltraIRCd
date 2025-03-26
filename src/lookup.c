@@ -177,7 +177,8 @@ lookup_start(struct Client *client)
   if (ConfigGeneral.disable_auth == 0)
   {
     sendto_one_notice(client, &me, "%s", lookup_report_headers[LOOKUP_IDENT_START]);
-    lookup->ident_request = ident_start(&client->addr, client->connection->fd->fd, lookup_ident_callback, lookup, 4);
+    lookup->ident_request =
+      ident_start(&client->addr, client->connection->fd->fd, lookup_ident_callback, lookup, ConfigGeneral.ident_timeout);
     if (lookup->ident_request)
       lookup->ident_pending = true;
     else

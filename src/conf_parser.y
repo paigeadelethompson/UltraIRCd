@@ -206,6 +206,7 @@ reset_block_state(void)
 %token  HOST
 %token  HUB
 %token  HUB_MASK
+%token  IDENT_TIMEOUT
 %token  INVISIBLE_ON_CONNECT
 %token  INVITE_CLIENT_COUNT
 %token  INVITE_CLIENT_TIME
@@ -2304,6 +2305,7 @@ general_item:       general_away_count |
                     general_cloak_num_bits |
                     general_cloak_secret |
                     general_cloak_suffix |
+                    general_ident_timeout |
                     error;
 
 
@@ -2603,6 +2605,14 @@ general_cloak_suffix: CLOAK_SUFFIX '=' QSTRING ';'
   io_free(ConfigGeneral.cloak_suffix);
   ConfigGeneral.cloak_suffix = io_strdup(yylval.string);
   cloak_set_suffix(yylval.string);
+};
+
+general_ident_timeout: IDENT_TIMEOUT '=' timespec ';'
+{
+  if ($3 < 1 || $3 > 30)
+    break;
+
+  ConfigGeneral.ident_timeout = $3;
 };
 
 /***************************************************************************

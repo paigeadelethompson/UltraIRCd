@@ -216,6 +216,7 @@ hide_services               { return HIDE_SERVICES; }
 host                        { return HOST; }
 hub                         { return HUB; }
 hub_mask                    { return HUB_MASK; }
+ident_timeout               { return IDENT_TIMEOUT; }
 invisible_on_connect        { return INVISIBLE_ON_CONNECT; }
 invite_client_count         { return INVITE_CLIENT_COUNT; }
 invite_client_time          { return INVITE_CLIENT_TIME; }
