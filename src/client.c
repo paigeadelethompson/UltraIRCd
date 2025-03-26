@@ -39,7 +39,7 @@
 #include "ircd.h"
 #include "ircd_hook.h"
 #include "numeric.h"
-#include "auth.h"
+#include "lookup.h"
 #include "conf.h"
 #include "conf_gecos.h"
 #include "server.h"
@@ -183,7 +183,7 @@ client_free(struct Client *client)
     assert(client->connection->node.next == NULL);
 
     assert(client->connection->list_task == NULL);
-    assert(client->connection->auth == NULL);
+    assert(client->connection->lookup == NULL);
 
     assert(list_length(&client->connection->acceptlist) == 0);
     assert(client->connection->acceptlist.head == NULL);
@@ -321,7 +321,7 @@ check_unknowns_list(void)
                 client_get_name(client, SHOW_IP));
       exit = true;
     }
-    else if (HasFlag(client, FLAGS_FINISHED_AUTH))
+    else if (HasFlag(client, FLAGS_LOOKUP_DONE))
       exit = true;
 
     if (exit)
@@ -787,10 +787,10 @@ client_exit(struct Client *client, const char *comment)
 
     hook_dispatch(ircd_hook_client_exit_local, &(ircd_hook_client_exit_ctx){ .client = client, .comment = comment });
 
-    if (client->connection->auth)
+    if (client->connection->lookup)
     {
-      auth_delete(client->connection->auth);
-      client->connection->auth = NULL;
+      lookup_delete(client->connection->lookup);
+      client->connection->lookup = NULL;
     }
 
     if (IsClient(client))

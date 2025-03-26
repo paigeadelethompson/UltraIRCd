@@ -131,7 +131,7 @@ ssl_handshake(fde_t *F, void *data_)
     log_write(LOG_TYPE_IRCD, "Client %s gave bad TLS client certificate",
               client_get_name(client, MASK_IP));
 
-  auth_start(client);
+  lookup_start(client);
 }
 
 /*
@@ -181,7 +181,7 @@ add_connection(struct Listener *listener, const struct io_addr *addr, int fd)
     ssl_handshake(client->connection->fd, client);
   }
   else
-    auth_start(client);
+    lookup_start(client);
 }
 
 static void

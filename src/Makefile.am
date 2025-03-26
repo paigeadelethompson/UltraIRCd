@@ -12,8 +12,6 @@ ircd_SOURCES = accept.c          \
                accept.h          \
                aline.c           \
                aline.h           \
-               auth.c            \
-               auth.h            \
                cap.c             \
                cap.h             \
                channel.c         \
@@ -88,6 +86,8 @@ ircd_SOURCES = accept.c          \
                isupport.h        \
                listener.c        \
                listener.h        \
+               lookup.c          \
+               lookup.h          \
                monitor.c         \
                monitor.h         \
                motd.c            \

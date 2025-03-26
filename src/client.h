@@ -32,7 +32,7 @@
 #include "fdlist.h"
 #include "io.h"
 #include "list.h"
-#include "auth.h"
+#include "lookup.h"
 #include "ircd_defs.h"
 
 
@@ -107,7 +107,7 @@ enum
   FLAGS_BLOCKED       = 1 << 15,  /**< Must wait for COMM_SELECT_WRITE */
   FLAGS_EXEMPTRESV    = 1 << 16,  /**< Client is exempt from RESV */
   FLAGS_GOTUSER       = 1 << 17,  /**< If we received a USER command */
-  FLAGS_FINISHED_AUTH = 1 << 18,  /**< Client has been released from auth */
+  FLAGS_LOOKUP_DONE   = 1 << 18,  /**< Client has completed the lookup process */
   FLAGS_FLOOD_NOTICED = 1 << 19,  /**< Notice to opers about this flooder has been sent */
   FLAGS_SERVICE       = 1 << 20,  /**< Client/server is a network service */
   FLAGS_TLS           = 1 << 21,  /**< User is connected via TLS (Transport Layer Security) */
@@ -290,7 +290,7 @@ struct Connection
     uintmax_t last_attempt;  /**< Last time the AWAY/INVITE/KNOCK/NICK request was issued; monotonic time */
   } away, invite, knock, nick;
 
-  struct AuthRequest *auth;
+  struct LookupRequest *lookup;
   struct Listener *listener;  /**< Listener accepted from */
   list_t acceptlist;  /**< Clients I'll allow to talk to me */
   list_t monitors;  /**< Chain of Monitor pointer blocks */

@@ -121,8 +121,8 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
-am_ircd_OBJECTS = accept.$(OBJEXT) aline.$(OBJEXT) auth.$(OBJEXT) \
-	cap.$(OBJEXT) channel.$(OBJEXT) channel_invite.$(OBJEXT) \
+am_ircd_OBJECTS = accept.$(OBJEXT) aline.$(OBJEXT) cap.$(OBJEXT) \
+	channel.$(OBJEXT) channel_invite.$(OBJEXT) \
 	channel_mode.$(OBJEXT) client.$(OBJEXT) \
 	client_svstag.$(OBJEXT) cloak.$(OBJEXT) command.$(OBJEXT) \
 	conf.$(OBJEXT) conf_class.$(OBJEXT) conf_cluster.$(OBJEXT) \
@@ -139,11 +139,11 @@ am_ircd_OBJECTS = accept.$(OBJEXT) aline.$(OBJEXT) auth.$(OBJEXT) \
 	hash.$(OBJEXT) id.$(OBJEXT) info.$(OBJEXT) ipcache.$(OBJEXT) \
 	ircd.$(OBJEXT) ircd_exit.$(OBJEXT) ircd_hook.$(OBJEXT) \
 	ircd_signal.$(OBJEXT) isupport.$(OBJEXT) listener.$(OBJEXT) \
-	monitor.$(OBJEXT) motd.$(OBJEXT) nuh.$(OBJEXT) \
-	numeric.$(OBJEXT) packet.$(OBJEXT) parse.$(OBJEXT) \
-	stats.$(OBJEXT) send.$(OBJEXT) server.$(OBJEXT) \
-	server_capab.$(OBJEXT) user.$(OBJEXT) user_mode.$(OBJEXT) \
-	whowas.$(OBJEXT)
+	lookup.$(OBJEXT) monitor.$(OBJEXT) motd.$(OBJEXT) \
+	nuh.$(OBJEXT) numeric.$(OBJEXT) packet.$(OBJEXT) \
+	parse.$(OBJEXT) stats.$(OBJEXT) send.$(OBJEXT) \
+	server.$(OBJEXT) server_capab.$(OBJEXT) user.$(OBJEXT) \
+	user_mode.$(OBJEXT) whowas.$(OBJEXT)
 ircd_OBJECTS = $(am_ircd_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -168,7 +168,7 @@ DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
 am__depfiles_remade = ./$(DEPDIR)/accept.Po ./$(DEPDIR)/aline.Po \
-	./$(DEPDIR)/auth.Po ./$(DEPDIR)/cap.Po ./$(DEPDIR)/channel.Po \
+	./$(DEPDIR)/cap.Po ./$(DEPDIR)/channel.Po \
 	./$(DEPDIR)/channel_invite.Po ./$(DEPDIR)/channel_mode.Po \
 	./$(DEPDIR)/client.Po ./$(DEPDIR)/client_svstag.Po \
 	./$(DEPDIR)/cloak.Po ./$(DEPDIR)/command.Po \
@@ -189,12 +189,12 @@ am__depfiles_remade = ./$(DEPDIR)/accept.Po ./$(DEPDIR)/aline.Po \
 	./$(DEPDIR)/ircd.Po ./$(DEPDIR)/ircd_exit.Po \
 	./$(DEPDIR)/ircd_hook.Po ./$(DEPDIR)/ircd_signal.Po \
 	./$(DEPDIR)/isupport.Po ./$(DEPDIR)/listener.Po \
-	./$(DEPDIR)/monitor.Po ./$(DEPDIR)/motd.Po ./$(DEPDIR)/nuh.Po \
-	./$(DEPDIR)/numeric.Po ./$(DEPDIR)/packet.Po \
-	./$(DEPDIR)/parse.Po ./$(DEPDIR)/send.Po ./$(DEPDIR)/server.Po \
-	./$(DEPDIR)/server_capab.Po ./$(DEPDIR)/stats.Po \
-	./$(DEPDIR)/user.Po ./$(DEPDIR)/user_mode.Po \
-	./$(DEPDIR)/whowas.Po
+	./$(DEPDIR)/lookup.Po ./$(DEPDIR)/monitor.Po \
+	./$(DEPDIR)/motd.Po ./$(DEPDIR)/nuh.Po ./$(DEPDIR)/numeric.Po \
+	./$(DEPDIR)/packet.Po ./$(DEPDIR)/parse.Po ./$(DEPDIR)/send.Po \
+	./$(DEPDIR)/server.Po ./$(DEPDIR)/server_capab.Po \
+	./$(DEPDIR)/stats.Po ./$(DEPDIR)/user.Po \
+	./$(DEPDIR)/user_mode.Po ./$(DEPDIR)/whowas.Po
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -418,8 +418,6 @@ ircd_SOURCES = accept.c          \
                accept.h          \
                aline.c           \
                aline.h           \
-               auth.c            \
-               auth.h            \
                cap.c             \
                cap.h             \
                channel.c         \
@@ -494,6 +492,8 @@ ircd_SOURCES = accept.c          \
                isupport.h        \
                listener.c        \
                listener.h        \
+               lookup.c          \
+               lookup.h          \
                monitor.c         \
                monitor.h         \
                motd.c            \
@@ -615,7 +615,6 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/accept.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/aline.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/auth.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cap.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel_invite.Po@am__quote@ # am--include-marker
@@ -659,6 +658,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ircd_signal.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/isupport.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/listener.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lookup.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/monitor.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/motd.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/nuh.Po@am__quote@ # am--include-marker
@@ -846,7 +846,6 @@ clean-am: clean-binPROGRAMS clean-generic clean-libtool mostlyclean-am
 distclean: distclean-am
 	-rm -f ./$(DEPDIR)/accept.Po
 	-rm -f ./$(DEPDIR)/aline.Po
-	-rm -f ./$(DEPDIR)/auth.Po
 	-rm -f ./$(DEPDIR)/cap.Po
 	-rm -f ./$(DEPDIR)/channel.Po
 	-rm -f ./$(DEPDIR)/channel_invite.Po
@@ -890,6 +889,7 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/ircd_signal.Po
 	-rm -f ./$(DEPDIR)/isupport.Po
 	-rm -f ./$(DEPDIR)/listener.Po
+	-rm -f ./$(DEPDIR)/lookup.Po
 	-rm -f ./$(DEPDIR)/monitor.Po
 	-rm -f ./$(DEPDIR)/motd.Po
 	-rm -f ./$(DEPDIR)/nuh.Po
@@ -951,7 +951,6 @@ installcheck-am:
 maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/accept.Po
 	-rm -f ./$(DEPDIR)/aline.Po
-	-rm -f ./$(DEPDIR)/auth.Po
 	-rm -f ./$(DEPDIR)/cap.Po
 	-rm -f ./$(DEPDIR)/channel.Po
 	-rm -f ./$(DEPDIR)/channel_invite.Po
@@ -995,6 +994,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/ircd_signal.Po
 	-rm -f ./$(DEPDIR)/isupport.Po
 	-rm -f ./$(DEPDIR)/listener.Po
+	-rm -f ./$(DEPDIR)/lookup.Po
 	-rm -f ./$(DEPDIR)/monitor.Po
 	-rm -f ./$(DEPDIR)/motd.Po
 	-rm -f ./$(DEPDIR)/nuh.Po

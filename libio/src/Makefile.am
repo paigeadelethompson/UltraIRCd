@@ -21,6 +21,8 @@ libio_la_SOURCES =  address.c     \
                     fdlist.h      \
                     hook.c        \
                     hook.h        \
+                    ident.c       \
+                    ident.h       \
                     io.h          \
                     io_getopt.c   \
                     io_getopt.h   \
