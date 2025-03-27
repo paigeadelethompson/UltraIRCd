@@ -160,7 +160,7 @@ lookup_delete(struct LookupRequest *lookup)
   io_free(lookup);
 }
 
-struct LookupRequest *
+void
 lookup_start(struct Client *client)
 {
   struct LookupRequest *lookup = io_calloc(sizeof(*lookup));
@@ -186,5 +186,4 @@ lookup_start(struct Client *client)
   }
 
   lookup_check_complete(lookup);
-  return lookup;
 }

@@ -34,5 +34,5 @@ struct LookupRequest
 };
 
 extern void lookup_delete(struct LookupRequest *);
-extern struct LookupRequest *lookup_start(struct Client *);
+extern void lookup_start(struct Client *);
 #endif  /* INCLUDED_lookup_h */
