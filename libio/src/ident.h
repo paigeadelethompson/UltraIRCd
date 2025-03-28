@@ -26,13 +26,9 @@
 
 typedef void (*IdentCallback)(void *, const char *);
 
-struct IdentRequest
-{
-  fde_t *fd;
-  IdentCallback callback;
-  void *user_data;
-};
+struct IdentRequest;
+typedef struct IdentRequest ident_request_t;
 
-extern void ident_delete(struct IdentRequest *);
-extern struct IdentRequest *ident_start(const struct io_addr *, int, IdentCallback, void *, uintmax_t);
+extern void ident_delete(ident_request_t *);
+extern ident_request_t *ident_start(const struct io_addr *, int, IdentCallback, void *, uintmax_t);
 #endif  /* INCLUDED_ident_h */

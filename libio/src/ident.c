@@ -153,8 +153,15 @@ ident_check_reply(char *const reply)
   return token;
 }
 
+struct IdentRequest
+{
+  fde_t *fd;
+  IdentCallback callback;
+  void *user_data;
+};
+
 void
-ident_delete(struct IdentRequest *request)
+ident_delete(ident_request_t *request)
 {
   if (request->fd)
     fd_close(request->fd);

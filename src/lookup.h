@@ -23,14 +23,16 @@
 #define INCLUDED_lookup_h
 
 #include "address.h"
+#include "ident.h"
 #include "client.h"
+
 
 struct LookupRequest
 {
   struct Client *client;
   bool dns_pending;
   bool ident_pending;
-  struct IdentRequest *ident_request;
+  ident_request_t *ident_request;
 };
 
 extern void lookup_delete(struct LookupRequest *);
