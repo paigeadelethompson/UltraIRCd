@@ -130,6 +130,7 @@ lookup_ident_callback(void *user_data, const char *username)
 {
   struct LookupRequest *lookup = user_data;
   lookup->ident_pending = false;
+  lookup->ident_request = NULL;
 
   if (string_is_empty(username))
   {
