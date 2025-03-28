@@ -172,7 +172,7 @@ ident_delete(ident_request_t *request)
 static void
 ident_read_reply(fde_t *F, void *data)
 {
-  struct IdentRequest *request = data;
+  ident_request_t *request = data;
   char buf[IDENT_BUFSIZE + 1];
   ssize_t len = 0;
 
@@ -191,7 +191,7 @@ ident_read_reply(fde_t *F, void *data)
 static void
 ident_connect_callback(fde_t *F, int error, void *data)
 {
-  struct IdentRequest *request = data;
+  ident_request_t *request = data;
 
   if (error != COMM_OK)
   {
@@ -231,10 +231,10 @@ ident_connect_callback(fde_t *F, int error, void *data)
   comm_setselect(F, COMM_SELECT_READ, ident_read_reply, request, 4);
 }
 
-struct IdentRequest *
+ident_request_t *
 ident_start(const struct io_addr *addr, int socket_fd, IdentCallback callback, void *user_data, uintmax_t timeout)
 {
-  struct IdentRequest *request = io_calloc(sizeof(*request));
+  ident_request_t *request = io_calloc(sizeof(*request));
   request->callback = callback;
   request->user_data = user_data;
 
