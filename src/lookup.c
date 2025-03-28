@@ -21,12 +21,10 @@
 
 #include "stdinc.h"
 #include "address.h"
-#include "client.h"
 #include "comm.h"
 #include "ident.h"
 #include "io_string.h"
 #include "io_time.h"
-#include "log.h"
 #include "memory.h"
 #include "res.h"
 #include "client.h"
