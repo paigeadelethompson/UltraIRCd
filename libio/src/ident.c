@@ -158,6 +158,8 @@ struct IdentRequest
   fde_t *fd;
   IdentCallback callback;
   void *user_data;
+  uint16_t local_port;
+  uint16_t remote_port;
 };
 
 void
@@ -200,24 +202,8 @@ ident_connect_callback(fde_t *F, int error, void *data)
     return;
   }
 
-  struct io_addr us;
-  struct io_addr them;
-  socklen_t ulen = sizeof(us);
-  socklen_t tlen = sizeof(them);
-  if (getsockname(F->fd, (struct sockaddr *)&us, &ulen) ||
-      getpeername(F->fd, (struct sockaddr *)&them, &tlen))
-  {
-      log_write(LOG_TYPE_IRCD, "Failed to get socket info: %s",
-                strerror(errno));
-      request->callback(request->user_data, NULL);
-      ident_delete(request);
-      return;
-  }
-
-  uint16_t uport = address_get_port(&us);
-  uint16_t tport = address_get_port(&them);
   char buf[16];
-  ssize_t len = snprintf(buf, sizeof(buf), "%u, %u\r\n", tport, uport);
+  ssize_t len = snprintf(buf, sizeof(buf), "%hu,%hu\r\n", request->remote_port, request->local_port);
 
   if (send(F->fd, buf, len, 0) != len)
   {
@@ -250,22 +236,29 @@ ident_start(const struct io_addr *addr, int socket_fd, IdentCallback callback, v
 
   request->fd = fd_open(fd, true, "ident");
 
-  struct io_addr localaddr;
-  address_clear(&localaddr);
+  struct io_addr local_addr;
+  struct io_addr remote_addr;
+  socklen_t local_len = sizeof(local_addr);
+  socklen_t remote_len = sizeof(remote_addr);
 
-  socklen_t locallen = sizeof(localaddr);
-  if (getsockname(socket_fd, (struct sockaddr *)&localaddr, &locallen))
+  if (getsockname(socket_fd, (struct sockaddr *)&local_addr, &local_len) ||
+      getpeername(socket_fd, (struct sockaddr *)&remote_addr, &remote_len))
   {
-    log_write(LOG_TYPE_IRCD, "getsockname failed: %s",
-              strerror(errno));
-    request->callback(request->user_data, NULL);
-    ident_delete(request);
-    return NULL;
+      log_write(LOG_TYPE_IRCD, "getsockname/getpeername failed: %s",
+                strerror(errno));
+      request->callback(request->user_data, NULL);
+      ident_delete(request);
+      return NULL;
   }
 
-  address_strip_ipv4(&localaddr);
-  address_set_port(&localaddr, 0);
+  request->local_port = address_get_port(&local_addr);
+  request->remote_port = address_get_port(&remote_addr);
 
-  comm_connect_tcp(request->fd, addr, IDENT_PORTNUM, &localaddr, ident_connect_callback, request, timeout);
+  struct io_addr bind_addr;
+  address_copy(&bind_addr, &local_addr);
+  address_strip_ipv4(&bind_addr);
+  address_set_port(&bind_addr, 0);
+
+  comm_connect_tcp(request->fd, addr, IDENT_PORTNUM, &bind_addr, ident_connect_callback, request, timeout);
   return request;
 }
