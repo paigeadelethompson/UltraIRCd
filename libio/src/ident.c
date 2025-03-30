@@ -244,11 +244,11 @@ ident_start(const struct io_addr *addr, int socket_fd, IdentCallback callback, v
   if (getsockname(socket_fd, (struct sockaddr *)&local_addr, &local_len) ||
       getpeername(socket_fd, (struct sockaddr *)&remote_addr, &remote_len))
   {
-      log_write(LOG_TYPE_IRCD, "getsockname/getpeername failed: %s",
-                strerror(errno));
-      request->callback(request->user_data, NULL);
-      ident_delete(request);
-      return NULL;
+    log_write(LOG_TYPE_IRCD, "getsockname/getpeername failed: %s",
+              strerror(errno));
+    request->callback(request->user_data, NULL);
+    ident_delete(request);
+    return NULL;
   }
 
   request->local_port = address_get_port(&local_addr);
