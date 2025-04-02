@@ -68,9 +68,7 @@ do_connect(struct Client *source, const char *name)
   }
 
   /* Notify all operators about connect requests. */
-  static const char *const type[] = { "Remote", "Local" };
-  const char *const type_p = type[MyConnect(source) != 0];
-
+  const char *const type_p = MyConnect(source) ? "Local" : "Remote";
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_GLOBAL, "from %s: %s CONNECT %s %u from %s",
                  me.name, type_p, name, conf->port, get_oper_name(source));
   sendto_servers(NULL, 0, 0, ":%s GLOBOPS :%s CONNECT %s %u from %s",
