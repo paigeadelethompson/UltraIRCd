@@ -98,7 +98,7 @@ flatten_links_write_file(void *unused)
   FILE *file = fopen(ConfigServerHide.flatten_links_file, "w");
   if (file == NULL)
   {
-    log_write(LOG_TYPE_IRCD, "Couldn't open \"%s\": %s",
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Unable to open \"%s\": %s",
               ConfigServerHide.flatten_links_file, strerror(errno));
     return;
   }
@@ -146,7 +146,7 @@ flatten_links_read_file(void)
   FILE *file = fopen(ConfigServerHide.flatten_links_file, "r");
   if (file == NULL)
   {
-    log_write(LOG_TYPE_IRCD, "Couldn't open \"%s\": %s",
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Unable to open \"%s\": %s",
               ConfigServerHide.flatten_links_file, strerror(errno));
     return;
   }

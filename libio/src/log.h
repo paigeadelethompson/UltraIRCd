@@ -53,6 +53,19 @@ enum log_type
 };
 
 /**
+ * @enum log_severity
+ * @brief Enumerates different severity levels for log entries.
+ */
+enum log_severity
+{
+  LOG_SEVERITY_DEBUG,  /**< Debug level messages. */
+  LOG_SEVERITY_INFO,   /**< Informational messages. */
+  LOG_SEVERITY_WARN,   /**< Warning messages. */
+  LOG_SEVERITY_ERROR,  /**< Error messages. */
+  LOG_SEVERITY_FATAL,  /**< Fatal error messages. */
+};
+
+/**
  * @struct Log
  * @brief Represents a log structure, holding information about log configuration.
  *
@@ -75,6 +88,6 @@ struct Log
 
 extern void log_destroy(struct Log *);
 extern void log_clear(void);
-extern void log_write(enum log_type, const char *, ...) IO_AFP(2,3);
+extern void log_write(enum log_type, enum log_severity, const char *, ...) IO_AFP(3,4);
 extern struct Log *log_add(enum log_type, bool, size_t, const char *);
 #endif  /* INCLUDED_log_h */

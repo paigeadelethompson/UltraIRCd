@@ -108,7 +108,7 @@ include   \.include{WS}(\<.*\>|\".*\")
                     yylval.string = yytext + 1;
 
                     if (yylval.string[yyleng - 2] != '"')
-                      log_write(LOG_TYPE_IRCD, "Unterminated character string");
+                      log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Unterminated character string");
                     else
                     {
                       unsigned int i = 0, j = 0;
@@ -125,7 +125,7 @@ include   \.include{WS}(\<.*\>|\".*\")
 
                           if (yylval.string[i] == '\0')  /* XXX: should not happen */
                           {
-                            log_write(LOG_TYPE_IRCD, "Unterminated character string");
+                            log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Unterminated character string");
                             break;
                           }
 
@@ -406,7 +406,7 @@ conf_include(void)
   /* do stacking and co. */
   if (include_stack_ptr >= MAX_INCLUDE_DEPTH)
   {
-    log_write(LOG_TYPE_IRCD, "Includes nested too deep in %s", p);
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Includes nested too deep in %s", p);
     return;
   }
 
@@ -419,7 +419,7 @@ conf_include(void)
   FILE *include_file = fopen(include_path, "r");
   if (include_file == NULL)
   {
-    log_write(LOG_TYPE_IRCD, "Unable to read configuration file '%s': %s",
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Unable to read configuration file '%s': %s",
               include_path, strerror(errno));
     return;
   }

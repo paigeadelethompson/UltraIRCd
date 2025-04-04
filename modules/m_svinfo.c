@@ -71,8 +71,7 @@ ms_svinfo(struct Client *source, int parc, char *parv[])
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
               "Link %s dropped, wrong TS protocol version (current: %d, minimum: %d)",
               client_get_name(source, MASK_IP), current_version, minimum_version);
-    log_write(LOG_TYPE_IRCD,
-              "Link %s dropped, wrong TS protocol version (current: %d, minimum: %d)",
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Link %s dropped, wrong TS protocol version (current: %d, minimum: %d)",
               client_get_name(source, SHOW_IP), current_version, minimum_version);
 
     client_exit(source, "Incompatible TS version");
@@ -96,8 +95,7 @@ ms_svinfo(struct Client *source, int parc, char *parv[])
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
               "Link %s dropped, excessive TS delta (my TS=%ju, their TS=%ju, delta=%ji)",
               client_get_name(source, MASK_IP), local_ts, remote_ts, delta_ts);
-    log_write(LOG_TYPE_IRCD,
-              "Link %s dropped, excessive TS delta (my TS=%ju, their TS=%ju, delta=%ji)",
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Link %s dropped, excessive TS delta (my TS=%ju, their TS=%ju, delta=%ji)",
               client_get_name(source, SHOW_IP), local_ts, remote_ts, delta_ts);
 
     client_exit(source, "Excessive TS delta");

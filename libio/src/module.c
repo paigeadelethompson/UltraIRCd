@@ -455,7 +455,7 @@ module_unload(const char *name, bool reload, void *user_data)
   if (module_unload_callback)
     module_unload_callback(name, handle, user_data);
 
-  log_write(LOG_TYPE_IRCD, "Module %s [handle: %p] unloaded", name, handle);
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "Module %s [handle: %p] unloaded", name, handle);
   return MODULE_SUCCESS;
 }
 
@@ -570,7 +570,7 @@ module_load(const char *name, bool manual, void *user_data)
   if (module_load_callback)
     module_load_callback(name, handle, user_data);
 
-  log_write(LOG_TYPE_IRCD, "Module %s [handle: %p] loaded", name, handle);
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "Module %s [handle: %p] loaded", name, handle);
   return MODULE_SUCCESS;
 }
 
@@ -663,7 +663,7 @@ module_load_all(unsigned int *loaded_count)
        * This ensures we log only significant errors and not just already loaded modules.
        */
       code = tmp;
-      log_write(LOG_TYPE_IRCD, "Failed to load module %s: %s",
+      log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Failed to load module %s: %s",
                 config->name, module_get_error());
     }
   }

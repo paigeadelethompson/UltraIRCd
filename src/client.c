@@ -274,7 +274,7 @@ check_pings_list(list_t *list)
             sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
                            "No response from %s, closing link",
                            client_get_name(client, MASK_IP));
-            log_write(LOG_TYPE_IRCD, "No response from %s, closing link",
+            log_write(LOG_TYPE_IRCD, LOG_SEVERITY_WARN, "No response from %s, closing link",
                       client_get_name(client, SHOW_IP));
           }
 
@@ -317,7 +317,7 @@ check_unknowns_list(void)
       sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
                      "No response from %s during handshake, closing link",
                      client_get_name(client, MASK_IP));
-      log_write(LOG_TYPE_IRCD, "No response from %s during handshake, closing link",
+      log_write(LOG_TYPE_IRCD, LOG_SEVERITY_WARN, "No response from %s during handshake, closing link",
                 client_get_name(client, SHOW_IP));
       exit = true;
     }
@@ -814,7 +814,7 @@ client_exit(struct Client *client, const char *comment)
 
       monitor_clear_list(client);
 
-      log_write(LOG_TYPE_USER, "%s (%ju): %s!%s@%s %s %s %ju/%ju :%s",
+      log_write(LOG_TYPE_USER, LOG_SEVERITY_INFO, "%s (%ju): %s!%s@%s %s %s %ju/%ju :%s",
                 date_ctime(client->connection->created_real),
                 io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->created_monotonic,
                 client->name, client->username, client->host,
@@ -875,7 +875,7 @@ client_exit(struct Client *client, const char *comment)
                      client->name, time_format_duration(io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->created_monotonic),
                      client->connection->send.bytes >> 10,
                      client->connection->recv.bytes >> 10);
-      log_write(LOG_TYPE_IRCD, "%s was connected for %s. %ju/%ju sendK/recvK.",
+      log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "%s was connected for %s. %ju/%ju sendK/recvK.",
                 client->name, time_format_duration(io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->created_monotonic),
                 client->connection->send.bytes >> 10,
                 client->connection->recv.bytes >> 10);
@@ -959,7 +959,7 @@ dead_link_on_read(struct Client *client, int error)
       sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
                      "Server %s closed the connection",
                      client_get_name(client, MASK_IP));
-      log_write(LOG_TYPE_IRCD, "Server %s closed the connection",
+      log_write(LOG_TYPE_IRCD, LOG_SEVERITY_WARN, "Server %s closed the connection",
                 client_get_name(client, SHOW_IP));
     }
     else
@@ -970,7 +970,7 @@ dead_link_on_read(struct Client *client, int error)
       sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
                      "Lost connection to %s: %s",
                      client_get_name(client, MASK_IP), strerror(current_error));
-      log_write(LOG_TYPE_IRCD, "Lost connection to %s: %s",
+      log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Lost connection to %s: %s",
                 client_get_name(client, SHOW_IP), strerror(current_error));
     }
 

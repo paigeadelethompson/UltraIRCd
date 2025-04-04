@@ -128,7 +128,7 @@ ssl_handshake(fde_t *F, void *data_)
   comm_setselect(F, COMM_SELECT_WRITE | COMM_SELECT_READ, NULL, NULL, 0);
 
   if (tls_verify_certificate(&F->tls, &client->tls_certfp) == false)
-    log_write(LOG_TYPE_IRCD, "Client %s gave bad TLS client certificate",
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Client %s gave bad TLS client certificate",
               client_get_name(client, MASK_IP));
 
   lookup_start(client);
@@ -291,7 +291,7 @@ listener_finalize(struct Listener *listener)
   int fd = comm_socket(address_get_family(&listener->addr), SOCK_STREAM, 0);
   if (fd == -1)
   {
-    log_write(LOG_TYPE_IRCD, "opening listener socket %s/%hu: %s",
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Opening listener socket %s/%hu: %s",
               listener_get_name(listener), listener_get_port(listener), strerror(errno));
     return false;
   }
@@ -302,7 +302,7 @@ listener_finalize(struct Listener *listener)
   {
     if (setsockopt(fd, IPPROTO_IPV6, IPV6_V6ONLY, &opt, sizeof(opt)))
     {
-      log_write(LOG_TYPE_IRCD, "setting IPV6_V6ONLY for listener %s/%hu: %s",
+      log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Setting IPV6_V6ONLY for listener %s/%hu: %s",
                 listener_get_name(listener), listener_get_port(listener), strerror(errno));
       close(fd);
       return false;
@@ -312,7 +312,7 @@ listener_finalize(struct Listener *listener)
 
   if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)))
   {
-    log_write(LOG_TYPE_IRCD, "setting SO_REUSEADDR for listener %s/%hu: %s",
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Setting SO_REUSEADDR for listener %s/%hu: %s",
               listener_get_name(listener), listener_get_port(listener), strerror(errno));
     close(fd);
     return false;
@@ -324,7 +324,7 @@ listener_finalize(struct Listener *listener)
    */
   if (bind(fd, (const struct sockaddr *)&listener->addr, address_length(&listener->addr)))
   {
-    log_write(LOG_TYPE_IRCD, "binding listener socket %s/%hu: %s",
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Binding listener socket %s/%hu: %s",
               listener_get_name(listener), listener_get_port(listener), strerror(errno));
     close(fd);
     return false;
@@ -332,7 +332,7 @@ listener_finalize(struct Listener *listener)
 
   if (listen(fd, LISTEN_BACKLOG))
   {
-    log_write(LOG_TYPE_IRCD, "listen failed for %s/%hu: %s",
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Listen failed for %s/%hu: %s",
               listener_get_name(listener), listener_get_port(listener), strerror(errno));
     close(fd);
     return false;

@@ -135,7 +135,7 @@ module_cmd_reload_single(struct Client *source, const char *arg)
   {
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "Error reloading core module: %s: terminating ircd", arg);
-    log_write(LOG_TYPE_IRCD, "Error loading core module %s: terminating ircd", arg);
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Error loading core module %s: terminating ircd", arg);
     exit(EXIT_FAILURE);
   }
 }
@@ -168,7 +168,7 @@ module_cmd_reload_all(struct Client *source)
 
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                  "Module reload: %u modules unloaded, %u modules loaded", unloaded_count, loaded_count);
-  log_write(LOG_TYPE_IRCD, "Module reload: %u modules unloaded, %u modules loaded", unloaded_count, loaded_count);
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "Module reload: %u modules unloaded, %u modules loaded", unloaded_count, loaded_count);
 
   if (core == false)
     return;
@@ -181,7 +181,7 @@ module_cmd_reload_all(struct Client *source)
     {
       sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                      "Error loading core module %s: terminating ircd", config->name);
-      log_write(LOG_TYPE_IRCD, "Error loading core module %s: terminating ircd", config->name);
+      log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Error loading core module %s: terminating ircd", config->name);
       exit(EXIT_FAILURE);
     }
   }

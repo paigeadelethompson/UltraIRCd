@@ -117,7 +117,8 @@ motd_cache(struct Motd *motd)
   int fd = open(motd->path, O_RDONLY);
   if (fd == -1)
   {
-    log_write(LOG_TYPE_IRCD, "Couldn't open \"%s\": %s", motd->path, strerror(errno));
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Unable to open MOTD file '%s': %s",
+              motd->path, strerror(errno));
     return NULL;
   }
 
@@ -125,7 +126,8 @@ motd_cache(struct Motd *motd)
   struct stat sb;
   if (fstat(fd, &sb))
   {
-    log_write(LOG_TYPE_IRCD, "Couldn't fstat \"%s\": %s", motd->path, strerror(errno));
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Error reading MOTD file '%s': %s",
+              motd->path, strerror(errno));
     close(fd);
     return NULL;
   }
@@ -134,7 +136,8 @@ motd_cache(struct Motd *motd)
   FILE *file = fdopen(fd, "r");
   if (file == NULL)
   {
-    log_write(LOG_TYPE_IRCD, "Couldn't fdopen \"%s\": %s", motd->path, strerror(errno));
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Error closing MOTD file '%s': %s",
+              motd->path, strerror(errno));
     close(fd);
     return NULL;
   }

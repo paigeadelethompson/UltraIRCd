@@ -1600,7 +1600,7 @@ auth_spoof: SPOOF '=' QSTRING ';'
     block_state.flags.value |= CONF_FLAGS_SPOOF_IP;
   }
   else
-    log_write(LOG_TYPE_IRCD, "Spoof either is too long or contains invalid characters. Ignoring it.");
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Spoof either is too long or contains invalid characters. Ignoring it.");
 };
 
 auth_redir_serv: REDIRSERV '=' QSTRING ';'
@@ -1925,7 +1925,7 @@ connect_entry: CONNECT
   {
     struct io_addr tmp;
     if (address_from_string(block_state.bind.buf, &tmp) == false)
-      log_write(LOG_TYPE_IRCD, "Invalid netmask for server bind(%s)", block_state.bind.buf);
+      log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Invalid netmask for server bind(%s)", block_state.bind.buf);
     else
     {
       conf->bind = io_calloc(sizeof(*conf->bind));

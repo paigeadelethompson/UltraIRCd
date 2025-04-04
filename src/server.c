@@ -255,7 +255,7 @@ server_tls_handshake(fde_t *F, void *data_)
   comm_setselect(F, COMM_SELECT_WRITE | COMM_SELECT_READ, NULL, NULL, 0);
 
   if (tls_verify_certificate(&F->tls, &client->tls_certfp) == false)
-    log_write(LOG_TYPE_IRCD, "Server %s gave bad TLS client certificate",
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Server %s gave bad TLS client certificate",
               client_get_name(client, MASK_IP));
 
   server_finish_tls_handshake(client);
@@ -397,14 +397,14 @@ server_connect(struct MaskItem *conf, struct Client *initiator)
 
   char buf[HOSTIPLEN + 1];
   address_to_string(conf->addr, buf, sizeof(buf));
-  log_write(LOG_TYPE_IRCD, "Connect to %s[%s] @%s", conf->name, conf->host, buf);
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "Connect to %s[%s] @%s", conf->name, conf->host, buf);
 
   /* Create a socket for the server connection */
   int fd = comm_socket(address_get_family(conf->addr), SOCK_STREAM, 0);
   if (fd == -1)
   {
     /* Eek, failure to create the socket */
-    log_write(LOG_TYPE_IRCD, "opening stream socket to %s: %s",
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "opening stream socket to %s: %s",
               conf->name, strerror(errno));
     return false;
   }

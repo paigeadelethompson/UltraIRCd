@@ -59,7 +59,7 @@ parse_remove_unknown(struct Client *client, const char *sender, char *buffer)
    */
   if ((IsDigit(*sender) && strlen(sender) <= IRC_MAXSID) || strchr(sender, '.'))
   {
-    log_write(LOG_TYPE_DEBUG, "Unknown prefix (%s) from %s, Squitting %s",
+    log_write(LOG_TYPE_DEBUG, LOG_SEVERITY_DEBUG, "Unknown prefix (%s) from %s, Squitting %s",
               buffer, client_get_name(client, SHOW_IP), sender);
     sendto_one(client, ":%s SQUIT %s :(Unknown prefix (%s) from %s)",
                me.id, sender, buffer, client->name);
@@ -234,7 +234,7 @@ parse_message(struct Client *client, char *buffer, const char *buffer_end)
       if (from->from != client)
       {
         ++ServerStats.is_wrdi;
-        log_write(LOG_TYPE_DEBUG, "Fake direction: dropped message from %s[%s] via %s",
+        log_write(LOG_TYPE_DEBUG, LOG_SEVERITY_DEBUG, "Fake direction %s(%s) from %s",
                   from->name, from->from->name, client_get_name(client, SHOW_IP));
         return;
       }

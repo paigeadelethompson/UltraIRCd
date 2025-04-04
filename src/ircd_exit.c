@@ -95,7 +95,7 @@ ircd_exit(ircd_exit_action_t action, const char *message)
 
   sendto_servers(NULL, 0, 0, ":%s ERROR :%s", me.id, buf);
 
-  log_write(LOG_TYPE_IRCD, "%s", buf);
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Fatal error: %s", buf);
 
   save_all_databases(NULL);
 

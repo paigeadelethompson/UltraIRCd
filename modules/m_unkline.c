@@ -79,7 +79,7 @@ kline_remove(struct Client *source, const struct aline_ctx *aline)
 
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "%s has removed the K-Line for: [%s@%s]",
                  get_oper_name(source), conf->user, conf->host);
-  log_write(LOG_TYPE_KLINE, "%s removed K-Line for [%s@%s]",
+  log_write(LOG_TYPE_KLINE, LOG_SEVERITY_INFO, "%s removed K-Line for [%s@%s]",
             get_oper_name(source), conf->user, conf->host);
 
   delete_one_address_conf(aline->host, conf);

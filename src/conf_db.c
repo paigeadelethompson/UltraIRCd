@@ -57,7 +57,7 @@ save_kline_database(const char *filename)
                                    "expires_at", arec->conf->until);
       if (entry == NULL)
       {
-        log_write(LOG_TYPE_IRCD, "Error packing kline: line %d, column %d, position %d: %s",
+        log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Error packing kline: line %d, column %d, position %d: %s",
                   error.line, error.column, error.position, error.text);
         continue;
       }
@@ -67,7 +67,7 @@ save_kline_database(const char *filename)
   }
 
   if (json_dump_file(root, filename, JSON_INDENT(4)))
-    log_write(LOG_TYPE_IRCD, "Error writing JSON data to file '%s'", filename);
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Error writing JSON data to file '%s'", filename);
 
   json_decref(root);
 }
@@ -80,7 +80,7 @@ load_kline_database(const char *filename)
   json_t *root = json_load_file(filename, 0, &error);
   if (root == NULL)
   {
-    log_write(LOG_TYPE_IRCD, "Error loading JSON file '%s': %s (line %d)",
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Error loading JSON file '%s': %s (line %d)",
               filename, error.text, error.line);
     return;
   }
@@ -88,7 +88,7 @@ load_kline_database(const char *filename)
   json_t *k_lines = json_object_get(root, "k_lines");
   if (json_is_array(k_lines) == 0)
   {
-    log_write(LOG_TYPE_IRCD, "Error: 'k_lines' is not an array in '%s'", filename);
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Error: 'k_lines' is not an array in '%s'", filename);
     json_decref(root);
     return;
   }
@@ -108,7 +108,7 @@ load_kline_database(const char *filename)
 
     if (res)
     {
-      log_write(LOG_TYPE_IRCD, "Error unpacking kline at index %zu: line %d, column %d, position %d: %s",
+      log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Error unpacking kline at index %zu: line %d, column %d, position %d: %s",
                 index, error.line, error.column, error.position, error.text);
       continue;
     }
@@ -151,7 +151,7 @@ save_dline_database(const char *filename)
                                    "expires_at", arec->conf->until);
       if (entry == NULL)
       {
-        log_write(LOG_TYPE_IRCD, "Error packing dline: line %d, column %d, position %d: %s",
+        log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Error packing dline: line %d, column %d, position %d: %s",
                   error.line, error.column, error.position, error.text);
         continue;
       }
@@ -161,7 +161,7 @@ save_dline_database(const char *filename)
   }
 
   if (json_dump_file(root, filename, JSON_INDENT(4)))
-    log_write(LOG_TYPE_IRCD, "Error writing JSON data to file '%s'", filename);
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Error writing JSON data to file '%s'", filename);
 
   json_decref(root);
 }
@@ -174,7 +174,7 @@ load_dline_database(const char *filename)
   json_t *root = json_load_file(filename, 0, &error);
   if (root == NULL)
   {
-    log_write(LOG_TYPE_IRCD, "Error loading JSON file '%s': %s (line %d)",
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Error loading JSON file '%s': %s (line %d)",
               filename, error.text, error.line);
     return;
   }
@@ -182,7 +182,7 @@ load_dline_database(const char *filename)
   json_t *d_lines = json_object_get(root, "d_lines");
   if (json_is_array(d_lines) == 0)
   {
-    log_write(LOG_TYPE_IRCD, "Error: 'd_lines' is not an array in '%s'", filename);
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Error: 'd_lines' is not an array in '%s'", filename);
     json_decref(root);
     return;
   }
@@ -200,7 +200,7 @@ load_dline_database(const char *filename)
                              "expires_at", &expires_at);
     if (res)
     {
-      log_write(LOG_TYPE_IRCD, "Error unpacking dline at index %zu: line %d, column %d, position %d: %s",
+      log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Error unpacking dline at index %zu: line %d, column %d, position %d: %s",
                 index, error.line, error.column, error.position, error.text);
       continue;
     }
@@ -240,7 +240,7 @@ save_resv_database(const char *filename)
                                  "expires_at", resv->expires_at);
     if (entry == NULL)
     {
-      log_write(LOG_TYPE_IRCD, "Error packing resv: line %d, column %d, position %d: %s",
+      log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Error packing resv: line %d, column %d, position %d: %s",
                 error.line, error.column, error.position, error.text);
       continue;
     }
@@ -262,7 +262,7 @@ save_resv_database(const char *filename)
                                  "expires_at", resv->expires_at);
     if (entry == NULL)
     {
-      log_write(LOG_TYPE_IRCD, "Error packing resv: line %d, column %d, position %d: %s",
+      log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Error packing resv: line %d, column %d, position %d: %s",
                 error.line, error.column, error.position, error.text);
       continue;
     }
@@ -271,7 +271,7 @@ save_resv_database(const char *filename)
   }
 
   if (json_dump_file(root, filename, JSON_INDENT(4)))
-    log_write(LOG_TYPE_IRCD, "Error writing JSON data to file '%s'", filename);
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Error writing JSON data to file '%s'", filename);
 
   json_decref(root);
 }
@@ -284,7 +284,7 @@ load_resv_database(const char *filename)
   json_t *root = json_load_file(filename, 0, &error);
   if (root == NULL)
   {
-    log_write(LOG_TYPE_IRCD, "Error loading JSON file '%s': %s (line %d)",
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Error loading JSON file '%s': %s (line %d)",
               filename, error.text, error.line);
     return;
   }
@@ -292,7 +292,7 @@ load_resv_database(const char *filename)
   json_t *resv_array = json_object_get(root, "resv");
   if (json_is_array(resv_array) == 0)
   {
-    log_write(LOG_TYPE_IRCD, "Error: 'resv' is not an array in '%s'", filename);
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Error: 'resv' is not an array in '%s'", filename);
     json_decref(root);
     return;
   }
@@ -310,7 +310,7 @@ load_resv_database(const char *filename)
                              "expires_at", &expires_at);
     if (res)
     {
-      log_write(LOG_TYPE_IRCD, "Error unpacking resv at index %zu: line %d, column %d, position %d: %s",
+      log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Error unpacking resv at index %zu: line %d, column %d, position %d: %s",
                 index, error.line, error.column, error.position, error.text);
       continue;
     }
@@ -346,7 +346,7 @@ save_xline_database(const char *filename)
                                  "expires_at", gecos->expires_at);
     if (entry == NULL)
     {
-      log_write(LOG_TYPE_IRCD, "Error packing xline: line %d, column %d, position %d: %s",
+      log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Error packing xline: line %d, column %d, position %d: %s",
                 error.line, error.column, error.position, error.text);
       continue;
     }
@@ -355,7 +355,7 @@ save_xline_database(const char *filename)
   }
 
   if (json_dump_file(root, filename, JSON_INDENT(4)))
-    log_write(LOG_TYPE_IRCD, "Error writing JSON data to file '%s'", filename);
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Error writing JSON data to file '%s'", filename);
 
   json_decref(root);
 }
@@ -368,7 +368,7 @@ load_xline_database(const char *filename)
   json_t *root = json_load_file(filename, 0, &error);
   if (root == NULL)
   {
-    log_write(LOG_TYPE_IRCD, "Error loading JSON file '%s': %s (line %d)",
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Error loading JSON file '%s': %s (line %d)",
               filename, error.text, error.line);
     return;
   }
@@ -376,7 +376,7 @@ load_xline_database(const char *filename)
   json_t *x_lines = json_object_get(root, "x_lines");
   if (json_is_array(x_lines) == 0)
   {
-    log_write(LOG_TYPE_IRCD, "Error: 'x_lines' is not an array in '%s'", filename);
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Error: 'x_lines' is not an array in '%s'", filename);
     json_decref(root);
     return;
   }
@@ -394,7 +394,7 @@ load_xline_database(const char *filename)
                              "expires_at", &expires_at);
     if (res)
     {
-      log_write(LOG_TYPE_IRCD, "Error unpacking xline at index %zu: line %d, column %d, position %d: %s",
+      log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Error unpacking xline at index %zu: line %d, column %d, position %d: %s",
                 index, error.line, error.column, error.position, error.text);
       continue;
     }

@@ -425,7 +425,7 @@ sendto_clients_ratelimited(uintmax_t *rate, const char *format, ...)
   va_end(args);
 
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "%s", buffer);
-  log_write(LOG_TYPE_IRCD, "%s", buffer);
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "%s", buffer);
 }
 
 /*
@@ -557,7 +557,7 @@ sendto_match_butone(const struct Client *one, const struct Client *from, const c
  *                support ALL capabs in 'capab', and NO capabs in 'nocapab'.
  *
  * This function was written in an attempt to merge together the other
- * billion sendto_*serv*() functions, which sprung up with capabs,
+ * billion sendto_*serv*() functions, which sprang up with capabs,
  * lazylinks, uids, etc.
  * -davidt
  */

@@ -107,8 +107,8 @@ mo_kill(struct Client *source, int parc, char *parv[])
                  target->name, target->username, target->host,
                  target->servptr->name, source->name, me.name, REASONLEN, reason);
 
-  log_write(LOG_TYPE_KILL, "KILL From %s For %s Path %s (%.*s)",
-            source->name, target->name, me.name, REASONLEN, reason);
+  log_write(LOG_TYPE_KILL, LOG_SEVERITY_INFO, "KILL %s by %s (%s)",
+            target->name, source->name, reason);
 
   /*
    * And pass on the message to other servers. Note, that if KILL was changed,
@@ -201,8 +201,8 @@ ms_kill(struct Client *source, int parc, char *parv[])
                    target->name, target->username, target->host,
                    target->servptr->name, source->name, reason);
 
-  log_write(LOG_TYPE_KILL, "KILL From %s For %s Path %s %s",
-            source->name, target->name, source->name, reason);
+  log_write(LOG_TYPE_KILL, LOG_SEVERITY_INFO, "KILL %s by %s (%s)",
+            target->name, source->name, reason);
 
   sendto_servers(source, 0, 0, ":%s KILL %s :%s %s",
                  source->id, target->id, parv[2], reason);

@@ -35,6 +35,54 @@
 #include "misc.h"
 #include "memory.h"
 
+/* ANSI color codes for 24-bit color support */
+#define COLOR_RESET "\033[0m"
+#define COLOR_BOLD "\033[1m"
+
+/* Severity level colors */
+static const char *severity_colors[] = {
+  "\033[38;2;128;128;128m",  /* DEBUG - Gray */
+  "\033[38;2;0;255;0m",      /* INFO - Green */
+  "\033[38;2;255;165;0m",    /* WARN - Orange */
+  "\033[38;2;255;0;0m",      /* ERROR - Red */
+  "\033[38;2;128;0;128m",    /* FATAL - Purple */
+};
+
+/* Log type colors */
+static const char *type_colors[] = {
+  "\033[38;2;0;191;255m",    /* IRCD - Deep Sky Blue */
+  "\033[38;2;255;0;0m",      /* KILL - Red */
+  "\033[38;2;255;165;0m",    /* KLINE - Orange */
+  "\033[38;2;255;0;0m",      /* DLINE - Red */
+  "\033[38;2;255;0;0m",      /* XLINE - Red */
+  "\033[38;2;255;165;0m",    /* RESV - Orange */
+  "\033[38;2;0;255;0m",      /* OPER - Green */
+  "\033[38;2;0;191;255m",    /* USER - Deep Sky Blue */
+  "\033[38;2;128;128;128m",  /* DEBUG - Gray */
+};
+
+/* Severity level strings */
+static const char *severity_strings[] = {
+  "DEBUG",
+  "INFO",
+  "WARN",
+  "ERROR",
+  "FATAL",
+};
+
+/* Log type strings */
+static const char *type_strings[] = {
+  "IRCD",
+  "KILL",
+  "KLINE",
+  "DLINE",
+  "XLINE",
+  "RESV",
+  "OPER",
+  "USER",
+  "DEBUG",
+};
+
 /**
  * @def TRUNCATED_STRING
  * @brief A string indicating that log message content has been truncated.
@@ -89,31 +137,7 @@ static list_t log_list;
 struct Log *
 log_add(enum log_type type, bool main, size_t max_file_size, const char *file_name)
 {
-  struct Log *log = io_calloc(sizeof(*log));
-  log->type = type;
-  log->file_name = io_strdup(file_name);
-  log->max_file_size = max_file_size;
-  log->main = main;
-  log->flush_immediately = true;
-  log->time_provider = date_iso8601_usec;
-  log->file = fopen(file_name, "a");
-  list_add(log, &log->node, &log_list);
-
-  if (log->file == NULL)
-  {
-    if (log->main)
-    {
-      perror("fopen");
-      exit(EXIT_FAILURE);
-    }
-
-    log_destroy(log);
-    return NULL;
-  }
-
-  /* Set owner-only read and write permissions. */
-  chmod(log->file_name, S_IRUSR | S_IWUSR);
-  return log;
+  return NULL;
 }
 
 /**
@@ -194,90 +218,71 @@ log_rotate_due(struct Log *log)
 }
 
 /**
- * @brief Writes a log entry with a variable argument list to the appropriate log file.
+ * @brief Writes a log entry with a variable argument list to stderr.
  *
- * This function writes a log entry to the appropriate log file based on the log type.
- * It performs log rotation if needed and flushes immediately based on the log's configuration.
+ * This function writes a log entry to stderr with color-coded severity and type.
+ * It formats the message with timestamp, severity, type, and the actual message.
  *
  * @param type The type of the log entry.
+ * @param severity The severity level of the log entry.
  * @param format The format string for the log entry.
  * @param ... Variable argument list for the log entry.
  */
 void
-log_write(enum log_type type, const char *format, ...)
+log_write(enum log_type type, enum log_severity severity, const char *format, ...)
 {
   if (ConfigLog.use_logging == 0)
     return;
 
-  list_node_t *node;
-  LIST_FOREACH(node, log_list.head)
-  {
-    struct Log *log = node->data;
+  char buffer[LOG_MAX_LENGTH + 1];  /* +1 for the null terminator ('\0'). */
+  va_list args;
+  va_start(args, format);
+  size_t length = vsnprintf(buffer, sizeof(buffer), format, args);
+  va_end(args);
 
-    /* Check if the log entry type matches the log's log type. */
-    if (log->type == type)
-    {
-      char buffer[LOG_MAX_LENGTH + 1];  /* +1 for the null terminator ('\0'). */
+  /* Check if log message was truncated. */
+  if (length >= sizeof(buffer))
+    strlcpy(buffer + LOG_MAX_LENGTH - sizeof(TRUNCATED_STRING), TRUNCATED_STRING, sizeof(TRUNCATED_STRING));
 
-      va_list args;
-      va_start(args, format);
-      size_t length = vsnprintf(buffer, sizeof(buffer), format, args);
-      va_end(args);
+  /* Remove "ERROR: " prefix if present and severity is ERROR or FATAL */
+  char *message = buffer;
+  if ((severity == LOG_SEVERITY_ERROR || severity == LOG_SEVERITY_FATAL) && 
+      strncmp(message, "ERROR: ", 7) == 0)
+    message += 7;
 
-      /* Check if log message was truncated. */
-      if (length >= sizeof(buffer))
-        strlcpy(buffer + LOG_MAX_LENGTH - sizeof(TRUNCATED_STRING), TRUNCATED_STRING, sizeof(TRUNCATED_STRING));
-
-      /* Check if log file exceeds the maximum size, rotate if needed. */
-      if (log->main == false && log_rotate_due(log))
-        log_rotate(log);
-
-      /* Write log entry to the file. */
-      fprintf(log->file, "[%s] %s\n", log->time_provider(0), buffer);
-
-      /* Optionally flush immediately based on the configuration. */
-      if (log->flush_immediately)
-        fflush(log->file);
-
-      return;
-    }
-  }
+  /* Write to stderr with color coding */
+  fprintf(stderr, "%s[%s]%s %s%s%s %s%s%s %s%s%s\n",
+          COLOR_BOLD,
+          date_iso8601_usec(0),
+          COLOR_RESET,
+          severity_colors[severity],
+          severity_strings[severity],
+          COLOR_RESET,
+          type_colors[type],
+          type_strings[type],
+          COLOR_RESET,
+          severity_colors[severity],
+          message,
+          COLOR_RESET);
+  fflush(stderr);
 }
 
 /**
  * @brief Closes, deinitializes, and frees a log.
  *
- * This function removes a log from the log list, closes the associated file, and frees memory.
- *
- * @param log The Log structure to destroy.
+ * This function is now a no-op since we're only logging to stderr.
  */
 void
 log_destroy(struct Log *log)
 {
-  list_remove(&log->node, &log_list);
-
-  if (log->file)
-    fclose(log->file);
-
-  io_free(log->file_name);
-  io_free(log);
 }
 
 /**
- * @brief Closes, deinitializes, and frees all logs except the main log.
+ * @brief Closes, deinitializes, and frees all logs.
  *
- * This function iterates through the log list, destroying all logs except the main log.
+ * This function is now a no-op since we're only logging to stderr.
  */
 void
 log_clear(void)
 {
-  list_node_t *node, *node_next;
-
-  LIST_FOREACH_SAFE(node, node_next, log_list.head)
-  {
-    struct Log *log = node->data;
-
-    if (log->main == false)
-      log_destroy(log);
-  }
 }

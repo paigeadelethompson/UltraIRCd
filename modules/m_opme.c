@@ -88,7 +88,7 @@ mo_opme(struct Client *source, int parc, char *parv[])
     }
   }
 
-  log_write(LOG_TYPE_IRCD, "%s used OPME on channel %s",
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "%s used OPME on channel %s",
             get_oper_name(source), channel->name);
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_GLOBAL, "from %s: %s used OPME on channel %s",
                  me.name, get_oper_name(source), channel->name);

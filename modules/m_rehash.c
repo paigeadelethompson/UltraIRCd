@@ -50,7 +50,7 @@ rehash_conf(struct Client *source)
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                  "%s is rehashing configuration file(s)",
                  get_oper_name(source));
-  log_write(LOG_TYPE_IRCD, "REHASH CONF from %s",
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "REHASH CONF from %s",
             get_oper_name(source));
   conf_rehash(false);
 }
@@ -66,7 +66,7 @@ rehash_motd(struct Client *source)
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                  "%s is forcing re-reading of MOTD files",
                  get_oper_name(source));
-  log_write(LOG_TYPE_IRCD, "REHASH MOTD from %s",
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "REHASH MOTD from %s",
             get_oper_name(source));
   motd_recache();
 }
@@ -82,7 +82,7 @@ rehash_dns(struct Client *source)
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                  "%s is rehashing DNS",
                  get_oper_name(source));
-  log_write(LOG_TYPE_IRCD, "REHASH DNS from %s",
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "REHASH DNS from %s",
             get_oper_name(source));
   restart_resolver();
 }

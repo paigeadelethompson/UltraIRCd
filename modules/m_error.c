@@ -53,7 +53,7 @@ mr_error(struct Client *source, int parc, char *parv[])
     return;
 
   const char *message = string_default(parv[1], "<>");
-  log_write(LOG_TYPE_IRCD, "Received ERROR message from %s: %s",
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Received ERROR message from %s: %s",
             client_get_name(source, SHOW_IP), message);
 
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE, "ERROR :from %s -- %s",
@@ -77,7 +77,7 @@ static void
 ms_error(struct Client *source, int parc, char *parv[])
 {
   const char *message = string_default(parv[1], "<>");
-  log_write(LOG_TYPE_IRCD, "Received ERROR message from %s: %s",
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Received ERROR message from %s: %s",
             client_get_name(source, SHOW_IP), message);
 
   if (MyConnect(source))

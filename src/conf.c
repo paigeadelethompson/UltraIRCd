@@ -690,7 +690,7 @@ conf_check_client(struct Client *client)
       sendto_clients(UMODE_REJ, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Rejecting client connection from %s: %s",
                      client_get_name(client, SHOW_IP), error);
 
-    log_write(LOG_TYPE_IRCD, "Rejecting client connection from %s: %s",
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_WARN, "Rejecting client connection from %s: %s",
          client_get_name(client, SHOW_IP), error);
     client_exit_fmt(client, "Connection rejected - %s", error);
     return false;
@@ -1018,7 +1018,7 @@ conf_rehash(bool sig)
   {
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "Got signal SIGHUP, reloading configuration file(s)");
-    log_write(LOG_TYPE_IRCD, "Got signal SIGHUP, reloading configuration file(s)");
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "Got signal SIGHUP, reloading configuration file(s)");
   }
 
   restart_resolver();
@@ -1231,7 +1231,7 @@ conf_handle_tls(bool cold)
   {
     if (cold)
     {
-      log_write(LOG_TYPE_IRCD, "Error while initializing TLS");
+      log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Error while initializing TLS");
       exit(EXIT_FAILURE);
     }
     else
@@ -1259,7 +1259,7 @@ conf_read_files(bool cold)
   {
     if (cold)
     {
-      log_write(LOG_TYPE_IRCD, "Unable to read configuration file '%s': %s",
+      log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Unable to read configuration file '%s': %s",
            ConfigGeneral.configfile, strerror(errno));
       exit(EXIT_FAILURE);
     }
@@ -1344,7 +1344,7 @@ yyerror(const char *msg)
   const char *p = stripws(conf_line_text);
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE, "\"%s\", line %u: %s: %s",
                  conf_file_name, conf_line_number, msg, p);
-  log_write(LOG_TYPE_IRCD, "\"%s\", line %u: %s: %s",
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "\"%s\", line %u: %s: %s",
             conf_file_name, conf_line_number, msg, p);
 }
 
@@ -1354,7 +1354,7 @@ conf_error_report(const char *msg)
   const char *p = stripws(conf_line_text);
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE, "\"%s\", line %u: %s: %s",
                  conf_file_name, conf_line_number, msg, p);
-  log_write(LOG_TYPE_IRCD, "\"%s\", line %u: %s: %s",
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "\"%s\", line %u: %s: %s",
             conf_file_name, conf_line_number, msg, p);
 }
 

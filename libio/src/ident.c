@@ -207,7 +207,7 @@ ident_connect_callback(fde_t *F, int error, void *data)
 
   if (send(F->fd, buf, len, 0) != len)
   {
-    log_write(LOG_TYPE_IRCD, "Failed to send Ident query: %s",
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Failed to send Ident query: %s",
               strerror(errno));
     request->callback(request->user_data, NULL);
     ident_delete(request);
@@ -227,7 +227,7 @@ ident_start(const struct io_addr *addr, int socket_fd, IdentCallback callback, v
   int fd = comm_socket(address_get_family(addr), SOCK_STREAM, 0);
   if (fd == -1)
   {
-    log_write(LOG_TYPE_IRCD, "Failed to create Ident socket: %s",
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Failed to create Ident socket: %s",
               strerror(errno));
     request->callback(request->user_data, NULL);
     ident_delete(request);
@@ -244,7 +244,7 @@ ident_start(const struct io_addr *addr, int socket_fd, IdentCallback callback, v
   if (getsockname(socket_fd, (struct sockaddr *)&local_addr, &local_len) ||
       getpeername(socket_fd, (struct sockaddr *)&remote_addr, &remote_len))
   {
-    log_write(LOG_TYPE_IRCD, "getsockname/getpeername failed: %s",
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "getsockname/getpeername failed: %s",
               strerror(errno));
     request->callback(request->user_data, NULL);
     ident_delete(request);

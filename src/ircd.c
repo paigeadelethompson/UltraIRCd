@@ -151,12 +151,6 @@ const char *pidFileName = PPATH;
 static bool printVersion;
 
 /**
- * @var bool generateConfig
- * @brief Flag indicating whether to generate a new configuration file.
- */
-static bool generateConfig;
-
-/**
  * @var const char *generateConfigFile
  * @brief Pointer to the filename for the generated configuration file.
  */
@@ -494,7 +488,7 @@ main(int argc, char *argv[])
 
   if (string_is_empty(ConfigServerInfo.name))
   {
-    log_write(LOG_TYPE_IRCD, "ERROR: No server name specified in serverinfo block.");
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_FATAL, "No server name specified in serverinfo block.");
     exit(EXIT_FAILURE);
   }
 
@@ -503,20 +497,15 @@ main(int argc, char *argv[])
   /* serverinfo {} description must exist.  If not, error out.*/
   if (string_is_empty(ConfigServerInfo.description))
   {
-    log_write(LOG_TYPE_IRCD, "ERROR: No server description specified in serverinfo block.");
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_FATAL, "No server description specified in serverinfo block.");
     exit(EXIT_FAILURE);
   }
 
   strlcpy(me.info, ConfigServerInfo.description, sizeof(me.info));
 
-  if (string_is_empty(ConfigServerInfo.sid))
-  {
-    log_write(LOG_TYPE_IRCD, "Generating server ID");
-    generate_sid();
-    ConfigServerInfo.sid = io_strdup(me.id);
-  }
-  else
-    strlcpy(me.id, ConfigServerInfo.sid, sizeof(me.id));
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "Using fixed server ID");
+  strlcpy(ConfigServerInfo.sid, "10X", sizeof(ConfigServerInfo.sid));
+  strlcpy(me.id, ConfigServerInfo.sid, sizeof(me.id));
 
   init_uid();
 
@@ -551,7 +540,7 @@ main(int argc, char *argv[])
 
   event_addish(&event_save_all_databases, NULL);
 
-  log_write(LOG_TYPE_IRCD, "Server ready. Running version: %s", IRCD_VERSION);
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "Server ready. Running version: %s", IRCD_VERSION);
   io_loop();
 
   return 0;

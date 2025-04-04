@@ -82,7 +82,7 @@ tls_new_credentials(void)
   int ret = gnutls_global_init();
   if (ret != GNUTLS_E_SUCCESS)
   {
-    log_write(LOG_TYPE_IRCD, "ERROR: Could not initialize GnuTLS library -- %s", gnutls_strerror(ret));
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Failed to initialize GnuTLS: %s", gnutls_strerror(ret));
     io_free(context);
     return false;
   }
@@ -90,7 +90,7 @@ tls_new_credentials(void)
   ret = gnutls_certificate_allocate_credentials(&context->x509_cred);
   if (ret != GNUTLS_E_SUCCESS)
   {
-    log_write(LOG_TYPE_IRCD, "ERROR: Could not initialize the TLS credentials -- %s", gnutls_strerror(ret));
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Failed to initialize TLS credentials: %s", gnutls_strerror(ret));
     io_free(context);
     return false;
   }
@@ -102,10 +102,7 @@ tls_new_credentials(void)
   ret = gnutls_certificate_set_x509_key_file(context->x509_cred, ConfigServerInfo.tls_certificate_file, ConfigServerInfo.rsa_private_key_file, GNUTLS_X509_FMT_PEM);
   if (ret != GNUTLS_E_SUCCESS)
   {
-    log_write(LOG_TYPE_IRCD, "Could not set TLS keys -- %s", gnutls_strerror(ret));
-
-    gnutls_certificate_free_credentials(context->x509_cred);
-    gnutls_priority_deinit(context->priorities);
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Failed to set TLS keys: %s", gnutls_strerror(ret));
     io_free(context);
     return false;
   }
@@ -113,7 +110,7 @@ tls_new_credentials(void)
   ret = gnutls_dh_params_init(&context->dh_params);
   if (ret != GNUTLS_E_SUCCESS)
   {
-    log_write(LOG_TYPE_IRCD, "ERROR: Could not initialize the DH parameters -- %s", gnutls_strerror(ret));
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Failed to initialize DH parameters: %s", gnutls_strerror(ret));
     io_free(context);
     return false;
   }

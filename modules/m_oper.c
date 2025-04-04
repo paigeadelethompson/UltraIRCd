@@ -68,7 +68,7 @@ oper_up(struct Client *client, const struct MaskItem *conf)
                    me.id, client->id, client->tsinfo, RPL_WHOISOPERATOR, conf->whois);
   }
 
-  log_write(LOG_TYPE_OPER, "OPER %s by %s",
+  log_write(LOG_TYPE_OPER, LOG_SEVERITY_INFO, "OPER %s by %s",
             conf->name, client_get_name(client, HIDE_IP));
 
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "%s is now an operator",
@@ -95,7 +95,7 @@ failed_oper_notice(struct Client *source, enum irc_numerics numeric,
                    "Failed OPER attempt as %s by %s - %s",
                    name, client_get_name(source, HIDE_IP), reason);
 
-  log_write(LOG_TYPE_OPER, "Failed OPER attempt as %s by %s - %s",
+  log_write(LOG_TYPE_OPER, LOG_SEVERITY_WARN, "Failed OPER attempt as %s by %s - %s",
             name, client_get_name(source, HIDE_IP), reason);
 }
 
