@@ -1,4 +1,11 @@
 cmake_minimum_required(VERSION 3.14)
+
+# Include Conan-generated files
+include(${CMAKE_BINARY_DIR}/conan_toolchain.cmake OPTIONAL RESULT_VARIABLE CONAN_TOOLCHAIN)
+if(NOT CONAN_TOOLCHAIN)
+    message(WARNING "The file conan_toolchain.cmake was not found. Make sure to run 'conan install' first.")
+endif()
+
 project(ircd-hybrid VERSION 8.2.47 LANGUAGES C)
 
 # Set C standard
@@ -64,7 +71,7 @@ add_definitions(-DAX_IOPOLL_MECHANISM_POLL=${AX_IOPOLL_MECHANISM_POLL})
 # Find required packages
 find_package(OpenSSL REQUIRED)
 if(WITH_JANSSON)
-  find_package(Jansson)
+  find_package(Jansson REQUIRED)
   if(NOT JANSSON_FOUND)
     message(WARNING "Jansson library not found. Some features may be disabled.")
   endif()
