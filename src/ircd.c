@@ -92,8 +92,8 @@ struct Counter Count;
  * @brief Structure representing the server's foreground state.
  *
  * The `ServerState_t` structure holds a flag indicating whether the server should
- * run in the foreground. The flag is set based on the command line parameter
- * '-foreground' when launching the ircd process.
+ * run in the background. The flag is set based on the command line parameter
+ * '-fork' when launching the ircd process.
  */
 struct ServerState_t server_state;
 
@@ -151,6 +151,18 @@ const char *pidFileName = PPATH;
 static bool printVersion;
 
 /**
+ * @var bool generateConfig
+ * @brief Flag indicating whether to generate a new configuration file.
+ */
+static bool generateConfig;
+
+/**
+ * @var const char *generateConfigFile
+ * @brief Pointer to the filename for the generated configuration file.
+ */
+static const char *generateConfigFile;
+
+/**
  * @var struct io_getopt myopts[]
  * @brief Array of command-line options and their descriptions.
  */
@@ -163,8 +175,9 @@ static struct io_getopt myopts[] =
   { "resvfile", 'r', &ConfigGeneral.resvfile, STRING, "File to use for resv database" },
   { "logfile", 'l', &logFileName, STRING, "File to use for ircd.log" },
   { "pidfile", 'p', &pidFileName, STRING, "File to use for process ID" },
-  { "foreground", 'f', &server_state.foreground, BOOLEAN, "Run in foreground (don't detach)" },
+  { "fork", 'f', &server_state.foreground, BOOLEAN, "Run in background (fork)" },
   { "version", 'v', &printVersion, BOOLEAN, "Print version and exit" },
+  { "generate-config", 'g', &generateConfigFile, OPTIONAL_STRING, "Generate a new configuration file and write to specified path (or stdout if no path given)" },
   { "help", 'h', NULL, USAGE, "Print this text" },
   { NULL, 0, NULL, STRING, NULL }
 };
@@ -302,10 +315,16 @@ ircd_time_failure(enum io_time_error_code error_code, const char *message)
 static void
 print_startup(int pid)
 {
-  printf("ircd: version %s\n", IRCD_VERSION);
-  printf("ircd: pid %d\n", pid);
-  printf("ircd: running in %s mode from %s\n",
-         server_state.foreground ? "foreground": "background", ConfigGeneral.dpath);
+  char cwd[PATH_MAX];
+  
+  if (getcwd(cwd, sizeof(cwd)) == NULL) {
+    strlcpy(cwd, "unknown", sizeof(cwd));
+  }
+  
+  fprintf(stderr, "ircd: version %s\n", IRCD_VERSION);
+  fprintf(stderr, "ircd: pid %d\n", pid);
+  fprintf(stderr, "ircd: running in %s mode from %s\n",
+         server_state.foreground ? "background": "foreground", cwd);
 }
 
 /**
@@ -374,6 +393,13 @@ main(int argc, char *argv[])
     return -1;
   }
 
+  /* Handle the -g option without an argument */
+  if (argc > 1 && strcmp(argv[1], "-g") == 0)
+  {
+    conf_generate_default(NULL);
+    exit(EXIT_SUCCESS);
+  }
+
   io_set_oom_handler(ircd_oom);
 
   io_rlimit_set_max_core();
@@ -421,6 +447,13 @@ main(int argc, char *argv[])
     exit(EXIT_SUCCESS);
   }
 
+  /* Handle the -g option with an argument */
+  if (generateConfigFile != NULL)
+  {
+    conf_generate_default(generateConfigFile);
+    exit(EXIT_SUCCESS);
+  }
+
   if (chdir(ConfigGeneral.dpath))
   {
     perror("chdir");
@@ -428,9 +461,9 @@ main(int argc, char *argv[])
   }
 
   if (server_state.foreground)
-    print_startup(getpid());
-  else
     make_daemon();
+  else
+    print_startup(getpid());
 
   ircd_signal_init();
 

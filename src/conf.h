@@ -330,4 +330,7 @@ extern struct MaskItem *find_conf_name(list_t *, const char *, enum maskitem_typ
 extern struct MaskItem *find_dline_conf(const struct io_addr *);
 extern struct MaskItem *operator_find(const struct Client *, const char *);
 extern const char *get_oper_name(const struct Client *);
+extern void conf_read_files(bool cold);
+extern void conf_rehash(bool cold);
+extern bool conf_generate_default(const char *filename);
 #endif  /* INCLUDED_conf_h */

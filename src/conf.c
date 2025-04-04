@@ -254,7 +254,7 @@ find_dline_conf(const struct io_addr *addr)
 /* void add_conf_by_address(int, struct MaskItem *aconf)
  * Input:
  * Output: None
- * Side-effects: Adds this entry to the hash table.
+ * Side effects: Adds this entry to the hash table.
  */
 struct AddressRec *
 add_conf_by_address(const unsigned int type, struct MaskItem *conf)
@@ -1378,4 +1378,184 @@ conf_match_password(const char *password, const struct MaskItem *conf)
     encr = password;
 
   return encr && strcmp(encr, conf->passwd) == 0;
+}
+
+/**
+ * @brief Generates a default configuration file and writes it to the specified path.
+ *
+ * This function creates a default configuration file with common settings
+ * and writes it to the specified path. It includes basic server information,
+ * operator settings, and other essential configuration blocks.
+ *
+ * @param filename The path where the configuration file should be written.
+ *                 If NULL, the configuration will be printed to stdout.
+ * @return Returns true if the file was successfully generated, false otherwise.
+ */
+bool
+conf_generate_default(const char *filename)
+{
+  /* Server information block */
+  printf("serverinfo {\n");
+  printf("  name = \"irc.example.com\";\n");
+  printf("  sid = \"001\";\n");
+  printf("  description = \"Example IRC Server\";\n");
+  printf("  network_name = \"Example Network\";\n");
+  printf("  network_description = \"Example IRC Network\";\n");
+  printf("  default_max_clients = 100;\n");
+  printf("  max_nick_length = 32;\n");
+  printf("  max_topic_length = 307;\n");
+  printf("  hub = no;\n");
+  printf("};\n\n");
+
+  /* Admin block */
+  printf("admin {\n");
+  printf("  name = \"Example Admin\";\n");
+  printf("  email = \"admin@example.com\";\n");
+  printf("  description = \"Example IRC Network Administrator\";\n");
+  printf("};\n\n");
+
+  /* General settings block */
+  printf("general {\n");
+  printf("  away_count = 3;\n");
+  printf("  away_time = 300;\n");
+  printf("  failed_oper_notice = yes;\n");
+  printf("  anti_nick_flood = yes;\n");
+  printf("  max_nick_time = 300;\n");
+  printf("  max_nick_changes = 5;\n");
+  printf("  max_accept = 20;\n");
+  printf("  whowas_history_length = 10000;\n");
+  printf("  anti_spam_exit_message_time = 60;\n");
+  printf("  ts_warn_delta = 30;\n");
+  printf("  ts_max_delta = 90;\n");
+  printf("  invisible_on_connect = no;\n");
+  printf("  warn_no_connect_block = yes;\n");
+  printf("  stats_i_oper_only = yes;\n");
+  printf("  stats_k_oper_only = yes;\n");
+  printf("  stats_m_oper_only = yes;\n");
+  printf("  stats_o_oper_only = yes;\n");
+  printf("  stats_P_oper_only = yes;\n");
+  printf("  stats_u_oper_only = yes;\n");
+  printf("  pace_wait = 1;\n");
+  printf("  pace_wait_simple = 1;\n");
+  printf("  short_motd = no;\n");
+  printf("  no_oper_flood = yes;\n");
+  printf("  specials_in_ident = 0;\n");
+  printf("  max_targets = 20;\n");
+  printf("  max_away_length = 160;\n");
+  printf("  oper_umodes = \"rw\";\n");
+  printf("  caller_id_wait = 60;\n");
+  printf("  opers_bypass_callerid = yes;\n");
+  printf("  default_floodcount = 10;\n");
+  printf("  default_floodtime = 1;\n");
+  printf("  min_nonwildcard = 4;\n");
+  printf("  min_nonwildcard_simple = 4;\n");
+  printf("  throttle_count = 10;\n");
+  printf("  throttle_time = 60;\n");
+  printf("  ping_cookie = yes;\n");
+  printf("  disable_auth = no;\n");
+  printf("  disable_dns = no;\n");
+  printf("  dline_min_cidr = 32;\n");
+  printf("  dline_min_cidr6 = 128;\n");
+  printf("  kline_min_cidr = 32;\n");
+  printf("  kline_min_cidr6 = 128;\n");
+  printf("  kill_chase_time_limit = 10;\n");
+  printf("  max_monitor = 100;\n");
+  printf("  cycle_on_host_change = yes;\n");
+  printf("  cloak_enabled = yes;\n");
+  printf("  cloak_cidr_len_ipv4 = 24;\n");
+  printf("  cloak_cidr_len_ipv6 = 64;\n");
+  printf("  cloak_num_bits = 64;\n");
+  printf("  cloak_secret = \"changeme\";\n");
+  printf("  cloak_suffix = \".ip\";\n");
+  printf("  ident_timeout = 10;\n");
+  printf("};\n\n");
+
+  /* Channel settings block */
+  printf("channel {\n");
+  printf("  max_bans = 100;\n");
+  printf("  max_bans_large = 1000;\n");
+  printf("  invite_client_count = 20;\n");
+  printf("  invite_client_time = 60;\n");
+  printf("  invite_delay_channel = 60;\n");
+  printf("  invite_expire_time = 3600;\n");
+  printf("  knock_client_count = 3;\n");
+  printf("  knock_client_time = 60;\n");
+  printf("  knock_delay_channel = 60;\n");
+  printf("  max_channels = 20;\n");
+  printf("  max_invites = 100;\n");
+  printf("  max_kick_length = 160;\n");
+  printf("  default_join_flood_count = 10;\n");
+  printf("  default_join_flood_time = 60;\n");
+  printf("  disable_fake_channels = no;\n");
+  printf("  enable_extbans = yes;\n");
+  printf("  enable_owner = yes;\n");
+  printf("  enable_admin = yes;\n");
+  printf("};\n\n");
+
+  /* Class settings block */
+  printf("class {\n");
+  printf("  name = \"users\";\n");
+  printf("  ping_time = 90;\n");
+  printf("  connectfreq = 300;\n");
+  printf("  max_number = 100;\n");
+  printf("  sendq = 1000000;\n");
+  printf("  recvq = 1000000;\n");
+  printf("  cidr_bitlen_ipv4 = 32;\n");
+  printf("  cidr_bitlen_ipv6 = 128;\n");
+  printf("};\n\n");
+
+  /* Operator block */
+  printf("operator {\n");
+  printf("  name = \"admin\";\n");
+  printf("  user = \"*@*\";\n");
+  printf("  password = \"changeme\";\n");
+  printf("  flags = \"ovh\";\n");
+  printf("};\n\n");
+
+  /* Listener block */
+  printf("listen {\n");
+  printf("  port = 6667;\n");
+  printf("  address = \"0.0.0.0\";\n");
+  printf("};\n\n");
+
+  /* Log settings block */
+  printf("logging {\n");
+  printf("  fname_userlog = \"/var/log/ircd-hybrid/userlog\";\n");
+  printf("  fname_fuserlog = \"/var/log/ircd-hybrid/fuserlog\";\n");
+  printf("  fname_operlog = \"/var/log/ircd-hybrid/operlog\";\n");
+  printf("  fname_serverlog = \"/var/log/ircd-hybrid/serverlog\";\n");
+  printf("  fname_glinet = \"/var/log/ircd-hybrid/glinet\";\n");
+  printf("  fname_kill = \"/var/log/ircd-hybrid/kill\";\n");
+  printf("  fname_kline = \"/var/log/ircd-hybrid/kline\";\n");
+  printf("  fname_xline = \"/var/log/ircd-hybrid/xline\";\n");
+  printf("  fname_trace = \"/var/log/ircd-hybrid/trace\";\n");
+  printf("  fname_ircd = \"/var/log/ircd-hybrid/ircd\";\n");
+  printf("};\n\n");
+
+  /* MOTD block */
+  printf("motd {\n");
+  printf("  file = \"/etc/ircd-hybrid/motd\";\n");
+  printf("};\n\n");
+
+  /* Serverhide block */
+  printf("serverhide {\n");
+  printf("  flatten_links = yes;\n");
+  printf("  flatten_links_delay = 300;\n");
+  printf("  flatten_links_file = \"/var/lib/ircd-hybrid/flatten_links.dat\";\n");
+  printf("  disable_remote_commands = no;\n");
+  printf("  hide_servers = no;\n");
+  printf("  hide_services = no;\n");
+  printf("  hidden = no;\n");
+  printf("  hidden_name = \"hidden\";\n");
+  printf("  hide_server_ips = yes;\n");
+  printf("};\n\n");
+
+  /* Module path and loading */
+  printf("module {\n");
+  printf("  path = \"/usr/lib/ircd-hybrid/modules\";\n");
+  printf("  load = \"m_*.so\";\n");
+  printf("  load = \"umode_*.so\";\n");
+  printf("};\n\n");
+
+  return true;
 }

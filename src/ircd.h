@@ -116,12 +116,12 @@ struct Counter
  * @struct ServerState_t
  * @brief Structure representing the server's foreground state.
  *
- * This structure holds a flag indicating whether the server should run in the foreground.
- * The flag is set based on the command line parameter '-foreground' when launching the ircd process.
+ * This structure holds a flag indicating whether the server should run in the background.
+ * The flag is set based on the command line parameter '-fork' when launching the ircd process.
  */
 struct ServerState_t
 {
-  bool foreground;  /**< Flag indicating whether the server should run in the foreground. */
+  bool foreground;  /**< Flag indicating whether the server should run in the background. */
 };
 
 /**

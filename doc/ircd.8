@@ -7,7 +7,7 @@ ircd \- ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon
 .IP \fBircd\fP
 [-configfile filename] [-klinefile filename] [-dlinefile filename]
 [-xlinefile filename] [-resvfile filename] [-logfile filename] [-pidfile filename]
-[-foreground] [-version] [-help]
+[-fork] [-version] [-help]
 .SH DESCRIPTION
 .LP
 \fIircd\fP is the server (daemon) program for the Internet Relay Chat
@@ -44,8 +44,8 @@ Specifies an alternative logfile to be used than that specified in include/defau
 Specifies the file used by the \fIircd\fP to store its process ID. The option is
 used to override the default ircd.pid given at compile time.
 .TP
-.B \-foreground
-Makes \fIircd\fP run in the foreground.
+.B \-fork
+Makes \fIircd\fP run in the background (fork).
 .TP
 .B \-version
 Makes \fIircd\fP print its version and exit.
@@ -65,9 +65,8 @@ carefully or you may expose a risk on your network simply by having your
 .LP
 .SH BOOTING THE SERVER
 It is sufficient to type \fIircd\fP at the command line to start
-\fIircd-hybrid\fP into the background. If you wish to run \fIircd\fP in the
-foreground (perhaps for debugging purposes), use the \fB-foreground\fP
-parameter.
+\fIircd-hybrid\fP in the foreground. If you wish to run \fIircd\fP in the
+background, use the \fB-fork\fP parameter.
 
 The \fIircd-hybrid\fP package in your distribution may ship with an rc-script
 which handles this for you. In Debian, it is \fB/etc/init.d/ircd-hybrid\fP.
@@ -75,8 +74,8 @@ which handles this for you. In Debian, it is \fB/etc/init.d/ircd-hybrid\fP.
 # ircd -configfile /usr/share/ircd/ircd.conf -logfile /var/log/ircd.log
 
 Starts \fIircd\fP with the config file /usr/share/ircd/ircd.conf and
-with a log file /var/log/ircd.log. It implicitly forks back to the
-console -- to prevent this, use \fB-foreground\fP.
+with a log file /var/log/ircd.log. It runs in the foreground by default.
+To run in the background, use \fB-fork\fP.
 
 Many of the above paths are hard-coded at compile time in the
 \fBinclude/defaults.h\fP file, so it may be convenient to edit these to

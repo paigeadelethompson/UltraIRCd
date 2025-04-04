@@ -109,6 +109,18 @@ handle_option(int *argc, char ***argv, struct io_getopt *opts, unsigned int inde
       (*argc)--;
       (*argv)++;
       break;
+    case OPTIONAL_STRING:
+      if (*argc >= 2 && (*argv)[1][0] != '-')
+      {
+        *((char **)opts[index].argloc) = io_strdup((*argv)[1]);
+        (*argc)--;
+        (*argv)++;
+      }
+      else
+      {
+        *((char **)opts[index].argloc) = NULL;
+      }
+      break;
     case USAGE:
       /* Print usage information and exit. */
       io_getopt_usage(progname, opts);

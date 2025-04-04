@@ -31,6 +31,19 @@
 #define INCLUDED_io_getopt_h
 
 /**
+ * @enum io_getopt_argtype
+ * @brief Enumeration of argument types for command-line options.
+ */
+enum io_getopt_argtype
+{
+  BOOLEAN,        /**< Boolean option (no argument required). */
+  INTEGER,        /**< Integer option (argument required). */
+  STRING,         /**< String option (argument required). */
+  USAGE,          /**< Usage option (prints usage information and exits). */
+  OPTIONAL_STRING /**< Optional string option (argument not required). */
+};
+
+/**
  * @struct io_getopt
  * @brief Structure representing a command-line option.
  *
@@ -43,7 +56,7 @@ struct io_getopt
   const char *opt;  /**< Long option name. */
   char short_opt;  /**< Short option name (single letter). */
   void *argloc;  /**< Location to store the argument. */
-  enum { INTEGER, BOOLEAN, STRING, USAGE } argtype;  /**< Type of the argument. */
+  enum io_getopt_argtype argtype;  /**< Type of the argument. */
   const char *desc;  /**< Description of the argument, usage for printing help. */
 };
 
