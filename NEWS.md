@@ -1,4 +1,4 @@
-#### Noteworthy changes in version 8.2.47 (2025-??-??)
+#### Noteworthy changes in version 8.2.47 (2025-04-04)
 * The `general::max_away_length` configuration directive has been added, allowing
   servers to specify the maximum length of a `AWAY` message that the server will
   accept from a client.
@@ -20,8 +20,8 @@
 * The `WALLOPS` command has been removed
 * The `serverinfo::motd_file` configuration directive has been added, allowing the
   Message of the Day (MOTD) file path to be customized instead of hardcoded
-* The `channel::max_kick_length` configuration directive has been added, allowing 
-  servers to specify the maximum length of a `KICK` message that the server will 
+* The `channel::max_kick_length` configuration directive has been added, allowing
+  servers to specify the maximum length of a `KICK` message that the server will
   accept from a client.
 
 
