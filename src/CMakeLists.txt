@@ -42,8 +42,6 @@ set(IRCD_SOURCES
     conf_service.h
     conf_shared.c
     conf_shared.h
-    conf_parser.c
-    conf_lexer.c
     defaults.h
     extban.c
     extban.h
@@ -115,6 +113,44 @@ set(IRCD_SOURCES
 
 # Create executable
 add_executable(ircd ${IRCD_SOURCES})
+
+# Generate parser files using custom commands
+add_custom_command(
+    OUTPUT 
+        ${CMAKE_CURRENT_BINARY_DIR}/conf_parser.c
+        ${CMAKE_CURRENT_BINARY_DIR}/conf_parser.h
+    COMMAND ${BISON_EXECUTABLE} -d -o ${CMAKE_CURRENT_BINARY_DIR}/conf_parser.c ${CMAKE_CURRENT_SOURCE_DIR}/conf_parser.y
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/conf_parser.y
+    COMMENT "Generating conf_parser.c and conf_parser.h from conf_parser.y"
+)
+
+# Generate lexer files using custom commands
+add_custom_command(
+    OUTPUT 
+        ${CMAKE_CURRENT_BINARY_DIR}/conf_lexer.c
+    COMMAND ${FLEX_EXECUTABLE} -o ${CMAKE_CURRENT_BINARY_DIR}/conf_lexer.c ${CMAKE_CURRENT_SOURCE_DIR}/conf_lexer.l
+    DEPENDS 
+        ${CMAKE_CURRENT_SOURCE_DIR}/conf_lexer.l
+        ${CMAKE_CURRENT_BINARY_DIR}/conf_parser.h
+    COMMENT "Generating conf_lexer.c from conf_lexer.l"
+)
+
+# Create a custom target for the generated files
+add_custom_target(parser_files
+    DEPENDS 
+        ${CMAKE_CURRENT_BINARY_DIR}/conf_parser.c
+        ${CMAKE_CURRENT_BINARY_DIR}/conf_parser.h
+        ${CMAKE_CURRENT_BINARY_DIR}/conf_lexer.c
+)
+
+# Add the generated files to the ircd target
+target_sources(ircd PRIVATE
+    ${CMAKE_CURRENT_BINARY_DIR}/conf_parser.c
+    ${CMAKE_CURRENT_BINARY_DIR}/conf_lexer.c
+)
+
+# Add dependency on parser generation
+add_dependencies(ircd parser_files)
 
 # Include directories
 target_include_directories(ircd PRIVATE
