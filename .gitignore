@@ -14,7 +14,7 @@ config.status.lineno
 configure.lineno
 libtool
 stamp-h*
-
+build/
 # C object files
 *.o
 

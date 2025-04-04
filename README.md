@@ -20,3 +20,58 @@ In case you need help or just want to delve deeper, you can join us on irc - #ir
 
 ## License
 ircd-hybrid is licensed under the **GNU General Public License v2.0**. A complete version of the license is available in the [COPYING.md](COPYING.md) file in this repository.
+
+## Building with CMake
+
+ircd-hybrid now uses CMake as its build system. Here's how to build it:
+
+### Prerequisites
+
+- CMake 3.14 or higher
+- C compiler (GCC, Clang, etc.)
+- OpenSSL development libraries
+- Jansson library (optional, but recommended)
+
+### Building
+
+1. Create a build directory:
+   ```bash
+   mkdir build
+   cd build
+   ```
+
+2. Configure the project:
+   ```bash
+   cmake ..
+   ```
+
+   You can customize the build with various options:
+   ```bash
+   cmake -DENABLE_DEBUGGING=ON -DWITH_JANSSON=OFF ..
+   ```
+
+3. Build the project:
+   ```bash
+   cmake --build .
+   ```
+
+4. Install:
+   ```bash
+   sudo cmake --install .
+   ```
+
+### CMake Options
+
+- `ENABLE_ASSERT`: Enable assertions (default: OFF)
+- `ENABLE_DEBUGGING`: Enable debugging (default: OFF)
+- `ENABLE_WARNINGS`: Enable warnings (default: ON)
+- `ENABLE_EFENCE`: Enable Electric Fence (default: OFF)
+- `WITH_TLS`: Enable TLS support (default: ON)
+- `WITH_JANSSON`: Enable Jansson support (default: ON)
+
+## Documentation
+
+For more information, see the following files:
+- `INSTALL.md`: Installation instructions
+- `doc/`: Documentation directory
+- `help/`: Help text files
