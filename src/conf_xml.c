@@ -24,8 +24,8 @@
  */
 
 #include "stdinc.h"
+#include "conf_schema.h"  /* Must come first for schema data */
 #include "conf_xml.h"
-#include "conf_schema.h"
 #include "conf.h"
 #include "log.h"
 #include "memory.h"
@@ -54,20 +54,22 @@
 #include "list.h"
 #include "ircd_defs.h"
 #include "conf_db.h"
+#include "motd.h"
+
+/* The xxd-generated schema data */
+extern const unsigned char etc_ircd_xsd[];
+extern const unsigned int etc_ircd_xsd_len;
 
 /* Forward declarations */
 static void conf_clear(void);
 static void conf_set_defaults(void);
 static void conf_validate(void);
+static void delete_conf_item(struct MaskItem *);
+static void delete_address_conf(struct AddressRec *);
 
 /* Global variables */
 static xmlSchemaPtr schema = NULL;
 static xmlSchemaValidCtxtPtr schema_valid_ctx = NULL;
-
-/* The xxd-generated variables will be named like:
- * unsigned char etc_ircd_xsd[];
- * unsigned int etc_ircd_xsd_len;
- */
 
 /* Helper functions */
 static void
@@ -503,7 +505,7 @@ parse_oper(xmlNodePtr node)
   struct MaskItem *conf = conf_make(CONF_OPER);
   conf->name = io_strdup((const char *)name);
 
-  struct split_nuh_item nuh;
+  struct nuh_split nuh;  /* Use correct struct name */
   nuh.nuhmask = (const char *)user;
   nuh.nickptr = NULL;
   nuh.userptr = conf->user;
@@ -530,11 +532,11 @@ parse_oper(xmlNodePtr node)
         ++flag;
 
       if (strcmp(flag, "admin") == 0)
-        conf->modes |= UMODE_ADMIN;
+        conf->port |= UMODE_ADMIN;  /* Use port field for modes */
       else if (strcmp(flag, "oper") == 0)
-        conf->modes |= UMODE_OPER;
+        conf->port |= UMODE_OPER;
       else if (strcmp(flag, "locop") == 0)
-        conf->modes |= UMODE_LOCOPS;
+        conf->port |= UMODE_LOCOPS;
 
       flag = strtok(NULL, ",");
     }
@@ -621,16 +623,14 @@ parse_auth(xmlNodePtr node)
     return;
 
   struct MaskItem *conf = conf_make(CONF_CLIENT);
-  struct nuh_split nuh =
-  {
-    .nuhmask = (const char *)user,
-    .nickptr = NULL,
-    .userptr = conf->user,
-    .hostptr = conf->host,
-    .nicksize = 0,
-    .usersize = sizeof(conf->user),
-    .hostsize = sizeof(conf->host)
-  };
+  struct nuh_split nuh = { 0 };  /* Use correct struct name */
+  nuh.nuhmask = (const char *)user;
+  nuh.nickptr = NULL;
+  nuh.userptr = conf->user;
+  nuh.hostptr = conf->host;
+  nuh.nicksize = 0;
+  nuh.usersize = sizeof(conf->user);
+  nuh.hostsize = sizeof(conf->host);
 
   nuh_split(&nuh);
 
@@ -866,7 +866,7 @@ parse_shared(xmlNodePtr node)
   struct SharedItem *shared = shared_make();
   shared->server = io_strdup((const char *)name);
 
-  struct split_nuh_item nuh;
+  struct nuh_split nuh = { 0 };  /* Use correct struct name */
   nuh.nuhmask = (const char *)user;
   nuh.nickptr = NULL;
   nuh.userptr = shared->user;
@@ -958,16 +958,14 @@ parse_kill(xmlNodePtr node)
     return;
 
   struct MaskItem *conf = conf_make(CONF_KLINE);
-  struct nuh_split nuh =
-  {
-    .nuhmask = (const char *)user,
-    .nickptr = NULL,
-    .userptr = conf->user,
-    .hostptr = conf->host,
-    .nicksize = 0,
-    .usersize = sizeof(conf->user),
-    .hostsize = sizeof(conf->host)
-  };
+  struct nuh_split nuh = { 0 };  /* Use correct struct name */
+  nuh.nuhmask = (const char *)user;
+  nuh.nickptr = NULL;
+  nuh.userptr = conf->user;
+  nuh.hostptr = conf->host;
+  nuh.nicksize = 0;
+  nuh.usersize = sizeof(conf->user);
+  nuh.hostsize = sizeof(conf->host);
 
   nuh_split(&nuh);
 
@@ -1225,4 +1223,107 @@ conf_xml_error_str(int error_code)
     default:
       return "Unknown error";
   }
+}
+
+/* Forward declarations */
+static void conf_clear(void)
+{
+  /* Clear all configuration items */
+  class_mark_for_deletion();
+  motd_clear();
+
+  /* Free and clear lists */
+  while (connect_items.head)
+  {
+    struct MaskItem *conf = connect_items.head->data;
+    delete_conf_item(conf);
+  }
+
+  while (operator_items.head)
+  {
+    struct MaskItem *conf = operator_items.head->data;
+    delete_conf_item(conf);
+  }
+
+  /* Clear address hash table */
+  for (int i = 0; i < ADDRESS_HASHSIZE; ++i)
+  {
+    while (atable[i].head)
+    {
+      struct AddressRec *arec = atable[i].head->data;
+      delete_address_conf(arec);
+    }
+  }
+}
+
+static void conf_set_defaults(void)
+{
+  /* Set default values for configuration */
+  ConfigServerInfo.name = NULL;
+  ConfigServerInfo.sid = NULL;
+  ConfigServerInfo.description = NULL;
+  ConfigServerInfo.network_name = NULL;
+  ConfigServerInfo.network_description = NULL;
+  ConfigServerInfo.default_max_clients = MAXCLIENTS_MAX;
+  ConfigServerInfo.max_nick_length = NICKLEN;
+  ConfigServerInfo.max_topic_length = TOPICLEN;
+  ConfigServerInfo.hub = false;
+
+  ConfigChannel.max_bans = 25;
+  ConfigChannel.max_bans_large = 500;
+  ConfigChannel.max_channels = 15;
+  ConfigChannel.max_invites = 20;
+  ConfigChannel.max_kick_length = 120;
+  ConfigChannel.invite_client_count = 10;
+  ConfigChannel.invite_client_time = 300;
+  ConfigChannel.invite_delay_channel = 5;
+  ConfigChannel.invite_expire_time = 1800;
+  ConfigChannel.knock_client_count = 1;
+  ConfigChannel.knock_client_time = 300;
+  ConfigChannel.knock_delay_channel = 60;
+  ConfigChannel.default_join_flood_count = 18;
+  ConfigChannel.default_join_flood_time = 6;
+  ConfigChannel.disable_fake_channels = false;
+  ConfigChannel.enable_extbans = true;
+  ConfigChannel.enable_owner = false;
+  ConfigChannel.enable_admin = false;
+
+  ConfigServerHide.flatten_links = false;
+  ConfigServerHide.flatten_links_delay = 300;
+  ConfigServerHide.flatten_links_file = NULL;
+  ConfigServerHide.disable_remote_commands = false;
+  ConfigServerHide.hide_servers = false;
+  ConfigServerHide.hide_services = false;
+  ConfigServerHide.hidden = false;
+  ConfigServerHide.hidden_name = NULL;
+  ConfigServerHide.hide_server_ips = false;
+}
+
+static void conf_validate(void)
+{
+  /* Validate configuration values */
+  if (!ConfigServerInfo.name)
+    ConfigServerInfo.name = io_strdup("hybrid8.local");
+
+  if (!ConfigServerInfo.sid)
+    ConfigServerInfo.sid = io_strdup("1AA");
+
+  if (!ConfigServerInfo.description)
+    ConfigServerInfo.description = io_strdup("ircd-hybrid");
+
+  if (!ConfigServerInfo.network_name)
+    ConfigServerInfo.network_name = io_strdup("HybridNet");
+
+  if (!ConfigServerInfo.network_description)
+    ConfigServerInfo.network_description = io_strdup("Hybrid IRC Network");
+
+  if (ConfigServerInfo.max_nick_length < 9)
+    ConfigServerInfo.max_nick_length = 9;
+  else if (ConfigServerInfo.max_nick_length > NICKLEN)
+    ConfigServerInfo.max_nick_length = NICKLEN;
+
+  if (ConfigServerInfo.max_topic_length < 1)
+    ConfigServerInfo.max_topic_length = 1;
+  else if (ConfigServerInfo.max_topic_length > TOPICLEN)
+    ConfigServerInfo.max_topic_length = TOPICLEN;
 } 
