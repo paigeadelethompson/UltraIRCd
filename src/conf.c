@@ -46,11 +46,11 @@
 #include "conf_cluster.h"
 #include "conf_db.h"
 #include "conf_gecos.h"
-#include "conf_parser.h"
 #include "conf_pseudo.h"
 #include "conf_resv.h"
 #include "conf_service.h"
 #include "conf_shared.h"
+#include "conf_xml.h"
 #include "client.h"
 #include "ipcache.h"
 #include "ircd.h"
@@ -62,6 +62,13 @@
 #include "server.h"
 #include "user.h"
 #include "whowas.h"
+
+/* Forward declarations */
+static void conf_set_defaults(void);
+static void conf_validate(void);
+static void conf_clear(void);
+static void conf_read_files_recurse(const char *filename);
+static void conf_read(FILE *file);
 
 /* Hashtable stuff...now external as it's used in m_stats.c */
 list_t atable[ADDRESS_HASHSIZE];
@@ -987,22 +994,30 @@ conf_validate(void)
 static void
 conf_read(FILE *file)
 {
-  conf_line_number = 1;
+  char line[IRCD_BUFSIZE];
+  char *p = NULL;
 
-  conf_set_defaults();  /* Set default values prior to conf parsing */
+  while (fgets(line, sizeof(line), file))
+  {
+    if ((p = strpbrk(line, "\n")))
+      *p = '\0';
 
-  conf_parser_ctx.pass = 1;
-  yyparse();  /* Pick up the classes first */
+    if (line[0] == '\0' || line[0] == '#' || line[0] == '/')
+      continue;
 
-  rewind(file);
+    if (strncmp(line, ".include", 8) == 0)
+    {
+      char *filename = line + 8;
+      while (isspace(*filename))
+        ++filename;
 
-  conf_parser_ctx.pass = 2;
-  yyparse();  /* Load the values from the conf */
+      conf_read_files_recurse(filename);
+      continue;
+    }
 
-  conf_validate();  /* Check to make sure some values are still okay. */
-                    /* Some global values are also loaded here. */
-  whowas_trim();  /* Attempt to trim whowas list if necessary */
-  class_delete_marked();  /* Delete unused classes that are marked for deletion */
+    /* Pass line to XML parser with cold=false since we're reading a file */
+    conf_xml_parse(line, false);
+  }
 }
 
 /* conf_rehash()
@@ -1017,17 +1032,11 @@ conf_rehash(bool sig)
   if (sig)
   {
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                   "Got signal SIGHUP, reloading configuration file(s)");
-    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "Got signal SIGHUP, reloading configuration file(s)");
+                  "Got signal SIGHUP, reloading configuration");
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "Got signal SIGHUP, reloading configuration");
   }
 
-  restart_resolver();
-
   conf_read_files(false);
-
-  module_load_all(NULL);
-
-  check_conf_klines();
 }
 
 /* conf_connect_allowed()
@@ -1336,24 +1345,15 @@ conf_assign_class(struct MaskItem *conf, const char *name)
 void
 yyerror(const char *msg)
 {
-  if (conf_parser_ctx.pass != 1)
-    return;
-
-  const char *p = stripws(conf_line_text);
-  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE, "\"%s\", line %u: %s: %s",
-                 conf_file_name, conf_line_number, msg, p);
-  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "\"%s\", line %u: %s: %s",
-            conf_file_name, conf_line_number, msg, p);
+  conf_error_report(msg);
 }
 
 void
 conf_error_report(const char *msg)
 {
-  const char *p = stripws(conf_line_text);
-  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE, "\"%s\", line %u: %s: %s",
-                 conf_file_name, conf_line_number, msg, p);
-  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "\"%s\", line %u: %s: %s",
-            conf_file_name, conf_line_number, msg, p);
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR,
+            "Error in %s at line %u: %s at '%s'",
+            conf_file_name, conf_line_number, msg, conf_line_text);
 }
 
 /* conf_match_password()
@@ -1556,4 +1556,29 @@ conf_generate_default(const char *filename)
   printf("};\n\n");
 
   return true;
+}
+
+static void
+conf_read_files_recurse(const char *filename)
+{
+  char path[IRCD_BUFSIZE];
+  FILE *file;
+
+  if (string_is_empty(filename))
+    return;
+
+  if (filename[0] == '/')  /* Absolute path */
+    strlcpy(path, filename, sizeof(path));
+  else  /* Relative path, prefix with ETCPATH */
+    snprintf(path, sizeof(path), "%s/%s", ETCPATH, filename);
+
+  if ((file = fopen(path, "r")) == NULL)
+  {
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Unable to open include file '%s': %s",
+              path, strerror(errno));
+    return;
+  }
+
+  conf_read(file);
+  fclose(file);
 }

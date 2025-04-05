@@ -1,11 +1,9 @@
-# Generate schema header
+# Generate schema header using xxd
 add_custom_command(
-    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/conf_schema.c
-    COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/cmake/generate_schema.py
-            ${CMAKE_SOURCE_DIR}/etc/ircd.xsd
-            ${CMAKE_CURRENT_BINARY_DIR}/conf_schema.c
-    DEPENDS ${CMAKE_SOURCE_DIR}/etc/ircd.xsd ${CMAKE_SOURCE_DIR}/cmake/generate_schema.py
-    COMMENT "Generating embedded schema header"
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/conf_schema.h
+    COMMAND xxd -i ${CMAKE_SOURCE_DIR}/etc/ircd.xsd > ${CMAKE_CURRENT_BINARY_DIR}/conf_schema.h
+    DEPENDS ${CMAKE_SOURCE_DIR}/etc/ircd.xsd
+    COMMENT "Generating schema header"
 )
 
 # Find required packages
@@ -48,8 +46,6 @@ set(IRCD_SOURCES
     conf_pseudo.h
     conf_resv.c
     conf_resv.h
-    conf_schema.h
-    ${CMAKE_CURRENT_BINARY_DIR}/conf_schema.c
     conf_service.c
     conf_service.h
     conf_shared.c

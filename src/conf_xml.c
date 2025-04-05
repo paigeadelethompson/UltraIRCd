@@ -30,10 +30,44 @@
 #include "log.h"
 #include "memory.h"
 #include "defaults.h"
+#include "parse.h"  /* Must come before conf_pseudo.h for Command struct */
+#include "conf_class.h"
+#include "conf_cluster.h"
+#include "conf_gecos.h"
+#include "conf_pseudo.h"
+#include "conf_resv.h"
+#include "conf_service.h"
+#include "conf_shared.h"
+#include "listener.h"
+#include "misc.h"
+#include "server.h"
+#include "nuh.h"
+#include "client.h"
+#include "send.h"
+#include "ircd.h"
+#include "address.h"  /* For address matching functions */
+#include "io_string.h"
+#include "numeric.h"
+#include "user.h"
+#include "channel.h"
+#include "channel_mode.h"
+#include "list.h"
+#include "ircd_defs.h"
+#include "conf_db.h"
+
+/* Forward declarations */
+static void conf_clear(void);
+static void conf_set_defaults(void);
+static void conf_validate(void);
 
 /* Global variables */
 static xmlSchemaPtr schema = NULL;
 static xmlSchemaValidCtxtPtr schema_valid_ctx = NULL;
+
+/* The xxd-generated variables will be named like:
+ * unsigned char etc_ircd_xsd[];
+ * unsigned int etc_ircd_xsd_len;
+ */
 
 /* Helper functions */
 static void
@@ -59,7 +93,7 @@ xml_warning_handler(void *ctx, const char *msg, ...)
   vsnprintf(buf, sizeof(buf), msg, args);
   va_end(args);
 
-  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_WARNING, "XML Warning: %s", buf);
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_WARN, "XML Warning: %s", buf);
 }
 
 /* Helper function to parse time specifications */
@@ -457,52 +491,35 @@ static void
 parse_oper(xmlNodePtr node)
 {
   xmlChar *name = xmlGetProp(node, (const xmlChar *)"name");
-  if (!name)
+  xmlChar *user = xmlGetProp(node, (const xmlChar *)"user");
+  xmlChar *password = xmlGetProp(node, (const xmlChar *)"password");
+  xmlChar *class_name = xmlGetProp(node, (const xmlChar *)"class");
+  xmlChar *encrypted = xmlGetProp(node, (const xmlChar *)"encrypted");
+  xmlChar *flags = xmlGetProp(node, (const xmlChar *)"flags");
+
+  if (!name || !user || !password)
     return;
 
   struct MaskItem *conf = conf_make(CONF_OPER);
   conf->name = io_strdup((const char *)name);
 
-  xmlChar *user = xmlGetProp(node, (const xmlChar *)"user");
-  xmlChar *password = xmlGetProp(node, (const xmlChar *)"password");
-  xmlChar *class_name = xmlGetProp(node, (const xmlChar *)"class");
-  xmlChar *whois = xmlGetProp(node, (const xmlChar *)"whois");
-  xmlChar *umodes = xmlGetProp(node, (const xmlChar *)"umodes");
-  xmlChar *encrypted = xmlGetProp(node, (const xmlChar *)"encrypted");
-  xmlChar *tls_certificate_fingerprint = xmlGetProp(node, (const xmlChar *)"tls_certificate_fingerprint");
-  xmlChar *tls_connection_required = xmlGetProp(node, (const xmlChar *)"tls_connection_required");
-  xmlChar *flags = xmlGetProp(node, (const xmlChar *)"flags");
+  struct split_nuh_item nuh;
+  nuh.nuhmask = (const char *)user;
+  nuh.nickptr = NULL;
+  nuh.userptr = conf->user;
+  nuh.hostptr = conf->host;
+  nuh.nicksize = 0;
+  nuh.usersize = sizeof(conf->user);
+  nuh.hostsize = sizeof(conf->host);
 
-  if (user)
-  {
-    struct nuh_split nuh =
-    {
-      .nuhmask = (const char *)user,
-      .nickptr = NULL,
-      .userptr = conf->user,
-      .hostptr = conf->host,
-      .nicksize = 0,
-      .usersize = sizeof(conf->user),
-      .hostsize = sizeof(conf->host)
-    };
+  nuh_split(&nuh);
 
-    nuh_split(&nuh);
-  }
+  conf->passwd = io_strdup((const char *)password);
 
-  if (password)
-    conf->passwd = io_strdup((const char *)password);
-  if (whois)
-    conf->whois = io_strdup((const char *)whois);
-  if (umodes)
-    conf->modes = io_strdup((const char *)umodes);
   if (encrypted && xmlStrcmp(encrypted, (const xmlChar *)"yes") == 0)
     conf->flags |= CONF_FLAGS_ENCRYPTED;
-  if (tls_certificate_fingerprint)
-    conf->certfp = io_strdup((const char *)tls_certificate_fingerprint);
-  if (tls_connection_required && xmlStrcmp(tls_connection_required, (const xmlChar *)"yes") == 0)
-    conf->flags |= CONF_FLAGS_TLS;
 
-  /* Parse operator flags */
+  /* Parse oper flags */
   if (flags)
   {
     char *flag_str = io_strdup((const char *)flags);
@@ -510,13 +527,14 @@ parse_oper(xmlNodePtr node)
     while (flag)
     {
       while (*flag == ' ')
-        flag++;
+        ++flag;
 
-      if (strcmp(flag, "kill") == 0)
-        conf->port |= OPER_FLAG_KILL;
-      else if (strcmp(flag, "kill:remote") == 0)
-        conf->port |= OPER_FLAG_KILL_REMOTE;
-      /* Add other flag parsing here */
+      if (strcmp(flag, "admin") == 0)
+        conf->modes |= UMODE_ADMIN;
+      else if (strcmp(flag, "oper") == 0)
+        conf->modes |= UMODE_OPER;
+      else if (strcmp(flag, "locop") == 0)
+        conf->modes |= UMODE_LOCOPS;
 
       flag = strtok(NULL, ",");
     }
@@ -529,11 +547,7 @@ parse_oper(xmlNodePtr node)
   xmlFree(user);
   xmlFree(password);
   xmlFree(class_name);
-  xmlFree(whois);
-  xmlFree(umodes);
   xmlFree(encrypted);
-  xmlFree(tls_certificate_fingerprint);
-  xmlFree(tls_connection_required);
   xmlFree(flags);
 }
 
@@ -556,7 +570,7 @@ parse_listen(xmlNodePtr node)
     while (flag)
     {
       while (*flag == ' ')
-        flag++;
+        ++flag;
 
       if (strcmp(flag, "tls") == 0)
         listener_flags |= LISTENER_TLS;
@@ -809,7 +823,7 @@ parse_cluster(xmlNodePtr node)
   while (type_token)
   {
     while (*type_token == ' ')
-      type_token++;
+      ++type_token;
 
     if (strcmp(type_token, "kline") == 0)
       cluster->type |= CLUSTER_KLINE;
@@ -852,16 +866,14 @@ parse_shared(xmlNodePtr node)
   struct SharedItem *shared = shared_make();
   shared->server = io_strdup((const char *)name);
 
-  struct nuh_split nuh =
-  {
-    .nuhmask = (const char *)user,
-    .nickptr = NULL,
-    .userptr = shared->user,
-    .hostptr = shared->host,
-    .nicksize = 0,
-    .usersize = sizeof(shared->user),
-    .hostsize = sizeof(shared->host)
-  };
+  struct split_nuh_item nuh;
+  nuh.nuhmask = (const char *)user;
+  nuh.nickptr = NULL;
+  nuh.userptr = shared->user;
+  nuh.hostptr = shared->host;
+  nuh.nicksize = 0;
+  nuh.usersize = sizeof(shared->user);
+  nuh.hostsize = sizeof(shared->host);
 
   nuh_split(&nuh);
 
@@ -871,7 +883,7 @@ parse_shared(xmlNodePtr node)
   while (type_token)
   {
     while (*type_token == ' ')
-      type_token++;
+      ++type_token;
 
     if (strcmp(type_token, "kline") == 0)
       shared->type |= SHARED_KLINE;
@@ -1142,8 +1154,8 @@ conf_xml_init(void)
   xmlSetGenericErrorFunc(NULL, xml_error_handler);
   xmlSetStructuredErrorFunc(NULL, NULL);
 
-  /* Load schema from embedded string */
-  xmlSchemaParserCtxtPtr parser_ctx = xmlSchemaNewMemParserCtxt(ircd_schema_xml, strlen(ircd_schema_xml));
+  /* Load schema from embedded bytes */
+  xmlSchemaParserCtxtPtr parser_ctx = xmlSchemaNewMemParserCtxt((const char *)etc_ircd_xsd, etc_ircd_xsd_len);
   if (!parser_ctx)
     return XML_PARSE_ERROR_SCHEMA_INVALID;
 
