@@ -23,6 +23,16 @@ option(ENABLE_EFENCE "Enable Electric Fence" OFF)
 option(WITH_TLS "Enable TLS support" ON)
 option(WITH_JANSSON "Enable Jansson support" ON)
 
+# Security options
+option(ENABLE_SECURITY_HARDENING "Enable security hardening features" ON)
+option(ENABLE_STACK_PROTECTOR "Enable stack protection" ON)
+option(ENABLE_FORTIFY_SOURCE "Enable FORTIFY_SOURCE" ON)
+option(ENABLE_PIE "Enable Position Independent Executable" ON)
+option(ENABLE_RELRO "Enable RELRO" ON)
+option(ENABLE_CFI "Enable Control Flow Integrity" ON)
+option(ENABLE_ASAN "Enable Address Sanitizer" ON)
+option(ENABLE_UBSAN "Enable Undefined Behavior Sanitizer" ON)
+
 # I/O polling mechanism selection
 option(ENABLE_KQUEUE "Force kqueue usage" OFF)
 option(ENABLE_EPOLL "Force epoll usage" OFF)
@@ -122,7 +132,7 @@ set(LT_OBJDIR ".libs/")
 
 # Compiler flags
 if(ENABLE_WARNINGS)
-    add_compile_options(-Wall -Wextra -Wno-unused-parameter)
+    add_compile_options(-Wall -Werror -Wextra -Wno-unused-parameter)
     if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
         add_compile_options(-Wno-format-truncation)
     endif()
@@ -132,6 +142,46 @@ if(ENABLE_DEBUGGING)
     add_compile_options(-g -O0)
 else()
     add_compile_options(-O2)
+endif()
+
+# Security hardening flags
+if(ENABLE_SECURITY_HARDENING)
+    # Format string protection
+    add_compile_options(-Wformat-security -Wformat=2)
+    
+    # Integer overflow protection
+    add_compile_options(-fwrapv)
+    
+    if(ENABLE_STACK_PROTECTOR)
+        add_compile_options(-fstack-protector-strong)
+    endif()
+    
+    if(ENABLE_FORTIFY_SOURCE)
+        add_compile_definitions(_FORTIFY_SOURCE=2)
+    endif()
+    
+    if(ENABLE_PIE)
+        add_compile_options(-fPIE)
+        add_link_options(-pie)
+    endif()
+    
+    if(ENABLE_RELRO)
+        add_link_options(-Wl,-z,relro -Wl,-z,now)
+    endif()
+    
+    if(ENABLE_CFI)
+        add_compile_options(-fcf-protection=full)
+    endif()
+    
+    if(ENABLE_ASAN)
+        add_compile_options(-fsanitize=address)
+        add_link_options(-fsanitize=address)
+    endif()
+    
+    if(ENABLE_UBSAN)
+        add_compile_options(-fsanitize=undefined)
+        add_link_options(-fsanitize=undefined)
+    endif()
 endif()
 
 # Define build date

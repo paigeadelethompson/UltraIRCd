@@ -105,6 +105,9 @@ set(MODULE_SOURCES
 # Create modules directory
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/modules)
 
+# Add position-independent code flag for module compilation
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 # Build each module as a shared library
 foreach(MODULE ${MODULE_SOURCES})
     get_filename_component(MODULE_NAME ${MODULE} NAME_WE)
@@ -117,6 +120,10 @@ foreach(MODULE ${MODULE_SOURCES})
         io
         ltdl
     )
+    
+    # Apply -fPIC flag to all modules since they're all shared libraries
+    target_compile_options(${MODULE_NAME} PRIVATE -fPIC)
+    
     set_target_properties(${MODULE_NAME} PROPERTIES
         PREFIX ""
         OUTPUT_NAME ${MODULE_NAME}

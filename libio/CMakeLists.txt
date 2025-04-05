@@ -43,6 +43,9 @@ set_target_properties(io PROPERTIES
     POSITION_INDEPENDENT_CODE ON
 )
 
+# Explicitly add -fPIC flag
+target_compile_options(io PRIVATE -fPIC)
+
 # Include directories
 target_include_directories(io PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}

@@ -135,8 +135,8 @@ io_time_set_error_callback(void (*callback)(enum io_time_error_code, const char 
 static void
 io_time_set_error(enum io_time_error_code code, const struct timespec *current, const struct timespec *previous)
 {
-  long delta_sec = current->tv_sec - previous->tv_sec;
-  long delta_nsec = current->tv_nsec - previous->tv_nsec;
+  int64_t delta_sec = current->tv_sec - previous->tv_sec;
+  int64_t delta_nsec = current->tv_nsec - previous->tv_nsec;
 
   if (delta_nsec < 0)
   {
@@ -144,7 +144,10 @@ io_time_set_error(enum io_time_error_code code, const struct timespec *current, 
     delta_nsec += 1000000000;
   }
 
-  snprintf(io_time_last_error, sizeof(io_time_last_error), io_time_error_strings[code],
+  /* Use the error string from the array for the error message */
+  snprintf(io_time_last_error, sizeof(io_time_last_error), 
+           "Clock failure: %s. Current: %ld s, %ld ns. Previous: %ld s, %ld ns. Delta: %ld s, %ld ns.",
+           io_time_error_strings[code],
            current->tv_sec, current->tv_nsec, previous->tv_sec, previous->tv_nsec, delta_sec, delta_nsec);
 }
 
