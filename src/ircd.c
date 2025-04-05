@@ -351,26 +351,6 @@ make_daemon(void)
     close(fd);
 }
 
-static void
-signal_handler(int sig)
-{
-  const char *signal_name;
-  
-  switch (sig) {
-    case SIGSEGV: signal_name = "SIGSEGV"; break;
-    case SIGABRT: signal_name = "SIGABRT"; break;
-    case SIGFPE:  signal_name = "SIGFPE"; break;
-    case SIGILL:  signal_name = "SIGILL"; break;
-    case SIGBUS:  signal_name = "SIGBUS"; break;
-    case SIGTERM: signal_name = "SIGTERM"; break;
-    case SIGINT:  signal_name = "SIGINT"; break;
-    default:      signal_name = "UNKNOWN"; break;
-  }
-  
-  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Received signal %s (%d), exiting", signal_name, sig);
-  exit(EXIT_FAILURE);
-}
-
 /**
  * @brief Main function to initialize and run the IRC server.
  *
@@ -660,13 +640,7 @@ main(int argc, char *argv[])
     log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "Entering main event loop...");
   }
 
-  /* Set up signal handlers */
-  signal(SIGSEGV, signal_handler);
-  signal(SIGABRT, signal_handler);
-  signal(SIGFPE, signal_handler);
-  signal(SIGILL, signal_handler);
-  signal(SIGBUS, signal_handler);
-
+ 
   io_loop();
 
   return 0;

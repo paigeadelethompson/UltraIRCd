@@ -180,21 +180,48 @@ log_write(enum log_type type, enum log_severity severity, const char *format, ..
   LIST_FOREACH(node, log_entries.head)
   {
     struct Log *log = node->data;
-    /* Show all messages if log type matches and either:
-       1. The log is configured for DEBUG severity (shows everything)
-       2. The message severity is DEBUG (always show debug messages)
-       3. The log's configured severity is greater than or equal to the message severity
-       4. The message severity is ERROR or CRITICAL (always show these)
+    
+    /* Use bitmasks for severity filtering
+       Each severity level is represented by a bit in a mask
+       DEBUG = 0x1F (all bits set)
+       INFO  = 0x1E (all except DEBUG)
+       WARN  = 0x1C (all except DEBUG, INFO)
+       ERROR = 0x18 (all except DEBUG, INFO, WARN)
+       CRIT  = 0x10 (only CRIT)
     */
-    if (log->type == type && 
-        (log->severity == LOG_SEVERITY_DEBUG || 
-         severity == LOG_SEVERITY_DEBUG || 
-         log->severity >= severity ||
-         severity == LOG_SEVERITY_ERROR ||
-         severity == LOG_SEVERITY_CRITICAL))
-    {
-      if (log->file)
-      {
+    unsigned int severity_mask = 0;
+    
+    /* Set the appropriate bits based on log severity */
+    switch (log->severity) {
+      case LOG_SEVERITY_DEBUG:
+        severity_mask = 0x1F; /* All severities */
+        break;
+      case LOG_SEVERITY_INFO:
+        severity_mask = 0x1E; /* INFO, WARN, ERROR, CRIT */
+        break;
+      case LOG_SEVERITY_WARN:
+        severity_mask = 0x1C; /* WARN, ERROR, CRIT */
+        break;
+      case LOG_SEVERITY_ERROR:
+        severity_mask = 0x18; /* ERROR, CRIT */
+        break;
+      case LOG_SEVERITY_CRITICAL:
+        severity_mask = 0x10; /* Only CRIT */
+        break;
+      default:
+        severity_mask = 0x00; /* No severities */
+        break;
+    }
+    
+    /* Use bitmask for log type filtering
+       Each log type is represented by a bit in a mask
+       We only need to check if the specific bit for this log type is set
+    */
+    unsigned int type_mask = 1 << type;
+    
+    /* Check if the message severity is enabled in the mask and the log type matches */
+    if ((severity_mask & (1 << severity)) && (type_mask & (1 << log->type))) {
+      if (log->file) {
         fprintf(log->file, "%s", formatted);
         /* Always flush the output to ensure messages are displayed */
         fflush(log->file);

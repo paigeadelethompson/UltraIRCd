@@ -1235,15 +1235,32 @@ conf_xml_parse(const char *filename, bool cold)
     return XML_PARSE_ERROR_FILE_NOT_FOUND;
 
   /* Validate against schema */
-  if (xmlSchemaValidateDoc(schema_valid_ctx, doc) != 0)
-  {
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_DEBUG, "Validating XML document against schema");
+  int result = xmlSchemaValidateDoc(schema_valid_ctx, doc);
+  
+  if (result != 0) {
+    /* Get the validation error details using standard libxml2 error handling */
+    const struct _xmlError *error = xmlGetLastError();
+    if (error) {
+      /* Log a brief error description */
+      log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Configuration validation failed: %s", 
+                error->message ? error->message : "Unknown validation error");
+      
+      /* Log more verbose debug information */
+      log_write(LOG_TYPE_IRCD, LOG_SEVERITY_DEBUG, "Validation error details: domain=%d, line=%d, column=%d, message=%s", 
+                error->domain, error->line, error->int2, 
+                error->message ? error->message : "Unknown validation error");
+    } else {
+      log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Generated configuration failed validation with error code: %d", result);
+    }
+    
     xmlFreeDoc(doc);
     return XML_PARSE_ERROR_VALIDATION_FAILED;
   }
-
-  int result = parse_xml_config(doc, cold);
+  
   xmlFreeDoc(doc);
-  return result;
+
+  return parse_xml_config(doc, cold);
 }
 
 const char *
@@ -1272,26 +1289,34 @@ custom_read_callback(void *context, char *buffer, int len)
 {
   FILE *fp = (FILE *)context;
   size_t bytes_read = fread(buffer, 1, len, fp);
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_DEBUG, "custom_read_callback: read %zu bytes", bytes_read);
   return (int)bytes_read;
 }
 
 bool
 conf_generate_default(const char *filename)
 {
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_DEBUG, "conf_generate_default: starting with filename=%s", 
+            filename ? filename : "NULL (stdout)");
+  
   FILE *fp = filename ? fopen(filename, "w") : stdout;
-  if (!fp)
+  if (!fp) {
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Failed to open output file: %s", strerror(errno));
     return false;
+  }
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_DEBUG, "Output file opened successfully");
 
   /* Create a buffer to store the configuration */
   char *config_buffer = NULL;
   size_t buffer_size = 0;
   FILE *buffer_fp = open_memstream(&config_buffer, &buffer_size);
   if (!buffer_fp) {
-    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Failed to allocate memory for configuration buffer");
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Failed to allocate memory for configuration buffer: %s", strerror(errno));
     if (filename)
       fclose(fp);
     return false;
   }
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_DEBUG, "Memory buffer created successfully");
 
   log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "Generating default configuration...");
 
@@ -1476,20 +1501,23 @@ conf_generate_default(const char *filename)
 
   /* Close the buffer file to finalize the string */
   fclose(buffer_fp);
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_DEBUG, "Configuration buffer generated, size: %zu bytes", buffer_size);
 
   log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "Configuration generation complete, validating against schema...");
   
   /* Create a memory stream for validation */
   FILE *validation_stream = fmemopen(config_buffer, buffer_size, "r");
   if (!validation_stream) {
-    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Failed to create memory stream for validation");
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Failed to create memory stream for validation: %s", strerror(errno));
     free(config_buffer);
     if (filename)
       fclose(fp);
     return false;
   }
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_DEBUG, "Memory stream created for validation");
   
   /* Parse the XML from memory stream using our custom read function */
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_DEBUG, "Parsing XML from memory stream");
   xmlDocPtr doc = xmlReadIO(custom_read_callback, 
                            (xmlInputCloseCallback)fclose, 
                            validation_stream, 
@@ -1498,28 +1526,46 @@ conf_generate_default(const char *filename)
                            XML_PARSE_NONET);
   
   if (!doc) {
-    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Failed to parse generated configuration");
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Failed to parse generated configuration: %s", 
+              xmlGetLastError() ? xmlGetLastError()->message : "Unknown error");
     free(config_buffer);
     if (filename)
       fclose(fp);
     return false;
   }
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_DEBUG, "XML document parsed successfully");
   
   /* Validate against schema */
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_DEBUG, "Validating XML document against schema");
   int result = xmlSchemaValidateDoc(schema_valid_ctx, doc);
-  xmlFreeDoc(doc);
   
   if (result != 0) {
-    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Generated configuration failed validation");
+    /* Get the validation error details using standard libxml2 error handling */
+    const struct _xmlError *error = xmlGetLastError();
+    if (error) {
+      /* Log a brief error description */
+      log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Configuration validation failed: %s", 
+                error->message ? error->message : "Unknown validation error");
+      
+      /* Log more verbose debug information */
+      log_write(LOG_TYPE_IRCD, LOG_SEVERITY_DEBUG, "Validation error details: domain=%d, line=%d, column=%d, message=%s", 
+                error->domain, error->line, error->int2, 
+                error->message ? error->message : "Unknown validation error");
+    } else {
+      log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Generated configuration failed validation with error code: %d", result);
+    }
+    
+    xmlFreeDoc(doc);
     free(config_buffer);
     if (filename)
       fclose(fp);
     return false;
   }
   
-  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "Configuration validation successful");
+  xmlFreeDoc(doc);
   
   /* Write the validated configuration to the output file */
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_DEBUG, "Writing validated configuration to output");
   if (fwrite(config_buffer, 1, buffer_size, fp) != buffer_size) {
     log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Failed to write configuration to output: %s", strerror(errno));
     free(config_buffer);
@@ -1527,6 +1573,7 @@ conf_generate_default(const char *filename)
       fclose(fp);
     return false;
   }
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_DEBUG, "Configuration written to output successfully");
   
   /* Clean up */
   free(config_buffer);
