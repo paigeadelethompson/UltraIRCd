@@ -31,6 +31,8 @@
 #ifndef INCLUDED_conf_pseudo_h
 #define INCLUDED_conf_pseudo_h
 
+#include "command.h"
+
 /**
  * @struct PseudoItem
  * @brief Structure representing a pseudo command item.

@@ -113,16 +113,6 @@ enum { LOG_MAX_LENGTH = 512 };
 enum { LOG_ROTATION_ATTEMPTS = 1000 };
 
 /**
- * @var log_list
- * @brief Doubly linked list holding all active loggers (Log structures).
- *
- * This global variable maintains a doubly linked list of active loggers.
- * Each element in the list is a Log structure representing a specific
- * type of log (e.g., ircd log, kill log, etc.).
- */
-static list_t log_list;
-
-/**
  * @brief Initializes the logging system with a specific log type, file name, maximum file size, flush behavior, and log level.
  *
  * This function creates and initializes a new log, setting its attributes, opening the log file, and adding it to the log list.
@@ -138,83 +128,6 @@ struct Log *
 log_add(enum log_type type, bool main, size_t max_file_size, const char *file_name)
 {
   return NULL;
-}
-
-/**
- * @brief Rotates log files, handling file renaming and creating a new log file.
- *
- * This function performs log rotation, renaming the current log file and creating a new one.
- * It checks for available filenames, handles file permissions, and reports success or failure.
- *
- * @param log The Log structure to rotate.
- * @return True if rotation succeeds, false otherwise.
- */
-static bool
-log_rotate(struct Log *log)
-{
-  char new_file_name[IO_PATH_MAX];
-  unsigned int attempt = 0;
-
-  /* Attempt to find an available filename for rotation. */
-  do
-  {
-    /* If it's the first attempt, append ".old" to the file name. */
-    if (attempt == 0)
-      snprintf(new_file_name, sizeof(new_file_name), "%s.old", log->file_name);
-    else
-      /* If subsequent attempts, append ".old." with attempt number. */
-      snprintf(new_file_name, sizeof(new_file_name), "%s.old.%u", log->file_name, attempt);
-
-    if (access(new_file_name, F_OK))
-      break;
-  } while (++attempt < LOG_ROTATION_ATTEMPTS);
-
-  /* If LOG_ROTATION_ATTEMPTS is reached without finding a new file name, return false. */
-  if (attempt == LOG_ROTATION_ATTEMPTS)
-    return false;  /* Rotation failed. */
-
-  /* Rename the current log file. */
-  if (rename(log->file_name, new_file_name))
-    return false;  /* Rotation failed. */
-
-  /* Create a new log file. */
-  FILE *new_file = fopen(log->file_name, "a");
-  if (new_file == NULL)
-    return false;  /* Rotation failed. */
-
-  fprintf(log->file, "[%s] Log file rotated. Exceeded maximum size: %zu bytes.\n",
-          log->time_provider(0), log->max_file_size);
-
-  /* Close the old log file. */
-  fclose(log->file);
-  log->file = new_file;
-
-  /* Set owner-only read and write permissions. */
-  chmod(log->file_name, S_IRUSR | S_IWUSR);
-  return true;  /* Rotation succeeded. */
-}
-
-/**
- * @brief Checks whether log rotation is due based on specific conditions.
- *
- * This function determines whether log rotation is necessary by evaluating
- * certain conditions, such as exceeding a predefined maximum file size.
- * If the log meets the conditions for rotation, it returns true; otherwise, it returns false.
- *
- * @param log The Log structure for which to check if rotation is due.
- * @return True if log rotation is due, false otherwise.
- */
-static bool
-log_rotate_due(struct Log *log)
-{
-  if (log->max_file_size == 0)
-    return false;
-
-  struct stat sb;
-  if (stat(log->file_name, &sb))
-    return false;
-
-  return (size_t)sb.st_size > log->max_file_size;
 }
 
 /**

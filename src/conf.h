@@ -29,7 +29,34 @@
 #include "client.h"
 #include "conf_class.h"
 #include "address.h"
+#include "stdinc.h"
+#include "list.h"
+#include "channel.h"
+#include "channel_mode.h"
+#include "hash.h"
+#include "ipcache.h"
+#include "conf_resv.h"
+#include "conf_service.h"
+#include "conf_shared.h"
+#include "conf_pseudo.h"
+#include "conf_gecos.h"
+#include "conf_cluster.h"
+#include "conf_db.h"
 
+/* Forward declarations */
+struct MaskItem;
+struct AddressRec;
+struct ClassItem;
+struct ClusterItem;
+struct SharedItem;
+struct GecosItem;
+struct PseudoItem;
+struct ServiceItem;
+
+/* Configuration functions */
+void conf_set_defaults(void);
+void conf_validate(void);
+void conf_clear(void);
 
 enum maskitem_type
 {
@@ -333,4 +360,5 @@ extern const char *get_oper_name(const struct Client *);
 extern void conf_read_files(bool cold);
 extern void conf_rehash(bool cold);
 extern bool conf_generate_default(const char *filename);
+extern void conf_handle_tls(bool cold);
 #endif  /* INCLUDED_conf_h */

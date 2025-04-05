@@ -64,9 +64,6 @@
 #include "whowas.h"
 
 /* Forward declarations */
-static void conf_set_defaults(void);
-static void conf_validate(void);
-static void conf_clear(void);
 static void conf_read_files_recurse(const char *filename);
 static void conf_read(FILE *file);
 
@@ -863,128 +860,6 @@ operator_find(const struct Client *client, const char *name)
   return NULL;
 }
 
-/* conf_set_defaults()
- *
- * inputs	- NONE
- * output	- NONE
- * side effects	- Set default values here.
- *		  This is called **PRIOR** to parsing the
- *		  configuration file.  If you want to do some validation
- *		  of values later, put them in validate_conf().
- */
-static void
-conf_set_defaults(void)
-{
-  /* Verify class_init() ran. */
-  assert(class_default == list_peek_tail(class_get_list()));
-
-  ConfigServerInfo.network_name = io_strdup(NETWORK_NAME_DEFAULT);
-  ConfigServerInfo.network_description = io_strdup(NETWORK_DESCRIPTION_DEFAULT);
-  ConfigServerInfo.default_max_clients = MAXCLIENTS_MAX;
-  ConfigServerInfo.max_nick_length = 9;
-  ConfigServerInfo.max_topic_length = TOPICLEN;
-  ConfigServerInfo.hub = 0;
-
-  ConfigLog.use_logging = 1;
-
-  ConfigChannel.enable_extbans = 0;
-  ConfigChannel.disable_fake_channels = 0;
-  ConfigChannel.invite_client_count = 10;
-  ConfigChannel.invite_client_time = 300;
-  ConfigChannel.invite_delay_channel = 5;
-  ConfigChannel.invite_expire_time = 1800;
-  ConfigChannel.knock_client_count = 1;
-  ConfigChannel.knock_client_time = 300;
-  ConfigChannel.knock_delay_channel = 60;
-  ConfigChannel.max_channels = 25;
-  ConfigChannel.max_invites = 20;
-  ConfigChannel.max_bans = 100;
-  ConfigChannel.max_bans_large = 500;
-  ConfigChannel.max_kick_length = KICKLEN;
-  ConfigChannel.default_join_flood_count = 18;
-  ConfigChannel.default_join_flood_time = 6;
-
-  ConfigServerHide.flatten_links = 0;
-  ConfigServerHide.flatten_links_delay = 300;
-  ConfigServerHide.hidden = 0;
-  ConfigServerHide.hide_servers = 0;
-  ConfigServerHide.hide_services = 0;
-  ConfigServerHide.hidden_name = io_strdup(NETWORK_NAME_DEFAULT);
-  ConfigServerHide.hide_server_ips = 0;
-  ConfigServerHide.disable_remote_commands = 0;
-
-  ConfigGeneral.away_count = 2;
-  ConfigGeneral.away_time = 10;
-  ConfigGeneral.max_monitor = 50;
-  ConfigGeneral.whowas_history_length = 15000;
-  ConfigGeneral.cycle_on_host_change = 1;
-  ConfigGeneral.dline_min_cidr = 16;
-  ConfigGeneral.dline_min_cidr6 = 48;
-  ConfigGeneral.kline_min_cidr = 16;
-  ConfigGeneral.kline_min_cidr6 = 48;
-  ConfigGeneral.invisible_on_connect = 1;
-  ConfigGeneral.disable_auth = 0;
-  ConfigGeneral.disable_dns = 0;
-  ConfigGeneral.kill_chase_time_limit = 90;
-  ConfigGeneral.default_floodcount = 8;
-  ConfigGeneral.default_floodtime = 1;
-  ConfigGeneral.failed_oper_notice = 1;
-  ConfigGeneral.specials_in_ident = 0;
-  ConfigGeneral.min_nonwildcard = 4;
-  ConfigGeneral.min_nonwildcard_simple = 3;
-  ConfigGeneral.max_accept = 50;
-  ConfigGeneral.max_away_length = AWAYLEN;
-  ConfigGeneral.anti_nick_flood = 0;
-  ConfigGeneral.max_nick_time = 20;
-  ConfigGeneral.max_nick_changes = 5;
-  ConfigGeneral.anti_spam_exit_message_time = 0;
-  ConfigGeneral.ts_warn_delta = 30;
-  ConfigGeneral.ts_max_delta = 600;
-  ConfigGeneral.warn_no_connect_block = 1;
-  ConfigGeneral.stats_e_disabled = 0;
-  ConfigGeneral.stats_i_oper_only = 1;  /* 1 = masked */
-  ConfigGeneral.stats_k_oper_only = 1;  /* 1 = masked */
-  ConfigGeneral.stats_o_oper_only = 1;
-  ConfigGeneral.stats_m_oper_only = 1;
-  ConfigGeneral.stats_P_oper_only = 0;
-  ConfigGeneral.stats_u_oper_only = 0;
-  ConfigGeneral.caller_id_wait = 60;
-  ConfigGeneral.opers_bypass_callerid = 1;
-  ConfigGeneral.pace_wait = 10;
-  ConfigGeneral.pace_wait_simple = 1;
-  ConfigGeneral.short_motd = 0;
-  ConfigGeneral.ping_cookie = 0;
-  ConfigGeneral.no_oper_flood = 0;
-  ConfigGeneral.max_targets = 4;
-  ConfigGeneral.oper_umodes = io_strdup("+flsw");
-  ConfigGeneral.throttle_count = 1;
-  ConfigGeneral.throttle_time = 1;
-  ConfigGeneral.ident_timeout = 4;
-
-  ConfigGeneral.cloak_enabled = false;
-  cloak_set_disabled();
-  ConfigGeneral.cloak_cidr_len_ipv4 = 32;
-  cloak_set_cidr_len_ipv4(ConfigGeneral.cloak_cidr_len_ipv4);
-  ConfigGeneral.cloak_cidr_len_ipv6 = 64;
-  cloak_set_cidr_len_ipv6(ConfigGeneral.cloak_cidr_len_ipv6);
-  ConfigGeneral.cloak_num_bits = 80;
-  cloak_set_num_bits(ConfigGeneral.cloak_num_bits);
-  ConfigGeneral.cloak_secret = io_strdup("_WPJFgJb2M9rDC3tZmPTTzvyfcWerKebmEG84bKeTdNw");
-  cloak_set_secret(ConfigGeneral.cloak_secret);
-  ConfigGeneral.cloak_suffix = io_strdup("irc");
-  cloak_set_suffix(ConfigGeneral.cloak_suffix);
-}
-
-static void
-conf_validate(void)
-{
-  if (string_is_empty(ConfigServerInfo.network_name))
-    ConfigServerInfo.network_name = io_strdup(NETWORK_NAME_DEFAULT);
-
-  if (string_is_empty(ConfigServerInfo.network_description))
-    ConfigServerInfo.network_description = io_strdup(NETWORK_DESCRIPTION_DEFAULT);
-}
-
 /* conf_read()
  *
  * inputs       - file descriptor pointing to config file to use
@@ -1018,6 +893,28 @@ conf_read(FILE *file)
     /* Pass line to XML parser with cold=false since we're reading a file */
     conf_xml_parse(line, false);
   }
+}
+
+/* conf_read_files_recurse()
+ *
+ * inputs       - filename to read
+ * output       - None
+ * side effects - Recursively read configuration files
+ */
+static void
+conf_read_files_recurse(const char *filename)
+{
+  FILE *file;
+
+  if ((file = fopen(filename, "r")) == NULL)
+  {
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Cannot open include file '%s': %s",
+              filename, strerror(errno));
+    return;
+  }
+
+  conf_read(file);
+  fclose(file);
 }
 
 /* conf_rehash()
@@ -1125,13 +1022,263 @@ get_oper_name(const struct Client *client)
   return buf;
 }
 
-/* conf_clear()
+/* conf_read_files()
  *
- * inputs       - none
+ * inputs       - cold start YES or NO
  * output       - none
- * side effects - Clear out the old configuration
+ * side effects - read all conf files needed, ircd.conf kline.conf etc.
  */
-static void
+void
+conf_read_files(bool cold)
+{
+  int result = conf_xml_init();
+  if (result != XML_PARSE_SUCCESS)
+  {
+    if (cold)
+    {
+      log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Error initializing XML parser: %s",
+                conf_xml_error_str(result));
+      exit(EXIT_FAILURE);
+    }
+    else
+    {
+      sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
+                     "Error initializing XML parser: %s",
+                     conf_xml_error_str(result));
+      return;
+    }
+  }
+
+  result = conf_xml_parse(ConfigGeneral.configfile, cold);
+  if (result != XML_PARSE_SUCCESS)
+  {
+    if (cold)
+    {
+      log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Error reading configuration file '%s': %s",
+                ConfigGeneral.configfile, conf_xml_error_str(result));
+      exit(EXIT_FAILURE);
+    }
+    else
+    {
+      sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
+                     "Error reading configuration file '%s': %s",
+                     ConfigGeneral.configfile, conf_xml_error_str(result));
+      return;
+    }
+  }
+
+  conf_handle_tls(cold);
+
+  motd_init();
+
+  isupport_add("CASEMAPPING", "%s", "ascii");
+  isupport_add("AWAYLEN", "%d", ConfigGeneral.max_away_length);
+  isupport_add("KICKLEN", "%d", ConfigChannel.max_kick_length);
+  isupport_add("NICKLEN", "%d", ConfigServerInfo.max_nick_length);
+  isupport_add("NETWORK", "%s", ConfigServerInfo.network_name);
+  isupport_add("MAXLIST", "beI:%u", ConfigChannel.max_bans);
+  isupport_add("MAXTARGETS", "%d", ConfigGeneral.max_targets);
+  isupport_add("CHANTYPES", "%s", "#");
+  isupport_add("CHANLIMIT", "#:%u", ConfigChannel.max_channels);
+  isupport_add("CHANNELLEN", "%d", CHANNELLEN);
+  isupport_add("TOPICLEN", "%d", ConfigServerInfo.max_topic_length);
+}
+
+/* conf_handle_tls()
+ *
+ * inputs       - cold If true, this is a cold (initial) boot
+ */
+void
+conf_handle_tls(bool cold)
+{
+  if (cold)
+  {
+    /* Only initialize TLS on cold boot */
+    if (tls_new_credentials() == false)
+      log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Failed to initialize TLS credentials");
+  }
+}
+
+/* conf_assign_class()
+ *
+ * inputs       - pointer to config item
+ * output       - NONE
+ * side effects - Add a class pointer to a conf
+ */
+void
+conf_assign_class(struct MaskItem *conf, const char *name)
+{
+  if (string_is_empty(name) || (conf->class = class_find(name, true)) == NULL)
+  {
+    conf->class = class_default;
+
+    if (conf->type == CONF_CLIENT || conf->type == CONF_OPER)
+      sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
+                     "Warning *** Defaulting to default class for %s@%s",
+                     conf->user, conf->host);
+    else
+      sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
+                     "Warning *** Defaulting to default class for %s",
+                     conf->name);
+  }
+}
+
+/* yyerror()
+ *
+ * inputs	- message from parser
+ * output	- NONE
+ * side effects	- message to opers and log file entry is made
+ */
+void
+yyerror(const char *msg)
+{
+  conf_error_report(msg);
+}
+
+void
+conf_error_report(const char *msg)
+{
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR,
+            "Error in configuration: %s", msg);
+}
+
+/* conf_match_password()
+ *
+ * inputs       - pointer to given password
+ *              - pointer to Conf
+ * output       - 1 or 0 if match
+ * side effects - none
+ */
+bool
+conf_match_password(const char *password, const struct MaskItem *conf)
+{
+  if (string_is_empty(password) || string_is_empty(conf->passwd))
+    return false;
+
+  const char *encr;
+  if (conf->flags & CONF_FLAGS_ENCRYPTED)
+    encr = crypt(password, conf->passwd);
+  else
+    encr = password;
+
+  return encr && strcmp(encr, conf->passwd) == 0;
+}
+
+/* Configuration functions */
+void
+conf_set_defaults(void)
+{
+  /* Verify class_init() ran. */
+  assert(class_default == list_peek_tail(class_get_list()));
+
+  ConfigServerInfo.network_name = io_strdup(NETWORK_NAME_DEFAULT);
+  ConfigServerInfo.network_description = io_strdup(NETWORK_DESCRIPTION_DEFAULT);
+  ConfigServerInfo.default_max_clients = MAXCLIENTS_MAX;
+  ConfigServerInfo.max_nick_length = 9;
+  ConfigServerInfo.max_topic_length = TOPICLEN;
+  ConfigServerInfo.hub = 0;
+
+  ConfigLog.use_logging = 1;
+
+  ConfigChannel.enable_extbans = 0;
+  ConfigChannel.disable_fake_channels = 0;
+  ConfigChannel.invite_client_count = 10;
+  ConfigChannel.invite_client_time = 300;
+  ConfigChannel.invite_delay_channel = 5;
+  ConfigChannel.invite_expire_time = 1800;
+  ConfigChannel.knock_client_count = 1;
+  ConfigChannel.knock_client_time = 300;
+  ConfigChannel.knock_delay_channel = 60;
+  ConfigChannel.max_channels = 25;
+  ConfigChannel.max_invites = 20;
+  ConfigChannel.max_bans = 100;
+  ConfigChannel.max_bans_large = 500;
+  ConfigChannel.max_kick_length = KICKLEN;
+  ConfigChannel.default_join_flood_count = 18;
+  ConfigChannel.default_join_flood_time = 6;
+
+  ConfigServerHide.flatten_links = 0;
+  ConfigServerHide.flatten_links_delay = 300;
+  ConfigServerHide.hidden = 0;
+  ConfigServerHide.hide_servers = 0;
+  ConfigServerHide.hide_services = 0;
+  ConfigServerHide.hidden_name = io_strdup(NETWORK_NAME_DEFAULT);
+  ConfigServerHide.hide_server_ips = 0;
+  ConfigServerHide.disable_remote_commands = 0;
+
+  ConfigGeneral.away_count = 2;
+  ConfigGeneral.away_time = 10;
+  ConfigGeneral.max_monitor = 50;
+  ConfigGeneral.whowas_history_length = 15000;
+  ConfigGeneral.cycle_on_host_change = 1;
+  ConfigGeneral.dline_min_cidr = 16;
+  ConfigGeneral.dline_min_cidr6 = 48;
+  ConfigGeneral.kline_min_cidr = 16;
+  ConfigGeneral.kline_min_cidr6 = 48;
+  ConfigGeneral.invisible_on_connect = 1;
+  ConfigGeneral.disable_auth = 0;
+  ConfigGeneral.disable_dns = 0;
+  ConfigGeneral.kill_chase_time_limit = 90;
+  ConfigGeneral.default_floodcount = 8;
+  ConfigGeneral.default_floodtime = 1;
+  ConfigGeneral.failed_oper_notice = 1;
+  ConfigGeneral.specials_in_ident = 0;
+  ConfigGeneral.min_nonwildcard = 4;
+  ConfigGeneral.min_nonwildcard_simple = 3;
+  ConfigGeneral.max_accept = 50;
+  ConfigGeneral.max_away_length = AWAYLEN;
+  ConfigGeneral.anti_nick_flood = 0;
+  ConfigGeneral.max_nick_time = 20;
+  ConfigGeneral.max_nick_changes = 5;
+  ConfigGeneral.anti_spam_exit_message_time = 0;
+  ConfigGeneral.ts_warn_delta = 30;
+  ConfigGeneral.ts_max_delta = 600;
+  ConfigGeneral.warn_no_connect_block = 1;
+  ConfigGeneral.stats_e_disabled = 0;
+  ConfigGeneral.stats_i_oper_only = 1;  /* 1 = masked */
+  ConfigGeneral.stats_k_oper_only = 1;  /* 1 = masked */
+  ConfigGeneral.stats_o_oper_only = 1;
+  ConfigGeneral.stats_m_oper_only = 1;
+  ConfigGeneral.stats_P_oper_only = 0;
+  ConfigGeneral.stats_u_oper_only = 0;
+  ConfigGeneral.caller_id_wait = 60;
+  ConfigGeneral.opers_bypass_callerid = 1;
+  ConfigGeneral.pace_wait = 10;
+  ConfigGeneral.pace_wait_simple = 1;
+  ConfigGeneral.short_motd = 0;
+  ConfigGeneral.ping_cookie = 0;
+  ConfigGeneral.no_oper_flood = 0;
+  ConfigGeneral.max_targets = 4;
+  ConfigGeneral.oper_umodes = io_strdup("+flsw");
+  ConfigGeneral.throttle_count = 1;
+  ConfigGeneral.throttle_time = 1;
+  ConfigGeneral.ident_timeout = 4;
+
+  ConfigGeneral.cloak_enabled = false;
+  cloak_set_disabled();
+  ConfigGeneral.cloak_cidr_len_ipv4 = 32;
+  cloak_set_cidr_len_ipv4(ConfigGeneral.cloak_cidr_len_ipv4);
+  ConfigGeneral.cloak_cidr_len_ipv6 = 64;
+  cloak_set_cidr_len_ipv6(ConfigGeneral.cloak_cidr_len_ipv6);
+  ConfigGeneral.cloak_num_bits = 80;
+  cloak_set_num_bits(ConfigGeneral.cloak_num_bits);
+  ConfigGeneral.cloak_secret = io_strdup("_WPJFgJb2M9rDC3tZmPTTzvyfcWerKebmEG84bKeTdNw");
+  cloak_set_secret(ConfigGeneral.cloak_secret);
+  ConfigGeneral.cloak_suffix = io_strdup("irc");
+  cloak_set_suffix(ConfigGeneral.cloak_suffix);
+}
+
+void
+conf_validate(void)
+{
+  if (string_is_empty(ConfigServerInfo.network_name))
+    ConfigServerInfo.network_name = io_strdup(NETWORK_NAME_DEFAULT);
+
+  if (string_is_empty(ConfigServerInfo.network_description))
+    ConfigServerInfo.network_description = io_strdup(NETWORK_DESCRIPTION_DEFAULT);
+}
+
+void
 conf_clear(void)
 {
   list_t *free_items [] = { &connect_items, &operator_items, NULL };
@@ -1229,404 +1376,4 @@ conf_clear(void)
 
   /* Clean out listeners */
   listener_close_marked();
-}
-
-static void
-conf_handle_tls(bool cold)
-{
-  if (tls_new_credentials() == false)
-  {
-    if (cold)
-    {
-      log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Error while initializing TLS");
-      exit(EXIT_FAILURE);
-    }
-    else
-    {
-      /* Failed to load new settings/certs, old ones remain active */
-      sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                     "Error reloading TLS settings, check the ircd log"); // report_crypto_errors logs this
-    }
-  }
-}
-
-/* conf_read_files()
- *
- * inputs       - cold start YES or NO
- * output       - none
- * side effects - read all conf files needed, ircd.conf kline.conf etc.
- */
-void
-conf_read_files(bool cold)
-{
-  int result = conf_xml_init();
-  if (result != XML_PARSE_SUCCESS)
-  {
-    if (cold)
-    {
-      log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Error initializing XML parser: %s",
-                conf_xml_error_str(result));
-      exit(EXIT_FAILURE);
-    }
-    else
-    {
-      sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
-                     "Error initializing XML parser: %s",
-                     conf_xml_error_str(result));
-      return;
-    }
-  }
-
-  result = conf_xml_parse(ConfigGeneral.configfile, cold);
-  if (result != XML_PARSE_SUCCESS)
-  {
-    if (cold)
-    {
-      log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Error reading configuration file '%s': %s",
-                ConfigGeneral.configfile, conf_xml_error_str(result));
-      exit(EXIT_FAILURE);
-    }
-    else
-    {
-      sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
-                     "Error reading configuration file '%s': %s",
-                     ConfigGeneral.configfile, conf_xml_error_str(result));
-      return;
-    }
-  }
-
-  conf_handle_tls(cold);
-
-  motd_init();
-
-  isupport_add("CASEMAPPING", "%s", "ascii");
-  isupport_add("AWAYLEN", "%d", ConfigGeneral.max_away_length);
-  isupport_add("KICKLEN", "%d", ConfigChannel.max_kick_length);
-  isupport_add("NICKLEN", "%d", ConfigServerInfo.max_nick_length);
-  isupport_add("NETWORK", "%s", ConfigServerInfo.network_name);
-  isupport_add("MAXLIST", "beI:%u", ConfigChannel.max_bans);
-  isupport_add("MAXTARGETS", "%d", ConfigGeneral.max_targets);
-  isupport_add("CHANTYPES", "%s", "#");
-  isupport_add("CHANLIMIT", "#:%u", ConfigChannel.max_channels);
-  isupport_add("CHANNELLEN", "%d", CHANNELLEN);
-  isupport_add("TOPICLEN", "%d", ConfigServerInfo.max_topic_length);
-}
-
-/* conf_assign_class()
- *
- * inputs       - pointer to config item
- * output       - NONE
- * side effects - Add a class pointer to a conf
- */
-void
-conf_assign_class(struct MaskItem *conf, const char *name)
-{
-  if (string_is_empty(name) || (conf->class = class_find(name, true)) == NULL)
-  {
-    conf->class = class_default;
-
-    if (conf->type == CONF_CLIENT || conf->type == CONF_OPER)
-      sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
-                     "Warning *** Defaulting to default class for %s@%s",
-                     conf->user, conf->host);
-    else
-      sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
-                     "Warning *** Defaulting to default class for %s",
-                     conf->name);
-  }
-}
-
-/* yyerror()
- *
- * inputs	- message from parser
- * output	- NONE
- * side effects	- message to opers and log file entry is made
- */
-void
-yyerror(const char *msg)
-{
-  conf_error_report(msg);
-}
-
-void
-conf_error_report(const char *msg)
-{
-  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR,
-            "Error in configuration: %s", msg);
-}
-
-/* conf_match_password()
- *
- * inputs       - pointer to given password
- *              - pointer to Conf
- * output       - 1 or 0 if match
- * side effects - none
- */
-bool
-conf_match_password(const char *password, const struct MaskItem *conf)
-{
-  if (string_is_empty(password) || string_is_empty(conf->passwd))
-    return false;
-
-  const char *encr;
-  if (conf->flags & CONF_FLAGS_ENCRYPTED)
-    encr = crypt(password, conf->passwd);
-  else
-    encr = password;
-
-  return encr && strcmp(encr, conf->passwd) == 0;
-}
-
-/**
- * @brief Generates a default configuration file and writes it to the specified path.
- *
- * This function creates a default configuration file with common settings
- * and writes it to the specified path. It includes basic server information,
- * operator settings, and other essential configuration blocks.
- *
- * @param filename The path where the configuration file should be written.
- *                 If NULL, the configuration will be printed to stdout.
- * @return Returns true if the file was successfully generated, false otherwise.
- */
-bool
-conf_generate_default(const char *filename)
-{
-  /* Server information block */
-  printf("serverinfo {\n");
-  printf("  name = \"irc.example.com\";\n");
-  printf("  sid = \"001\";\n");
-  printf("  description = \"Example IRC Server\";\n");
-  printf("  network_name = \"Example Network\";\n");
-  printf("  network_description = \"Example IRC Network\";\n");
-  printf("  default_max_clients = 100;\n");
-  printf("  max_nick_length = 32;\n");
-  printf("  max_topic_length = 307;\n");
-  printf("  hub = no;\n");
-  printf("};\n\n");
-
-  /* Admin block */
-  printf("admin {\n");
-  printf("  name = \"Example Admin\";\n");
-  printf("  email = \"admin@example.com\";\n");
-  printf("  description = \"Example IRC Network Administrator\";\n");
-  printf("};\n\n");
-
-  /* General settings block */
-  printf("general {\n");
-  printf("  away_count = 3;\n");
-  printf("  away_time = 300;\n");
-  printf("  failed_oper_notice = yes;\n");
-  printf("  anti_nick_flood = yes;\n");
-  printf("  max_nick_time = 300;\n");
-  printf("  max_nick_changes = 5;\n");
-  printf("  max_accept = 20;\n");
-  printf("  whowas_history_length = 10000;\n");
-  printf("  anti_spam_exit_message_time = 60;\n");
-  printf("  ts_warn_delta = 30;\n");
-  printf("  ts_max_delta = 90;\n");
-  printf("  invisible_on_connect = no;\n");
-  printf("  warn_no_connect_block = yes;\n");
-  printf("  stats_i_oper_only = yes;\n");
-  printf("  stats_k_oper_only = yes;\n");
-  printf("  stats_m_oper_only = yes;\n");
-  printf("  stats_o_oper_only = yes;\n");
-  printf("  stats_P_oper_only = yes;\n");
-  printf("  stats_u_oper_only = yes;\n");
-  printf("  pace_wait = 1;\n");
-  printf("  pace_wait_simple = 1;\n");
-  printf("  short_motd = no;\n");
-  printf("  no_oper_flood = yes;\n");
-  printf("  specials_in_ident = 0;\n");
-  printf("  max_targets = 20;\n");
-  printf("  max_away_length = 160;\n");
-  printf("  oper_umodes = \"rw\";\n");
-  printf("  caller_id_wait = 60;\n");
-  printf("  opers_bypass_callerid = yes;\n");
-  printf("  default_floodcount = 10;\n");
-  printf("  default_floodtime = 1;\n");
-  printf("  min_nonwildcard = 4;\n");
-  printf("  min_nonwildcard_simple = 4;\n");
-  printf("  throttle_count = 10;\n");
-  printf("  throttle_time = 60;\n");
-  printf("  ping_cookie = yes;\n");
-  printf("  disable_auth = no;\n");
-  printf("  disable_dns = no;\n");
-  printf("  dline_min_cidr = 32;\n");
-  printf("  dline_min_cidr6 = 128;\n");
-  printf("  kline_min_cidr = 32;\n");
-  printf("  kline_min_cidr6 = 128;\n");
-  printf("  kill_chase_time_limit = 10;\n");
-  printf("  max_monitor = 100;\n");
-  printf("  cycle_on_host_change = yes;\n");
-  printf("  cloak_enabled = yes;\n");
-  printf("  cloak_cidr_len_ipv4 = 24;\n");
-  printf("  cloak_cidr_len_ipv6 = 64;\n");
-  printf("  cloak_num_bits = 64;\n");
-  printf("  cloak_secret = \"changeme\";\n");
-  printf("  cloak_suffix = \".ip\";\n");
-  printf("  ident_timeout = 10;\n");
-  printf("};\n\n");
-
-  /* Channel settings block */
-  printf("channel {\n");
-  printf("  max_bans = 100;\n");
-  printf("  max_bans_large = 1000;\n");
-  printf("  invite_client_count = 20;\n");
-  printf("  invite_client_time = 60;\n");
-  printf("  invite_delay_channel = 60;\n");
-  printf("  invite_expire_time = 3600;\n");
-  printf("  knock_client_count = 3;\n");
-  printf("  knock_client_time = 60;\n");
-  printf("  knock_delay_channel = 60;\n");
-  printf("  max_channels = 20;\n");
-  printf("  max_invites = 100;\n");
-  printf("  max_kick_length = 160;\n");
-  printf("  default_join_flood_count = 10;\n");
-  printf("  default_join_flood_time = 60;\n");
-  printf("  disable_fake_channels = no;\n");
-  printf("  enable_extbans = yes;\n");
-  printf("  enable_owner = yes;\n");
-  printf("  enable_admin = yes;\n");
-  printf("};\n\n");
-
-  /* Class settings block */
-  printf("class {\n");
-  printf("  name = \"users\";\n");
-  printf("  ping_time = 90;\n");
-  printf("  connectfreq = 300;\n");
-  printf("  max_number = 100;\n");
-  printf("  sendq = 1000000;\n");
-  printf("  recvq = 1000000;\n");
-  printf("  cidr_bitlen_ipv4 = 32;\n");
-  printf("  cidr_bitlen_ipv6 = 128;\n");
-  printf("};\n\n");
-
-  /* Operator block */
-  printf("operator {\n");
-  printf("  name = \"admin\";\n");
-  printf("  user = \"*@*\";\n");
-  printf("  password = \"changeme\";\n");
-  printf("  flags = \"ovh\";\n");
-  printf("};\n\n");
-
-  /* Listener block */
-  printf("listen {\n");
-  printf("  port = 6667;\n");
-  printf("  address = \"0.0.0.0\";\n");
-  printf("};\n\n");
-
-  /* Log settings block */
-  printf("logging {\n");
-  printf("  fname_userlog = \"/var/log/ircd-hybrid/userlog\";\n");
-  printf("  fname_fuserlog = \"/var/log/ircd-hybrid/fuserlog\";\n");
-  printf("  fname_operlog = \"/var/log/ircd-hybrid/operlog\";\n");
-  printf("  fname_serverlog = \"/var/log/ircd-hybrid/serverlog\";\n");
-  printf("  fname_glinet = \"/var/log/ircd-hybrid/glinet\";\n");
-  printf("  fname_kill = \"/var/log/ircd-hybrid/kill\";\n");
-  printf("  fname_kline = \"/var/log/ircd-hybrid/kline\";\n");
-  printf("  fname_xline = \"/var/log/ircd-hybrid/xline\";\n");
-  printf("  fname_trace = \"/var/log/ircd-hybrid/trace\";\n");
-  printf("  fname_ircd = \"/var/log/ircd-hybrid/ircd\";\n");
-  printf("};\n\n");
-
-  /* MOTD block */
-  printf("motd {\n");
-  printf("  file = \"/etc/ircd-hybrid/motd\";\n");
-  printf("};\n\n");
-
-  /* Serverhide block */
-  printf("serverhide {\n");
-  printf("  flatten_links = yes;\n");
-  printf("  flatten_links_delay = 300;\n");
-  printf("  flatten_links_file = \"/var/lib/ircd-hybrid/flatten_links.dat\";\n");
-  printf("  disable_remote_commands = no;\n");
-  printf("  hide_servers = no;\n");
-  printf("  hide_services = no;\n");
-  printf("  hidden = no;\n");
-  printf("  hidden_name = \"hidden\";\n");
-  printf("  hide_server_ips = yes;\n");
-  printf("};\n\n");
-
-  /* Module path and loading */
-  printf("module {\n");
-  printf("  path = \"/usr/lib/ircd-hybrid/modules\";\n");
-  printf("  load = \"m_*.so\";\n");
-  printf("  load = \"umode_*.so\";\n");
-  printf("};\n\n");
-
-  return true;
-}
-
-static void
-conf_read_files_recurse(const char *filename)
-{
-  char path[IRCD_BUFSIZE];
-  FILE *file;
-
-  if (string_is_empty(filename))
-    return;
-
-  if (filename[0] == '/')  /* Absolute path */
-    strlcpy(path, filename, sizeof(path));
-  else  /* Relative path, prefix with ETCPATH */
-    snprintf(path, sizeof(path), "%s/%s", ETCPATH, filename);
-
-  if ((file = fopen(path, "r")) == NULL)
-  {
-    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Unable to open include file '%s': %s",
-              path, strerror(errno));
-    return;
-  }
-
-  conf_read(file);
-  fclose(file);
-}
-
-void
-delete_conf_item(struct MaskItem *conf)
-{
-  if (!conf)
-    return;
-
-  if (conf->name)
-    io_free(conf->name);
-  if (conf->passwd)
-    io_free(conf->passwd);
-  if (conf->reason)
-    io_free(conf->reason);
-  if (conf->certfp)
-    io_free(conf->certfp);
-  if (conf->whois)
-    io_free(conf->whois);
-  if (conf->cipher_list)
-    io_free(conf->cipher_list);
-  if (conf->bind)
-    io_free(conf->bind);
-
-  /* Free lists */
-  while (conf->hub_list.head)
-  {
-    io_free(conf->hub_list.head->data);
-    list_remove(conf->hub_list.head, &conf->hub_list);
-  }
-
-  while (conf->leaf_list.head)
-  {
-    io_free(conf->leaf_list.head->data);
-    list_remove(conf->leaf_list.head, &conf->leaf_list);
-  }
-
-  io_free(conf);
-}
-
-void
-delete_address_conf(struct AddressRec *arec)
-{
-  if (!arec)
-    return;
-
-  if (arec->conf)
-    delete_conf_item(arec->conf);
-
-  io_free(arec);
 }

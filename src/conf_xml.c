@@ -73,11 +73,9 @@
 #include "tls.h"
 
 /* Forward declarations */
-static void conf_clear(void);
-static void conf_set_defaults(void);
-static void conf_validate(void);
-static void delete_conf_item(struct MaskItem *);
-static void delete_address_conf(struct AddressRec *);
+void conf_clear(void);
+void conf_set_defaults(void);
+void conf_validate(void);
 
 /* Global variables */
 static xmlSchemaPtr schema = NULL;
@@ -518,7 +516,7 @@ parse_oper(xmlNodePtr node)
   conf->name = io_strdup((const char *)name);
 
   struct nuh_split nuh;  /* Use correct struct name */
-  nuh.nuhmask = (const char *)user;
+  nuh.nuhmask = (char *)user;
   nuh.nickptr = NULL;
   nuh.userptr = conf->user;
   nuh.hostptr = conf->host;
@@ -636,7 +634,7 @@ parse_auth(xmlNodePtr node)
 
   struct MaskItem *conf = conf_make(CONF_CLIENT);
   struct nuh_split nuh = { 0 };  /* Use correct struct name */
-  nuh.nuhmask = (const char *)user;
+  nuh.nuhmask = (char *)user;
   nuh.nickptr = NULL;
   nuh.userptr = conf->user;
   nuh.hostptr = conf->host;
@@ -879,7 +877,7 @@ parse_shared(xmlNodePtr node)
   shared->server = io_strdup((const char *)name);
 
   struct nuh_split nuh = { 0 };  /* Use correct struct name */
-  nuh.nuhmask = (const char *)user;
+  nuh.nuhmask = (char *)user;
   nuh.nickptr = NULL;
   nuh.userptr = shared->user;
   nuh.hostptr = shared->host;
@@ -971,7 +969,7 @@ parse_kill(xmlNodePtr node)
 
   struct MaskItem *conf = conf_make(CONF_KLINE);
   struct nuh_split nuh = { 0 };  /* Use correct struct name */
-  nuh.nuhmask = (const char *)user;
+  nuh.nuhmask = (char *)user;
   nuh.nickptr = NULL;
   nuh.userptr = conf->user;
   nuh.hostptr = conf->host;
@@ -1237,115 +1235,126 @@ conf_xml_error_str(int error_code)
   }
 }
 
-/* Forward declarations */
-static void conf_clear(void)
+/**
+ * @brief Generates a default configuration file and writes it to the specified path.
+ *
+ * This function creates a default configuration file with common settings
+ * and writes it to the specified path. It includes basic server information,
+ * operator settings, and other essential configuration blocks.
+ *
+ * @param filename The path where the configuration file should be written.
+ *                 If NULL, the configuration will be printed to stdout.
+ * @return Returns true if the file was successfully generated, false otherwise.
+ */
+bool
+conf_generate_default(const char *filename)
 {
-  /* Clear all configuration items */
-  class_mark_for_deletion();
-  motd_clear();
+  FILE *fp = filename ? fopen(filename, "w") : stdout;
+  if (!fp)
+    return false;
 
-  /* Free and clear lists */
-  while (connect_items.head)
-  {
-    struct MaskItem *conf = connect_items.head->data;
-    delete_conf_item(conf);
-  }
+  fprintf(fp, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+  fprintf(fp, "<ircd xmlns=\"http://www.ircd-hybrid.org/ircd\">\n\n");
 
-  while (operator_items.head)
-  {
-    struct MaskItem *conf = operator_items.head->data;
-    delete_conf_item(conf);
-  }
+  /* Server information */
+  fprintf(fp, "  <serverinfo\n");
+  fprintf(fp, "    name=\"irc.example.com\"\n");
+  fprintf(fp, "    sid=\"001\"\n");
+  fprintf(fp, "    description=\"Example IRC Server\"\n");
+  fprintf(fp, "    network_name=\"Example Network\"\n");
+  fprintf(fp, "    network_description=\"Example IRC Network\"\n");
+  fprintf(fp, "    default_max_clients=\"100\"\n");
+  fprintf(fp, "    max_nick_length=\"32\"\n");
+  fprintf(fp, "    max_topic_length=\"307\"\n");
+  fprintf(fp, "    hub=\"no\"\n");
+  fprintf(fp, "    motd_file=\"/etc/ircd-hybrid/motd\"\n");
+  fprintf(fp, "  />\n\n");
 
-  /* Clear address hash table */
-  for (int i = 0; i < ADDRESS_HASHSIZE; ++i)
-  {
-    while (atable[i].head)
-    {
-      struct AddressRec *arec = atable[i].head->data;
-      delete_address_conf(arec);
-    }
-  }
-}
+  /* Admin information */
+  fprintf(fp, "  <admin\n");
+  fprintf(fp, "    name=\"Example Admin\"\n");
+  fprintf(fp, "    description=\"Example IRC Network Administrator\"\n");
+  fprintf(fp, "    email=\"admin@example.com\"\n");
+  fprintf(fp, "  />\n\n");
 
-static void conf_set_defaults(void)
-{
-  /* Set default values for configuration */
-  ConfigServerInfo.name = NULL;
-  ConfigServerInfo.sid = NULL;
-  ConfigServerInfo.description = NULL;
-  ConfigServerInfo.network_name = NULL;
-  ConfigServerInfo.network_description = NULL;
-  ConfigServerInfo.default_max_clients = MAXCLIENTS_MAX;
-  ConfigServerInfo.max_nick_length = NICKLEN;
-  ConfigServerInfo.max_topic_length = TOPICLEN;
-  ConfigServerInfo.hub = false;
+  /* Class configuration */
+  fprintf(fp, "  <class\n");
+  fprintf(fp, "    name=\"users\"\n");
+  fprintf(fp, "    ping_time=\"90 seconds\"\n");
+  fprintf(fp, "    connectfreq=\"300 seconds\"\n");
+  fprintf(fp, "    max_number=\"100\"\n");
+  fprintf(fp, "    sendq=\"1000000 bytes\"\n");
+  fprintf(fp, "    recvq=\"1000000 bytes\"\n");
+  fprintf(fp, "    max_channels=\"15\"\n");
+  fprintf(fp, "    max_perip_local=\"3\"\n");
+  fprintf(fp, "    max_perip_global=\"5\"\n");
+  fprintf(fp, "    cidr_bitlen_ipv4=\"32\"\n");
+  fprintf(fp, "    cidr_bitlen_ipv6=\"128\"\n");
+  fprintf(fp, "    random_idle=\"no\"\n");
+  fprintf(fp, "    hide_idle_from_opers=\"no\"\n");
+  fprintf(fp, "  />\n\n");
 
-  ConfigChannel.max_bans = 25;
-  ConfigChannel.max_bans_large = 500;
-  ConfigChannel.max_channels = 15;
-  ConfigChannel.max_invites = 20;
-  ConfigChannel.max_kick_length = 120;
-  ConfigChannel.invite_client_count = 10;
-  ConfigChannel.invite_client_time = 300;
-  ConfigChannel.invite_delay_channel = 5;
-  ConfigChannel.invite_expire_time = 1800;
-  ConfigChannel.knock_client_count = 1;
-  ConfigChannel.knock_client_time = 300;
-  ConfigChannel.knock_delay_channel = 60;
-  ConfigChannel.default_join_flood_count = 18;
-  ConfigChannel.default_join_flood_time = 6;
-  ConfigChannel.disable_fake_channels = false;
-  ConfigChannel.enable_extbans = true;
-  ConfigChannel.enable_owner = false;
-  ConfigChannel.enable_admin = false;
+  /* Channel configuration */
+  fprintf(fp, "  <channel\n");
+  fprintf(fp, "    max_bans=\"100\"\n");
+  fprintf(fp, "    max_bans_large=\"1000\"\n");
+  fprintf(fp, "    max_invites=\"100\"\n");
+  fprintf(fp, "    max_kick_length=\"160\"\n");
+  fprintf(fp, "    max_channels=\"20\"\n");
+  fprintf(fp, "    invite_client_count=\"20\"\n");
+  fprintf(fp, "    invite_client_time=\"60 seconds\"\n");
+  fprintf(fp, "    invite_delay_channel=\"60 seconds\"\n");
+  fprintf(fp, "    invite_expire_time=\"3600 seconds\"\n");
+  fprintf(fp, "    knock_client_count=\"3\"\n");
+  fprintf(fp, "    knock_client_time=\"60 seconds\"\n");
+  fprintf(fp, "    knock_delay_channel=\"60 seconds\"\n");
+  fprintf(fp, "    default_join_flood_count=\"10\"\n");
+  fprintf(fp, "    default_join_flood_time=\"60 seconds\"\n");
+  fprintf(fp, "    disable_fake_channels=\"no\"\n");
+  fprintf(fp, "    enable_extbans=\"yes\"\n");
+  fprintf(fp, "    enable_owner=\"yes\"\n");
+  fprintf(fp, "    enable_admin=\"yes\"\n");
+  fprintf(fp, "  />\n\n");
 
-  ConfigServerHide.flatten_links = false;
-  ConfigServerHide.flatten_links_delay = 300;
-  ConfigServerHide.flatten_links_file = NULL;
-  ConfigServerHide.disable_remote_commands = false;
-  ConfigServerHide.hide_servers = false;
-  ConfigServerHide.hide_services = false;
-  ConfigServerHide.hidden = false;
-  ConfigServerHide.hidden_name = NULL;
-  ConfigServerHide.hide_server_ips = false;
-}
+  /* Server hiding configuration */
+  fprintf(fp, "  <serverhide\n");
+  fprintf(fp, "    flatten_links=\"yes\"\n");
+  fprintf(fp, "    flatten_links_delay=\"300 seconds\"\n");
+  fprintf(fp, "    flatten_links_file=\"/var/lib/ircd-hybrid/flatten_links.dat\"\n");
+  fprintf(fp, "    disable_remote_commands=\"no\"\n");
+  fprintf(fp, "    hide_servers=\"no\"\n");
+  fprintf(fp, "    hide_services=\"no\"\n");
+  fprintf(fp, "    hidden=\"no\"\n");
+  fprintf(fp, "    hidden_name=\"hidden\"\n");
+  fprintf(fp, "    hide_server_ips=\"yes\"\n");
+  fprintf(fp, "  />\n\n");
 
-static void conf_validate(void)
-{
-  /* Validate configuration values */
-  if (!ConfigServerInfo.name)
-    ConfigServerInfo.name = io_strdup("hybrid8.local");
+  /* Logging configuration */
+  fprintf(fp, "  <log use_logging=\"yes\">\n");
+  fprintf(fp, "    <file name=\"/var/log/ircd-hybrid/userlog\" type=\"user\" size=\"10 megabytes\"/>\n");
+  fprintf(fp, "    <file name=\"/var/log/ircd-hybrid/operlog\" type=\"operator\" size=\"10 megabytes\"/>\n");
+  fprintf(fp, "    <file name=\"/var/log/ircd-hybrid/serverlog\" type=\"debug\" size=\"10 megabytes\"/>\n");
+  fprintf(fp, "  </log>\n\n");
 
-  if (!ConfigServerInfo.sid)
-    ConfigServerInfo.sid = io_strdup("1AA");
+  /* Operator configuration */
+  fprintf(fp, "  <oper\n");
+  fprintf(fp, "    name=\"admin\"\n");
+  fprintf(fp, "    user=\"*@*\"\n");
+  fprintf(fp, "    password=\"changeme\"\n");
+  fprintf(fp, "    class=\"users\"\n");
+  fprintf(fp, "    flags=\"kill,connect,die,globops,module,rehash,admin\"\n");
+  fprintf(fp, "  />\n\n");
 
-  if (!ConfigServerInfo.description)
-    ConfigServerInfo.description = io_strdup("ircd-hybrid");
+  /* Listen configuration */
+  fprintf(fp, "  <listen\n");
+  fprintf(fp, "    port=\"6667\"\n");
+  fprintf(fp, "    ip=\"0.0.0.0\"\n");
+  fprintf(fp, "    flags=\"client\"\n");
+  fprintf(fp, "  />\n\n");
 
-  if (!ConfigServerInfo.network_name)
-    ConfigServerInfo.network_name = io_strdup("HybridNet");
+  fprintf(fp, "</ircd>\n");
 
-  if (!ConfigServerInfo.network_description)
-    ConfigServerInfo.network_description = io_strdup("Hybrid IRC Network");
-
-  if (ConfigServerInfo.max_nick_length < 9)
-    ConfigServerInfo.max_nick_length = 9;
-  else if (ConfigServerInfo.max_nick_length > NICKLEN)
-    ConfigServerInfo.max_nick_length = NICKLEN;
-
-  if (ConfigServerInfo.max_topic_length < 1)
-    ConfigServerInfo.max_topic_length = 1;
-  else if (ConfigServerInfo.max_topic_length > TOPICLEN)
-    ConfigServerInfo.max_topic_length = TOPICLEN;
-}
-
-static size_t get_embedded_schema_len(void)
-{
-  return _home_netcraveos_ircd_hybrid_etc_ircd_xsd_len;
-}
-
-static const char *get_embedded_schema(void)
-{
-  return (const char *)_home_netcraveos_ircd_hybrid_etc_ircd_xsd;
+  if (filename)
+    fclose(fp);
+  return true;
 } 
