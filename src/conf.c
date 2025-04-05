@@ -1023,8 +1023,6 @@ conf_rehash(bool sig)
 
   restart_resolver();
 
-  /* don't close listeners until we know we can go ahead with the rehash */
-
   conf_read_files(false);
 
   module_load_all(NULL);
@@ -1243,7 +1241,7 @@ conf_handle_tls(bool cold)
   }
 }
 
-/* read_conf_files()
+/* conf_read_files()
  *
  * inputs       - cold start YES or NO
  * output       - none
@@ -1252,41 +1250,41 @@ conf_handle_tls(bool cold)
 void
 conf_read_files(bool cold)
 {
-  conf_parser_ctx.boot = cold;
-  conf_parser_ctx.conf_file = fopen(ConfigGeneral.configfile, "r");
-
-  if (conf_parser_ctx.conf_file == NULL)
+  int result = conf_xml_init();
+  if (result != XML_PARSE_SUCCESS)
   {
     if (cold)
     {
-      log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Unable to read configuration file '%s': %s",
-           ConfigGeneral.configfile, strerror(errno));
+      log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Error initializing XML parser: %s",
+                conf_xml_error_str(result));
       exit(EXIT_FAILURE);
     }
     else
     {
       sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
-                     "Unable to read configuration file '%s': %s",
-                     ConfigGeneral.configfile, strerror(errno));
+                     "Error initializing XML parser: %s",
+                     conf_xml_error_str(result));
       return;
     }
   }
 
-  /*
-   * We need to know the initial filename for the yyerror() to report
-   *
-   *  FIXME: The full path is in conffilenamebuf first time since we
-   *          don't know anything else
-   *
-   *  - Gozem 2002-07-21
-   */
-  strlcpy(conf_file_name, ConfigGeneral.configfile, sizeof(conf_file_name));
-
-  if (cold == false)
-    conf_clear();
-
-  conf_read(conf_parser_ctx.conf_file);
-  fclose(conf_parser_ctx.conf_file);
+  result = conf_xml_parse(ConfigGeneral.configfile, cold);
+  if (result != XML_PARSE_SUCCESS)
+  {
+    if (cold)
+    {
+      log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Error reading configuration file '%s': %s",
+                ConfigGeneral.configfile, conf_xml_error_str(result));
+      exit(EXIT_FAILURE);
+    }
+    else
+    {
+      sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
+                     "Error reading configuration file '%s': %s",
+                     ConfigGeneral.configfile, conf_xml_error_str(result));
+      return;
+    }
+  }
 
   conf_handle_tls(cold);
 

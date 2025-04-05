@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.files import copy
 import os
 
@@ -16,12 +16,14 @@ class IrcHybridConan(ConanFile):
         "fPIC": [True, False],
         "with_tls": [True, False],
         "with_jansson": [True, False],
+        "with_xml": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_tls": True,
         "with_jansson": True,
+        "with_xml": True,
     }
 
     def config_options(self):
@@ -37,6 +39,8 @@ class IrcHybridConan(ConanFile):
             self.requires("openssl/3.2.1")
         if self.options.with_jansson:
             self.requires("jansson/2.14")
+        if self.options.with_xml:
+            self.requires("libxml2/2.12.3")
 
     def layout(self):
         cmake_layout(self)
@@ -45,7 +49,11 @@ class IrcHybridConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["WITH_TLS"] = self.options.with_tls
         tc.variables["WITH_JANSSON"] = self.options.with_jansson
+        tc.variables["WITH_XML"] = self.options.with_xml
         tc.generate()
+
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
         cmake = CMake(self)

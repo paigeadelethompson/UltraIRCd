@@ -1,21 +1,16 @@
-# Find Bison and Flex
-find_package(BISON REQUIRED)
-find_package(FLEX REQUIRED)
-
-# Generate parser and lexer
-bison_target(Parser 
-    ${CMAKE_CURRENT_SOURCE_DIR}/conf_parser.y
-    ${CMAKE_CURRENT_BINARY_DIR}/conf_parser.c
-    DEFINES_FILE ${CMAKE_CURRENT_BINARY_DIR}/conf_parser.h
-    COMPILE_FLAGS "-d"
+# Generate schema header
+add_custom_command(
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/conf_schema.c
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/cmake/generate_schema.py
+            ${CMAKE_SOURCE_DIR}/etc/ircd.xsd
+            ${CMAKE_CURRENT_BINARY_DIR}/conf_schema.c
+    DEPENDS ${CMAKE_SOURCE_DIR}/etc/ircd.xsd ${CMAKE_SOURCE_DIR}/cmake/generate_schema.py
+    COMMENT "Generating embedded schema header"
 )
 
-flex_target(Scanner
-    ${CMAKE_CURRENT_SOURCE_DIR}/conf_lexer.l
-    ${CMAKE_CURRENT_BINARY_DIR}/conf_lexer.c
-)
-
-add_flex_bison_dependency(Scanner Parser)
+# Find required packages
+find_package(Python3 REQUIRED)
+find_package(LibXml2 REQUIRED)
 
 # Source files
 set(IRCD_SOURCES
@@ -53,10 +48,14 @@ set(IRCD_SOURCES
     conf_pseudo.h
     conf_resv.c
     conf_resv.h
+    conf_schema.h
+    ${CMAKE_CURRENT_BINARY_DIR}/conf_schema.c
     conf_service.c
     conf_service.h
     conf_shared.c
     conf_shared.h
+    conf_xml.c
+    conf_xml.h
     defaults.h
     extban.c
     extban.h
@@ -124,8 +123,6 @@ set(IRCD_SOURCES
     user_mode.h
     whowas.c
     whowas.h
-    ${BISON_Parser_OUTPUTS}
-    ${FLEX_Scanner_OUTPUTS}
 )
 
 # Create executable
@@ -144,6 +141,7 @@ target_link_libraries(ircd PRIVATE
     ltdl
     ircd_headers
     crypt
+    LibXml2::LibXml2
 )
 
 # Add Jansson library if found

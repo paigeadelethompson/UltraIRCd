@@ -1,0 +1,378 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://www.ircd-hybrid.org/ircd"
+           xmlns:ircd="http://www.ircd-hybrid.org/ircd"
+           elementFormDefault="qualified">
+
+  <!-- Time specification format -->
+  <xs:simpleType name="timeSpec">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="(\d+(\s+(years?|months?|weeks?|days?|hours?|minutes?|seconds?))?(\s+)?)+"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- Size specification format -->
+  <xs:simpleType name="sizeSpec">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="(\d+(\s+(megabytes?|mbytes?|mb|kilobytes?|kbytes?|kb|bytes?))?(\s+)?)+"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- Boolean type that accepts yes/no -->
+  <xs:simpleType name="yesNo">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="yes"/>
+      <xs:enumeration value="no"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- Server ID format: [0-9][A-Z0-9][A-Z0-9] -->
+  <xs:simpleType name="sidType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9][A-Z0-9][A-Z0-9]"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- Operator flags -->
+  <xs:simpleType name="operFlags">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="(kill(:remote)?|connect(:remote)?|die|globops|module|rehash(:remote)?|admin|locops|remoteban|set|opme|nick:resv|join:resv|resv|unresv|close|message:mass)(,\s*(kill(:remote)?|connect(:remote)?|die|globops|module|rehash(:remote)?|admin|locops|remoteban|set|opme|nick:resv|join:resv|resv|unresv|close|message:mass))*"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- Listen flags -->
+  <xs:simpleType name="listenFlags">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="(tls|hidden|server|client|defer)(,\s*(tls|hidden|server|client|defer))*"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- Auth flags -->
+  <xs:simpleType name="authFlags">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="(exceed_limit|kline_exempt|xline_exempt|need_ident|can_flood|no_tilde|resv_exempt|webirc|need_password)(,\s*(exceed_limit|kline_exempt|xline_exempt|need_ident|can_flood|no_tilde|resv_exempt|webirc|need_password))*"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- Connect flags -->
+  <xs:simpleType name="connectFlags">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="(autoconn|tls)(,\s*(autoconn|tls))*"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- Log types -->
+  <xs:simpleType name="logType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="user"/>
+      <xs:enumeration value="operator"/>
+      <xs:enumeration value="xline"/>
+      <xs:enumeration value="resv"/>
+      <xs:enumeration value="dline"/>
+      <xs:enumeration value="kline"/>
+      <xs:enumeration value="kill"/>
+      <xs:enumeration value="debug"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- Root element -->
+  <xs:element name="ircd">
+    <xs:complexType>
+      <xs:sequence>
+        <!-- Module configuration -->
+        <xs:element name="module_base_path" minOccurs="0" maxOccurs="1">
+          <xs:complexType>
+            <xs:attribute name="path" type="xs:string" use="required"/>
+          </xs:complexType>
+        </xs:element>
+
+        <xs:element name="loadmodule" minOccurs="0" maxOccurs="unbounded">
+          <xs:complexType>
+            <xs:attribute name="path" type="xs:string" use="required"/>
+            <xs:attribute name="resident" type="yesNo" default="no"/>
+            <xs:attribute name="core" type="yesNo" default="no"/>
+          </xs:complexType>
+        </xs:element>
+
+        <!-- Server information -->
+        <xs:element name="serverinfo" minOccurs="1" maxOccurs="1">
+          <xs:complexType>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+            <xs:attribute name="sid" type="sidType" use="required"/>
+            <xs:attribute name="description" type="xs:string" use="required"/>
+            <xs:attribute name="network_name" type="xs:string" use="required"/>
+            <xs:attribute name="network_description" type="xs:string" use="required"/>
+            <xs:attribute name="default_max_clients" type="xs:positiveInteger" use="required"/>
+            <xs:attribute name="max_nick_length">
+              <xs:simpleType>
+                <xs:restriction base="xs:integer">
+                  <xs:minInclusive value="9"/>
+                  <xs:maxInclusive value="30"/>
+                </xs:restriction>
+              </xs:simpleType>
+            </xs:attribute>
+            <xs:attribute name="max_topic_length">
+              <xs:simpleType>
+                <xs:restriction base="xs:integer">
+                  <xs:minInclusive value="1"/>
+                  <xs:maxInclusive value="300"/>
+                </xs:restriction>
+              </xs:simpleType>
+            </xs:attribute>
+            <xs:attribute name="hub" type="yesNo" default="no"/>
+            <xs:attribute name="motd_file" type="xs:string" use="required"/>
+            <xs:attribute name="rsa_private_key_file" type="xs:string"/>
+            <xs:attribute name="tls_certificate_file" type="xs:string"/>
+            <xs:attribute name="tls_dh_param_file" type="xs:string"/>
+            <xs:attribute name="tls_supported_groups" type="xs:string"/>
+            <xs:attribute name="tls_cipher_list" type="xs:string"/>
+            <xs:attribute name="tls_cipher_suites" type="xs:string"/>
+            <xs:attribute name="tls_message_digest_algorithm" type="xs:string"/>
+          </xs:complexType>
+        </xs:element>
+
+        <!-- Admin information -->
+        <xs:element name="admin" minOccurs="0" maxOccurs="1">
+          <xs:complexType>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+            <xs:attribute name="description" type="xs:string" use="required"/>
+            <xs:attribute name="email" type="xs:string" use="required"/>
+          </xs:complexType>
+        </xs:element>
+
+        <!-- Class configuration -->
+        <xs:element name="class" minOccurs="0" maxOccurs="unbounded">
+          <xs:complexType>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+            <xs:attribute name="ping_time" type="timeSpec" use="required"/>
+            <xs:attribute name="connectfreq" type="timeSpec" use="required"/>
+            <xs:attribute name="max_number" type="xs:nonNegativeInteger" use="required"/>
+            <xs:attribute name="sendq" type="sizeSpec" use="required"/>
+            <xs:attribute name="recvq" type="sizeSpec" use="required"/>
+            <xs:attribute name="max_channels" type="xs:nonNegativeInteger" use="required"/>
+            <xs:attribute name="max_perip_local" type="xs:nonNegativeInteger" use="required"/>
+            <xs:attribute name="max_perip_global" type="xs:nonNegativeInteger" use="required"/>
+            <xs:attribute name="min_idle" type="timeSpec"/>
+            <xs:attribute name="max_idle" type="timeSpec"/>
+            <xs:attribute name="cidr_bitlen_ipv4">
+              <xs:simpleType>
+                <xs:restriction base="xs:integer">
+                  <xs:minInclusive value="0"/>
+                  <xs:maxInclusive value="32"/>
+                </xs:restriction>
+              </xs:simpleType>
+            </xs:attribute>
+            <xs:attribute name="cidr_bitlen_ipv6">
+              <xs:simpleType>
+                <xs:restriction base="xs:integer">
+                  <xs:minInclusive value="0"/>
+                  <xs:maxInclusive value="128"/>
+                </xs:restriction>
+              </xs:simpleType>
+            </xs:attribute>
+            <xs:attribute name="number_per_cidr" type="xs:nonNegativeInteger"/>
+            <xs:attribute name="random_idle" type="yesNo" default="no"/>
+            <xs:attribute name="hide_idle_from_opers" type="yesNo" default="no"/>
+          </xs:complexType>
+        </xs:element>
+
+        <!-- Channel configuration -->
+        <xs:element name="channel" minOccurs="0" maxOccurs="1">
+          <xs:complexType>
+            <xs:attribute name="max_bans" type="xs:positiveInteger" use="required"/>
+            <xs:attribute name="max_bans_large" type="xs:positiveInteger" use="required"/>
+            <xs:attribute name="max_invites" type="xs:positiveInteger" use="required"/>
+            <xs:attribute name="max_kick_length" type="xs:positiveInteger" use="required"/>
+            <xs:attribute name="max_channels" type="xs:positiveInteger" use="required"/>
+            <xs:attribute name="invite_client_count" type="xs:positiveInteger" use="required"/>
+            <xs:attribute name="invite_client_time" type="timeSpec" use="required"/>
+            <xs:attribute name="invite_delay_channel" type="timeSpec" use="required"/>
+            <xs:attribute name="invite_expire_time" type="timeSpec" use="required"/>
+            <xs:attribute name="knock_client_count" type="xs:positiveInteger" use="required"/>
+            <xs:attribute name="knock_client_time" type="timeSpec" use="required"/>
+            <xs:attribute name="knock_delay_channel" type="timeSpec" use="required"/>
+            <xs:attribute name="default_join_flood_count" type="xs:positiveInteger" use="required"/>
+            <xs:attribute name="default_join_flood_time" type="timeSpec" use="required"/>
+            <xs:attribute name="disable_fake_channels" type="yesNo" default="no"/>
+            <xs:attribute name="enable_extbans" type="yesNo" default="no"/>
+            <xs:attribute name="enable_owner" type="yesNo" default="no"/>
+            <xs:attribute name="enable_admin" type="yesNo" default="no"/>
+          </xs:complexType>
+        </xs:element>
+
+        <!-- Server hiding configuration -->
+        <xs:element name="serverhide" minOccurs="0" maxOccurs="1">
+          <xs:complexType>
+            <xs:attribute name="flatten_links" type="yesNo" default="no"/>
+            <xs:attribute name="flatten_links_delay" type="timeSpec"/>
+            <xs:attribute name="flatten_links_file" type="xs:string"/>
+            <xs:attribute name="disable_remote_commands" type="yesNo" default="no"/>
+            <xs:attribute name="hide_servers" type="yesNo" default="no"/>
+            <xs:attribute name="hide_services" type="yesNo" default="no"/>
+            <xs:attribute name="hidden" type="yesNo" default="no"/>
+            <xs:attribute name="hidden_name" type="xs:string"/>
+            <xs:attribute name="hide_server_ips" type="yesNo" default="no"/>
+          </xs:complexType>
+        </xs:element>
+
+        <!-- Logging configuration -->
+        <xs:element name="log" minOccurs="0" maxOccurs="unbounded">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="file" minOccurs="0" maxOccurs="unbounded">
+                <xs:complexType>
+                  <xs:attribute name="name" type="xs:string" use="required"/>
+                  <xs:attribute name="type" type="logType" use="required"/>
+                  <xs:attribute name="size" type="sizeSpec"/>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+            <xs:attribute name="use_logging" type="yesNo" use="required"/>
+          </xs:complexType>
+        </xs:element>
+
+        <!-- Operator configuration -->
+        <xs:element name="oper" minOccurs="0" maxOccurs="unbounded">
+          <xs:complexType>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+            <xs:attribute name="user" type="xs:string" use="required"/>
+            <xs:attribute name="password" type="xs:string" use="required"/>
+            <xs:attribute name="class" type="xs:string" use="required"/>
+            <xs:attribute name="whois" type="xs:string"/>
+            <xs:attribute name="umodes" type="xs:string"/>
+            <xs:attribute name="encrypted" type="yesNo" default="no"/>
+            <xs:attribute name="tls_certificate_fingerprint" type="xs:string"/>
+            <xs:attribute name="tls_connection_required" type="yesNo" default="no"/>
+            <xs:attribute name="flags" type="operFlags" use="required"/>
+          </xs:complexType>
+        </xs:element>
+
+        <!-- Listen configuration -->
+        <xs:element name="listen" minOccurs="0" maxOccurs="unbounded">
+          <xs:complexType>
+            <xs:attribute name="port" type="xs:string" use="required"/>
+            <xs:attribute name="ip" type="xs:string"/>
+            <xs:attribute name="host" type="xs:string"/>
+            <xs:attribute name="flags" type="listenFlags" use="required"/>
+          </xs:complexType>
+        </xs:element>
+
+        <!-- Auth configuration -->
+        <xs:element name="auth" minOccurs="0" maxOccurs="unbounded">
+          <xs:complexType>
+            <xs:attribute name="user" type="xs:string" use="required"/>
+            <xs:attribute name="password" type="xs:string"/>
+            <xs:attribute name="class" type="xs:string" use="required"/>
+            <xs:attribute name="flags" type="authFlags" use="required"/>
+            <xs:attribute name="spoof" type="xs:string"/>
+            <xs:attribute name="redirserv" type="xs:string"/>
+            <xs:attribute name="redirport" type="xs:positiveInteger"/>
+            <xs:attribute name="encrypted" type="yesNo" default="no"/>
+          </xs:complexType>
+        </xs:element>
+
+        <!-- Connect configuration -->
+        <xs:element name="connect" minOccurs="0" maxOccurs="unbounded">
+          <xs:complexType>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+            <xs:attribute name="host" type="xs:string" use="required"/>
+            <xs:attribute name="timeout" type="timeSpec" use="required"/>
+            <xs:attribute name="bind" type="xs:string"/>
+            <xs:attribute name="send_password" type="xs:string" use="required"/>
+            <xs:attribute name="accept_password" type="xs:string" use="required"/>
+            <xs:attribute name="tls_certificate_fingerprint" type="xs:string"/>
+            <xs:attribute name="port" type="xs:positiveInteger" use="required"/>
+            <xs:attribute name="aftype">
+              <xs:simpleType>
+                <xs:restriction base="xs:string">
+                  <xs:enumeration value="ipv4"/>
+                  <xs:enumeration value="ipv6"/>
+                </xs:restriction>
+              </xs:simpleType>
+            </xs:attribute>
+            <xs:attribute name="tls_cipher_list" type="xs:string"/>
+            <xs:attribute name="flags" type="connectFlags" use="required"/>
+            <xs:attribute name="hub_mask" type="xs:string"/>
+            <xs:attribute name="leaf_mask" type="xs:string"/>
+            <xs:attribute name="class" type="xs:string" use="required"/>
+            <xs:attribute name="encrypted" type="yesNo" default="no"/>
+          </xs:complexType>
+        </xs:element>
+
+        <!-- Cluster configuration -->
+        <xs:element name="cluster" minOccurs="0" maxOccurs="unbounded">
+          <xs:complexType>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+            <xs:attribute name="type" type="xs:string" use="required"/>
+          </xs:complexType>
+        </xs:element>
+
+        <!-- Shared configuration -->
+        <xs:element name="shared" minOccurs="0" maxOccurs="unbounded">
+          <xs:complexType>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+            <xs:attribute name="user" type="xs:string" use="required"/>
+            <xs:attribute name="type" type="xs:string" use="required"/>
+          </xs:complexType>
+        </xs:element>
+
+        <!-- GECOS configuration -->
+        <xs:element name="gecos" minOccurs="0" maxOccurs="unbounded">
+          <xs:complexType>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+            <xs:attribute name="reason" type="xs:string"/>
+          </xs:complexType>
+        </xs:element>
+
+        <!-- Pseudo configuration -->
+        <xs:element name="pseudo" minOccurs="0" maxOccurs="unbounded">
+          <xs:complexType>
+            <xs:attribute name="command" type="xs:string" use="required"/>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+            <xs:attribute name="prepend" type="xs:string"/>
+            <xs:attribute name="target" type="xs:string" use="required"/>
+          </xs:complexType>
+        </xs:element>
+
+        <!-- Kill configuration -->
+        <xs:element name="kill" minOccurs="0" maxOccurs="unbounded">
+          <xs:complexType>
+            <xs:attribute name="user" type="xs:string" use="required"/>
+            <xs:attribute name="reason" type="xs:string"/>
+          </xs:complexType>
+        </xs:element>
+
+        <!-- Deny configuration -->
+        <xs:element name="deny" minOccurs="0" maxOccurs="unbounded">
+          <xs:complexType>
+            <xs:attribute name="ip" type="xs:string" use="required"/>
+            <xs:attribute name="reason" type="xs:string"/>
+          </xs:complexType>
+        </xs:element>
+
+        <!-- Exempt configuration -->
+        <xs:element name="exempt" minOccurs="0" maxOccurs="unbounded">
+          <xs:complexType>
+            <xs:attribute name="ip" type="xs:string" use="required"/>
+          </xs:complexType>
+        </xs:element>
+
+        <!-- RESV configuration -->
+        <xs:element name="resv" minOccurs="0" maxOccurs="unbounded">
+          <xs:complexType>
+            <xs:attribute name="mask" type="xs:string" use="required"/>
+            <xs:attribute name="reason" type="xs:string"/>
+            <xs:attribute name="exempt" type="xs:string"/>
+          </xs:complexType>
+        </xs:element>
+
+        <!-- Service configuration -->
+        <xs:element name="service" minOccurs="0" maxOccurs="unbounded">
+          <xs:complexType>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema> 
