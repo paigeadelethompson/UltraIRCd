@@ -87,8 +87,6 @@ set(IRCD_SOURCES
     ircd_exit.h
     ircd_hook.c
     ircd_hook.h
-    ircd_signal.c
-    ircd_signal.h
     isupport.c
     isupport.h
     listener.c

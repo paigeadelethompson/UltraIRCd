@@ -53,7 +53,6 @@
 #include "cloak.h"
 #include "hash.h"
 #include "id.h"
-#include "ircd_signal.h"
 #include "motd.h"
 #include "conf.h"
 #include "parse.h"
@@ -91,14 +90,34 @@ struct SetOptions GlobalSetOptions;
 struct Counter Count;
 
 /**
- * @struct ServerState_t
- * @brief Structure representing the server's foreground state.
- *
- * The `ServerState_t` structure holds a flag indicating whether the server should
- * run in the background. The flag is set based on the command line parameter
- * '-fork' when launching the ircd process.
+ * @var bool debug_mode
+ * @brief Flag indicating whether debug mode is enabled.
  */
-struct ServerState_t server_state = { .foreground = true, .debug = false };
+static bool debug_mode = false;
+
+/**
+ * @var bool foreground_mode
+ * @brief Flag indicating whether the server should run in foreground mode.
+ */
+static bool foreground_mode = true;
+
+/**
+ * @var bool dorehash
+ * @brief Flag indicating whether configuration rehashing is needed.
+ */
+static bool dorehash = false;
+
+/**
+ * @var bool doremotd
+ * @brief Flag indicating whether MOTD reloading is needed.
+ */
+static bool doremotd = false;
+
+/**
+ * @var bool generate_config
+ * @brief Flag indicating whether configuration generation is needed.
+ */
+static bool generate_config = false;
 
 /**
  * @struct ServerStatistics
@@ -148,32 +167,6 @@ const char *logFileName = LPATH;
 const char *pidFileName = PPATH;
 
 /**
- * @var const char *generateConfigFile
- * @brief Pointer to the filename for the generated configuration file.
- */
-static const char *generateConfigFile;
-
-/**
- * @var struct option long_options[]
- * @brief Array of long options for getopt_long.
- */
-static struct option long_options[] = {
-  {"configfile", required_argument, 0, 'c'},
-  {"klinefile", required_argument, 0, 'k'},
-  {"dlinefile", required_argument, 0, 'd'},
-  {"xlinefile", required_argument, 0, 'x'},
-  {"resvfile", required_argument, 0, 'r'},
-  {"logfile", required_argument, 0, 'l'},
-  {"pidfile", required_argument, 0, 'p'},
-  {"fork", no_argument, 0, 'f'},
-  {"version", no_argument, 0, 'v'},
-  {"generate-config", optional_argument, 0, 'g'},
-  {"debug", no_argument, 0, 'D'},
-  {"help", no_argument, 0, 'h'},
-  {0, 0, 0, 0}
-};
-
-/**
  * @brief Display usage information for the program.
  *
  * Displays the program's usage information, including valid options and their descriptions.
@@ -194,7 +187,7 @@ print_usage(const char *name)
   fprintf(stderr, "  -p, --pidfile FILE       File to use for process ID\n");
   fprintf(stderr, "  -f, --fork               Run in background (fork)\n");
   fprintf(stderr, "  -v, --version            Print version and exit\n");
-  fprintf(stderr, "  -g, --generate-config [FILE] Generate a new configuration file\n");
+  fprintf(stderr, "  -g, --generate-config    Generate a new configuration file to stdout\n");
   fprintf(stderr, "  -D, --debug              Enable debug logging\n");
   fprintf(stderr, "  -h, --help               Print this text\n");
 }
@@ -290,38 +283,6 @@ initialize_global_set_options(void)
 }
 
 /**
- * @brief Handles out-of-memory conditions.
- *
- * This function reports an out-of-memory condition and restarts the program.
- */
-static void
-ircd_oom(void)
-{
-  ircd_exit(IRCD_EXIT_RESTART, "out of memory");
-}
-
-/**
- * @brief Handles time provider API error conditions.
- *
- * This function reports an error condition encountered in the time provider API using the provided
- * error message. It exits with EXIT_FAILURE if the error code is IO_TIME_ERR_INIT, otherwise, it restarts the program.
- *
- * @param error_code The error code indicating the type of error in the time provider API.
- * @param message The error message providing details about the time provider API error.
- */
-static void
-ircd_time_failure(enum io_time_error_code error_code, const char *message)
-{
-  if (error_code == IO_TIME_ERR_INIT)
-  {
-    fprintf(stderr, "ERROR: %s\n", message);
-    exit(EXIT_FAILURE);  /* Exit with failure if initialization error. */
-  }
-
-  ircd_exit(IRCD_EXIT_RESTART, message);  /* Restart the program for other errors. */
-}
-
-/**
  * @brief Prints startup information including version and process ID.
  *
  * This function prints information about the server version, process ID,
@@ -341,7 +302,7 @@ print_startup(int pid)
   log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "ircd: version %s", IRCD_VERSION);
   log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "ircd: pid %d", pid);
   log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "ircd: running in %s mode from %s",
-           server_state.foreground ? "foreground" : "background", cwd);
+           foreground_mode ? "foreground" : "background", cwd);
   log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "ircd: started at %s", date_iso8601_usec(0));
 }
 
@@ -424,79 +385,18 @@ signal_handler(int sig)
 int
 main(int argc, char *argv[])
 {
-  
   int opt;
-  int option_index = 0;
-  const char *short_options = "c:k:d:x:r:l:p:fvgDh";
 
-  /* Check to see if the user is running us as root, which is a nono */
-  if (geteuid() == 0)
+  /* Parse command line options */
+  while ((opt = getopt(argc, argv, "c:d:f:gh:l:p:r:v:x:D")) != -1)
   {
-    fprintf(stderr, "ERROR: This server won't run as root/superuser\n");
-    return -1;
-  }
-
-  /* Handle the -g option without an argument */
-  if (argc > 1 && strcmp(argv[1], "-g") == 0)
-  {
-    conf_generate_default(NULL);
-    exit(EXIT_SUCCESS);
-  }
-
-  io_set_oom_handler(ircd_oom);
-
-  io_rlimit_set_max_core();
-
-  io_rlimit_set_max_nofile();
-
-  io_time_set_error_callback(ircd_time_failure);
-  io_time_init();
-
-  /* Configure libjansson to use io_calloc and io_free. */
-  json_set_alloc_funcs(io_calloc, io_free);
-
-  /*
-   * Calculate the seed using multiple sources of entropy
-   * - Real-time and monotonic clocks provide high-resolution time values
-   * - Process ID adds process-specific uniqueness
-   * This combination aims to create a seed that is harder to predict
-   */
-  const uint32_t seed = (uint32_t)(
-     (io_time_get(IO_TIME_REALTIME_SEC) % UINT32_MAX) ^  /* Real-time seconds (modulo to fit in 32 bits) */
-      io_time_get(IO_TIME_REALTIME_NSEC) ^  /* Real-time nanoseconds */
-    ((io_time_get(IO_TIME_MONOTONIC_SEC) % UINT32_MAX) ^  /* Monotonic seconds (modulo to fit in 32 bits) */
-      io_time_get(IO_TIME_MONOTONIC_NSEC) ^  /* Monotonic nanoseconds */
-    ((uint32_t)(getpid() & 0xFFFF) << 16))  /* Masked and shifted PID for added entropy */
-  );
-
-  init_genrand(seed);
-
-  ConfigGeneral.dpath      = DPATH;
-  ConfigGeneral.spath      = SPATH;
-  ConfigGeneral.configfile = CPATH;    /* Server configuration file */
-  ConfigGeneral.klinefile  = KPATH;    /* Server kline file         */
-  ConfigGeneral.xlinefile  = XPATH;    /* Server xline file         */
-  ConfigGeneral.dlinefile  = DLPATH;   /* dline file                */
-  ConfigGeneral.resvfile   = RESVPATH; /* resv file                 */
-
-  myargv = argv;
-  umask(077);  /* umask 077: u=rwx,g=,o= */
-
-  /* By default, run in foreground mode and debug off */
-  server_state.foreground = true;
-  server_state.debug = false;
-
-  /* Parse command line options using getopt_long */
-  while ((opt = getopt_long(argc, argv, short_options, long_options, &option_index)) != -1) {
-    switch (opt) {
+    switch (opt)
+    {
       case 'c':
         ConfigGeneral.configfile = io_strdup(optarg);
         break;
-      case 'k':
-        ConfigGeneral.klinefile = io_strdup(optarg);
-        break;
       case 'd':
-        ConfigGeneral.dlinefile = io_strdup(optarg);
+        ConfigGeneral.dpath = io_strdup(optarg);
         break;
       case 'x':
         ConfigGeneral.xlinefile = io_strdup(optarg);
@@ -511,25 +411,16 @@ main(int argc, char *argv[])
         pidFileName = io_strdup(optarg);
         break;
       case 'f':
-        server_state.foreground = false;  /* -f means run in background */
+        foreground_mode = false;  /* -f means run in background */
         break;
       case 'v':
-        printf("ircd: version %s\n", IRCD_VERSION);
+        log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "ircd: version %s", IRCD_VERSION);
         exit(EXIT_SUCCESS);
       case 'g':
-        generateConfigFile = optarg ? io_strdup(optarg) : NULL;
+        generate_config = true;
         break;
       case 'D':
-        server_state.debug = true;  /* Enable debug logging */
-        log_add(LOG_TYPE_IRCD, LOG_SEVERITY_DEBUG, true, 0, "stderr");
-        log_add(LOG_TYPE_KILL, LOG_SEVERITY_DEBUG, false, 0, "stderr");
-        log_add(LOG_TYPE_KLINE, LOG_SEVERITY_DEBUG, false, 0, "stderr");
-        log_add(LOG_TYPE_DLINE, LOG_SEVERITY_DEBUG, false, 0, "stderr");
-        log_add(LOG_TYPE_XLINE, LOG_SEVERITY_DEBUG, false, 0, "stderr");
-        log_add(LOG_TYPE_RESV, LOG_SEVERITY_DEBUG, false, 0, "stderr");
-        log_add(LOG_TYPE_OPER, LOG_SEVERITY_DEBUG, false, 0, "stderr");
-        log_add(LOG_TYPE_USER, LOG_SEVERITY_DEBUG, false, 0, "stderr");
-        log_write(LOG_TYPE_IRCD, LOG_SEVERITY_DEBUG, "Debug mode enabled");
+        debug_mode = true;  /* Enable debug logging */
         break;
       case 'h':
         print_usage(argv[0]);
@@ -540,39 +431,62 @@ main(int argc, char *argv[])
     }
   }
 
-  if (!server_state.debug)
+  /* Initialize logging based on debug flag */
+  if (debug_mode)
   {
-        log_add(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, true, 0, "stderr");
-        log_add(LOG_TYPE_KILL, LOG_SEVERITY_INFO, false, 0, "stderr");
-        log_add(LOG_TYPE_KLINE, LOG_SEVERITY_INFO, false, 0, "stderr");
-        log_add(LOG_TYPE_DLINE, LOG_SEVERITY_INFO, false, 0, "stderr");
-        log_add(LOG_TYPE_XLINE, LOG_SEVERITY_INFO, false, 0, "stderr");
-        log_add(LOG_TYPE_RESV, LOG_SEVERITY_INFO, false, 0, "stderr");
-        log_add(LOG_TYPE_OPER, LOG_SEVERITY_INFO, false, 0, "stderr");
-        log_add(LOG_TYPE_USER, LOG_SEVERITY_INFO, false, 0, "stderr");
-    
+    log_add(LOG_TYPE_IRCD, LOG_SEVERITY_DEBUG, true, 0, "stderr");
+    log_add(LOG_TYPE_KILL, LOG_SEVERITY_DEBUG, false, 0, "stderr");
+    log_add(LOG_TYPE_KLINE, LOG_SEVERITY_DEBUG, false, 0, "stderr");
+    log_add(LOG_TYPE_DLINE, LOG_SEVERITY_DEBUG, false, 0, "stderr");
+    log_add(LOG_TYPE_XLINE, LOG_SEVERITY_DEBUG, false, 0, "stderr");
+    log_add(LOG_TYPE_RESV, LOG_SEVERITY_DEBUG, false, 0, "stderr");
+    log_add(LOG_TYPE_OPER, LOG_SEVERITY_DEBUG, false, 0, "stderr");
+    log_add(LOG_TYPE_USER, LOG_SEVERITY_DEBUG, false, 0, "stderr");
+  }
+  else
+  {
+    log_add(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, true, 0, "stderr");
+    log_add(LOG_TYPE_KILL, LOG_SEVERITY_INFO, false, 0, "stderr");
+    log_add(LOG_TYPE_KLINE, LOG_SEVERITY_INFO, false, 0, "stderr");
+    log_add(LOG_TYPE_DLINE, LOG_SEVERITY_INFO, false, 0, "stderr");
+    log_add(LOG_TYPE_XLINE, LOG_SEVERITY_INFO, false, 0, "stderr");
+    log_add(LOG_TYPE_RESV, LOG_SEVERITY_INFO, false, 0, "stderr");
+    log_add(LOG_TYPE_OPER, LOG_SEVERITY_INFO, false, 0, "stderr");
+    log_add(LOG_TYPE_USER, LOG_SEVERITY_INFO, false, 0, "stderr");
   }
 
   /* Change to the working directory */
   char cwd[PATH_MAX];
   if (getcwd(cwd, sizeof(cwd)) == NULL) {
-    fprintf(stderr, "ircd: unable to get current working directory: %s\n", strerror(errno));
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "ircd: unable to get current working directory: %s", strerror(errno));
     exit(EXIT_FAILURE);
   }
 
   ConfigGeneral.dpath = io_strdup(cwd);
   
- /* Initialize the configuration */
+  /* Initialize the configuration */
   log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "Initializing configuration...");
   log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "Configuration file path: %s", ConfigGeneral.configfile);
   log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "Data directory: %s", ConfigGeneral.dpath);
   
-  if (!server_state.foreground)
+   /* Generate default config to stdout and exit */
+  if (generate_config)
+  {
+    if (conf_generate_default(NULL))
+    {
+      exit(EXIT_SUCCESS);
+    }
+    else
+    {
+      log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Failed to generate configuration file to stdout.");
+      exit(EXIT_FAILURE);
+    }
+  }
+
+  if (!foreground_mode)
     make_daemon();
   else
     print_startup(getpid());
-
-  ircd_signal_init();
 
   /* We need this to initialise the fd array before anything else */
   fdlist_init();
@@ -631,22 +545,6 @@ main(int argc, char *argv[])
   
   log_write(LOG_TYPE_IRCD, LOG_SEVERITY_DEBUG, "DEBUG: Server description check passed");
   log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "Configuration loaded successfully");
-
-  if (generateConfigFile != NULL)
-  {
-    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "Generating default configuration file...");
-    if (conf_generate_default(generateConfigFile))
-    {
-      log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "Configuration file %s generated successfully.",
-                generateConfigFile ? generateConfigFile : "written to stdout");
-      exit(EXIT_SUCCESS);
-    }
-    else
-    {
-      log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Failed to generate configuration file.");
-      exit(EXIT_FAILURE);
-    }
-  }
 
   /* Check if there is pidfile and daemon already running */
   log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "Creating PID file...");
@@ -756,7 +654,7 @@ main(int argc, char *argv[])
   event_addish(&event_save_all_databases, NULL);
 
   /* Only switch to configured logging if we have a valid configuration */
-  if (server_state.foreground)
+  if (foreground_mode)
   {
     log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "Server ready. Running version: %s", IRCD_VERSION);
     log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "Entering main event loop...");
