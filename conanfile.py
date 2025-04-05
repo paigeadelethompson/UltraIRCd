@@ -3,13 +3,14 @@ from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.files import copy
 import os
 
-class IrcHybridConan(ConanFile):
-    name = "ircd-hybrid"
-    version = "8.2.47"
-    description = "IRC daemon with advanced features"
+
+class UltraIrcConan(ConanFile):
+    name = "ultra-ircd"
+    version = "8.3.0"
+    description = "Ultra-IRCd - Advanced IRC daemon"
     license = "GPL-2.0-or-later"
-    homepage = "https://github.com/ircd-hybrid/ircd-hybrid"
-    url = "https://github.com/ircd-hybrid/ircd-hybrid"
+    homepage = "https://github.com/paige/ultra-ircd"
+    url = "https://github.com/paige/ultra-ircd"
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],

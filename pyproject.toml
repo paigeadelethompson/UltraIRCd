@@ -2,20 +2,11 @@
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
-[project]
-name = "ircd-hybrid-vendored-dependencies"
-version = "8.3.0"
-description = "Vendored dependencies for ircd-hybrid"
-requires-python = ">=3.8"
-dependencies = [
-    "conan2>=2.0.0",
-]
-
 [tool.hatch.envs.default]
 dependencies = [
     "conan2>=2.0.0",
+    "lxml>=4.9.0",
 ]
 
 [tool.hatch.envs.default.scripts]
-build = "conan build . --output-folder=build"
-test = "conan test . --output-folder=build" 
+xsd-docs = "python tools/generate_xsd_docs.py etc/ircd.xsd -o doc/xsd_documentation.md" 

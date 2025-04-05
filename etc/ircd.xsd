@@ -1,11 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-           targetNamespace="http://www.ircd-hybrid.org/ircd"
-           xmlns:ircd="http://www.ircd-hybrid.org/ircd"
+           targetNamespace="http://www.ultra-ircd.org/ircd"
+           xmlns:ircd="http://www.ultra-ircd.org/ircd"
            elementFormDefault="qualified">
+
+  <xs:annotation>
+    <xs:documentation>
+      Ultra-IRCd Configuration Schema
+      
+      This schema defines the XML configuration format for Ultra-IRCd.
+      It provides validation for the configuration file and serves as documentation
+      for the available configuration options.
+    </xs:documentation>
+  </xs:annotation>
 
   <!-- Time specification format -->
   <xs:simpleType name="timeSpec">
+    <xs:annotation>
+      <xs:documentation>
+        Time specification format that accepts values like "30 seconds", "5 minutes", "2 hours", "1 day", etc.
+        Examples: "30s", "5m", "2h", "1d", "1w", "1mo", "1y"
+      </xs:documentation>
+    </xs:annotation>
     <xs:restriction base="xs:string">
       <xs:pattern value="(\d+(\s+(years?|months?|weeks?|days?|hours?|minutes?|seconds?))?(\s+)?)+"/>
     </xs:restriction>
@@ -13,6 +29,12 @@
 
   <!-- Size specification format -->
   <xs:simpleType name="sizeSpec">
+    <xs:annotation>
+      <xs:documentation>
+        Size specification format that accepts values like "10 megabytes", "5 kilobytes", etc.
+        Examples: "10mb", "5kb", "1b"
+      </xs:documentation>
+    </xs:annotation>
     <xs:restriction base="xs:string">
       <xs:pattern value="(\d+(\s+(megabytes?|mbytes?|mb|kilobytes?|kbytes?|kb|bytes?))?(\s+)?)+"/>
     </xs:restriction>
@@ -20,6 +42,11 @@
 
   <!-- Boolean type that accepts yes/no -->
   <xs:simpleType name="yesNo">
+    <xs:annotation>
+      <xs:documentation>
+        Boolean type that accepts "yes" or "no" as values.
+      </xs:documentation>
+    </xs:annotation>
     <xs:restriction base="xs:string">
       <xs:enumeration value="yes"/>
       <xs:enumeration value="no"/>
@@ -28,6 +55,12 @@
 
   <!-- Server ID format: [0-9][A-Z0-9][A-Z0-9] -->
   <xs:simpleType name="sidType">
+    <xs:annotation>
+      <xs:documentation>
+        Server ID format that must match the pattern [0-9][A-Z0-9][A-Z0-9].
+        Example: "001", "02A", "10B"
+      </xs:documentation>
+    </xs:annotation>
     <xs:restriction base="xs:string">
       <xs:pattern value="[0-9][A-Z0-9][A-Z0-9]"/>
     </xs:restriction>
@@ -35,6 +68,13 @@
 
   <!-- Operator flags -->
   <xs:simpleType name="operFlags">
+    <xs:annotation>
+      <xs:documentation>
+        Operator flags that define what an IRC operator can do.
+        Available flags: kill(:remote), connect(:remote), die, globops, module, rehash(:remote), 
+        admin, locops, remoteban, set, opme, nick:resv, join:resv, resv, unresv, close, message:mass
+      </xs:documentation>
+    </xs:annotation>
     <xs:restriction base="xs:string">
       <xs:pattern value="(kill(:remote)?|connect(:remote)?|die|globops|module|rehash(:remote)?|admin|locops|remoteban|set|opme|nick:resv|join:resv|resv|unresv|close|message:mass)(,\s*(kill(:remote)?|connect(:remote)?|die|globops|module|rehash(:remote)?|admin|locops|remoteban|set|opme|nick:resv|join:resv|resv|unresv|close|message:mass))*"/>
     </xs:restriction>
@@ -42,6 +82,12 @@
 
   <!-- Listen flags -->
   <xs:simpleType name="listenFlags">
+    <xs:annotation>
+      <xs:documentation>
+        Listen flags that define the behavior of a listen directive.
+        Available flags: tls, hidden, server, client, defer
+      </xs:documentation>
+    </xs:annotation>
     <xs:restriction base="xs:string">
       <xs:pattern value="(tls|hidden|server|client|defer)(,\s*(tls|hidden|server|client|defer))*"/>
     </xs:restriction>
@@ -49,6 +95,13 @@
 
   <!-- Auth flags -->
   <xs:simpleType name="authFlags">
+    <xs:annotation>
+      <xs:documentation>
+        Auth flags that define the behavior of an auth directive.
+        Available flags: exceed_limit, kline_exempt, xline_exempt, need_ident, can_flood, 
+        no_tilde, resv_exempt, webirc, need_password
+      </xs:documentation>
+    </xs:annotation>
     <xs:restriction base="xs:string">
       <xs:pattern value="(exceed_limit|kline_exempt|xline_exempt|need_ident|can_flood|no_tilde|resv_exempt|webirc|need_password)(,\s*(exceed_limit|kline_exempt|xline_exempt|need_ident|can_flood|no_tilde|resv_exempt|webirc|need_password))*"/>
     </xs:restriction>
@@ -56,6 +109,12 @@
 
   <!-- Connect flags -->
   <xs:simpleType name="connectFlags">
+    <xs:annotation>
+      <xs:documentation>
+        Connect flags that define the behavior of a connect directive.
+        Available flags: autoconn, tls
+      </xs:documentation>
+    </xs:annotation>
     <xs:restriction base="xs:string">
       <xs:pattern value="(autoconn|tls)(,\s*(autoconn|tls))*"/>
     </xs:restriction>
@@ -63,6 +122,12 @@
 
   <!-- Log types -->
   <xs:simpleType name="logType">
+    <xs:annotation>
+      <xs:documentation>
+        Log types that define what kind of information is being logged.
+        Available types: user, operator, xline, resv, dline, kline, kill, debug
+      </xs:documentation>
+    </xs:annotation>
     <xs:restriction base="xs:string">
       <xs:enumeration value="user"/>
       <xs:enumeration value="operator"/>
@@ -77,6 +142,12 @@
 
   <!-- Log severity levels -->
   <xs:simpleType name="logSeverity">
+    <xs:annotation>
+      <xs:documentation>
+        Log severity levels that define the importance of a log message.
+        Available levels: debug, info, notice, warn, error, critical
+      </xs:documentation>
+    </xs:annotation>
     <xs:restriction base="xs:string">
       <xs:enumeration value="debug"/>
       <xs:enumeration value="info"/>
@@ -89,6 +160,11 @@
 
   <!-- Log file name (supports stdout) -->
   <xs:simpleType name="logFileName">
+    <xs:annotation>
+      <xs:documentation>
+        Log file name that can be a file path or "stdout" to log to standard output.
+      </xs:documentation>
+    </xs:annotation>
     <xs:union memberTypes="xs:string">
       <xs:simpleType>
         <xs:restriction base="xs:string">
@@ -100,16 +176,32 @@
 
   <!-- Root element -->
   <xs:element name="ircd">
+    <xs:annotation>
+      <xs:documentation>
+        The root element of the Ultra-IRCd configuration file.
+        Contains all configuration options for the IRC server.
+      </xs:documentation>
+    </xs:annotation>
     <xs:complexType>
       <xs:sequence>
         <!-- Module configuration -->
         <xs:element name="module_base_path" minOccurs="0" maxOccurs="1">
+          <xs:annotation>
+            <xs:documentation>
+              Specifies the base path for loading modules.
+            </xs:documentation>
+          </xs:annotation>
           <xs:complexType>
             <xs:attribute name="path" type="xs:string" use="required"/>
           </xs:complexType>
         </xs:element>
 
         <xs:element name="loadmodule" minOccurs="0" maxOccurs="unbounded">
+          <xs:annotation>
+            <xs:documentation>
+              Specifies a module to load at startup.
+            </xs:documentation>
+          </xs:annotation>
           <xs:complexType>
             <xs:attribute name="path" type="xs:string" use="required"/>
             <xs:attribute name="resident" type="yesNo" default="no"/>
@@ -119,6 +211,11 @@
 
         <!-- Server information -->
         <xs:element name="serverinfo" minOccurs="1" maxOccurs="1">
+          <xs:annotation>
+            <xs:documentation>
+              Contains basic server information such as name, description, and network details.
+            </xs:documentation>
+          </xs:annotation>
           <xs:complexType>
             <xs:attribute name="name" type="xs:string" use="required"/>
             <xs:attribute name="sid" type="sidType" use="required"/>
@@ -156,6 +253,11 @@
 
         <!-- Admin information -->
         <xs:element name="admin" minOccurs="0" maxOccurs="1">
+          <xs:annotation>
+            <xs:documentation>
+              Contains administrator contact information.
+            </xs:documentation>
+          </xs:annotation>
           <xs:complexType>
             <xs:attribute name="name" type="xs:string" use="required"/>
             <xs:attribute name="description" type="xs:string" use="required"/>
@@ -165,6 +267,12 @@
 
         <!-- Class configuration -->
         <xs:element name="class" minOccurs="0" maxOccurs="unbounded">
+          <xs:annotation>
+            <xs:documentation>
+              Defines connection classes for clients and servers.
+              Classes control limits such as maximum connections, send/recv queue sizes, etc.
+            </xs:documentation>
+          </xs:annotation>
           <xs:complexType>
             <xs:attribute name="name" type="xs:string" use="required"/>
             <xs:attribute name="ping_time" type="timeSpec" use="required"/>
@@ -201,6 +309,11 @@
 
         <!-- Channel configuration -->
         <xs:element name="channel" minOccurs="0" maxOccurs="1">
+          <xs:annotation>
+            <xs:documentation>
+              Contains channel-related configuration options.
+            </xs:documentation>
+          </xs:annotation>
           <xs:complexType>
             <xs:attribute name="max_bans" type="xs:positiveInteger" use="required"/>
             <xs:attribute name="max_bans_large" type="xs:positiveInteger" use="required"/>
@@ -225,6 +338,11 @@
 
         <!-- Server hiding configuration -->
         <xs:element name="serverhide" minOccurs="0" maxOccurs="1">
+          <xs:annotation>
+            <xs:documentation>
+              Controls server hiding and link flattening options.
+            </xs:documentation>
+          </xs:annotation>
           <xs:complexType>
             <xs:attribute name="flatten_links" type="yesNo" default="no"/>
             <xs:attribute name="flatten_links_delay" type="timeSpec"/>
@@ -240,9 +358,19 @@
 
         <!-- Logging configuration -->
         <xs:element name="log" minOccurs="0" maxOccurs="unbounded">
+          <xs:annotation>
+            <xs:documentation>
+              Configures logging options for the server.
+            </xs:documentation>
+          </xs:annotation>
           <xs:complexType>
             <xs:sequence>
               <xs:element name="file" minOccurs="0" maxOccurs="unbounded">
+                <xs:annotation>
+                  <xs:documentation>
+                    Defines a log file with its type and severity level.
+                  </xs:documentation>
+                </xs:annotation>
                 <xs:complexType>
                   <xs:attribute name="name" type="logFileName" use="required"/>
                   <xs:attribute name="type" type="logType" use="required"/>
@@ -257,6 +385,11 @@
 
         <!-- Operator configuration -->
         <xs:element name="oper" minOccurs="0" maxOccurs="unbounded">
+          <xs:annotation>
+            <xs:documentation>
+              Defines IRC operators and their privileges.
+            </xs:documentation>
+          </xs:annotation>
           <xs:complexType>
             <xs:attribute name="name" type="xs:string" use="required"/>
             <xs:attribute name="user" type="xs:string" use="required"/>
@@ -273,6 +406,11 @@
 
         <!-- Listen configuration -->
         <xs:element name="listen" minOccurs="0" maxOccurs="unbounded">
+          <xs:annotation>
+            <xs:documentation>
+              Defines ports and addresses the server should listen on.
+            </xs:documentation>
+          </xs:annotation>
           <xs:complexType>
             <xs:attribute name="port" type="xs:string" use="required"/>
             <xs:attribute name="ip" type="xs:string"/>
@@ -283,6 +421,11 @@
 
         <!-- Auth configuration -->
         <xs:element name="auth" minOccurs="0" maxOccurs="unbounded">
+          <xs:annotation>
+            <xs:documentation>
+              Defines authentication rules for connecting clients.
+            </xs:documentation>
+          </xs:annotation>
           <xs:complexType>
             <xs:attribute name="user" type="xs:string" use="required"/>
             <xs:attribute name="password" type="xs:string"/>
@@ -297,6 +440,11 @@
 
         <!-- Connect configuration -->
         <xs:element name="connect" minOccurs="0" maxOccurs="unbounded">
+          <xs:annotation>
+            <xs:documentation>
+              Defines server connections for linking to other IRC servers.
+            </xs:documentation>
+          </xs:annotation>
           <xs:complexType>
             <xs:attribute name="name" type="xs:string" use="required"/>
             <xs:attribute name="host" type="xs:string" use="required"/>
@@ -325,6 +473,11 @@
 
         <!-- Cluster configuration -->
         <xs:element name="cluster" minOccurs="0" maxOccurs="unbounded">
+          <xs:annotation>
+            <xs:documentation>
+              Defines cluster configurations for server grouping.
+            </xs:documentation>
+          </xs:annotation>
           <xs:complexType>
             <xs:attribute name="name" type="xs:string" use="required"/>
             <xs:attribute name="type" type="xs:string" use="required"/>
@@ -333,6 +486,11 @@
 
         <!-- Shared configuration -->
         <xs:element name="shared" minOccurs="0" maxOccurs="unbounded">
+          <xs:annotation>
+            <xs:documentation>
+              Defines shared configurations for server sharing.
+            </xs:documentation>
+          </xs:annotation>
           <xs:complexType>
             <xs:attribute name="name" type="xs:string" use="required"/>
             <xs:attribute name="user" type="xs:string" use="required"/>
@@ -342,6 +500,11 @@
 
         <!-- GECOS configuration -->
         <xs:element name="gecos" minOccurs="0" maxOccurs="unbounded">
+          <xs:annotation>
+            <xs:documentation>
+              Defines GECOS (General Electric Comprehensive Operating Supervisor) bans.
+            </xs:documentation>
+          </xs:annotation>
           <xs:complexType>
             <xs:attribute name="name" type="xs:string" use="required"/>
             <xs:attribute name="reason" type="xs:string"/>
@@ -350,6 +513,11 @@
 
         <!-- Pseudo configuration -->
         <xs:element name="pseudo" minOccurs="0" maxOccurs="unbounded">
+          <xs:annotation>
+            <xs:documentation>
+              Defines pseudo-client configurations.
+            </xs:documentation>
+          </xs:annotation>
           <xs:complexType>
             <xs:attribute name="command" type="xs:string" use="required"/>
             <xs:attribute name="name" type="xs:string" use="required"/>
@@ -360,6 +528,11 @@
 
         <!-- Kill configuration -->
         <xs:element name="kill" minOccurs="0" maxOccurs="unbounded">
+          <xs:annotation>
+            <xs:documentation>
+              Defines kill configurations for automatic user disconnection.
+            </xs:documentation>
+          </xs:annotation>
           <xs:complexType>
             <xs:attribute name="user" type="xs:string" use="required"/>
             <xs:attribute name="reason" type="xs:string"/>
@@ -368,6 +541,11 @@
 
         <!-- Deny configuration -->
         <xs:element name="deny" minOccurs="0" maxOccurs="unbounded">
+          <xs:annotation>
+            <xs:documentation>
+              Defines IP addresses that are denied from connecting.
+            </xs:documentation>
+          </xs:annotation>
           <xs:complexType>
             <xs:attribute name="ip" type="xs:string" use="required"/>
             <xs:attribute name="reason" type="xs:string"/>
@@ -376,6 +554,11 @@
 
         <!-- Exempt configuration -->
         <xs:element name="exempt" minOccurs="0" maxOccurs="unbounded">
+          <xs:annotation>
+            <xs:documentation>
+              Defines IP addresses that are exempt from certain restrictions.
+            </xs:documentation>
+          </xs:annotation>
           <xs:complexType>
             <xs:attribute name="ip" type="xs:string" use="required"/>
           </xs:complexType>
@@ -383,6 +566,11 @@
 
         <!-- RESV configuration -->
         <xs:element name="resv" minOccurs="0" maxOccurs="unbounded">
+          <xs:annotation>
+            <xs:documentation>
+              Defines reserved nicknames and channels.
+            </xs:documentation>
+          </xs:annotation>
           <xs:complexType>
             <xs:attribute name="mask" type="xs:string" use="required"/>
             <xs:attribute name="reason" type="xs:string"/>
@@ -392,6 +580,11 @@
 
         <!-- Service configuration -->
         <xs:element name="service" minOccurs="0" maxOccurs="unbounded">
+          <xs:annotation>
+            <xs:documentation>
+              Defines service configurations.
+            </xs:documentation>
+          </xs:annotation>
           <xs:complexType>
             <xs:attribute name="name" type="xs:string" use="required"/>
           </xs:complexType>

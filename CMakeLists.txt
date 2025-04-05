@@ -6,7 +6,7 @@ if(NOT CONAN_TOOLCHAIN)
     message(WARNING "The file conan_toolchain.cmake was not found. Make sure to run 'conan install' first.")
 endif()
 
-project(ircd-hybrid VERSION 8.2.47 LANGUAGES C)
+project(ultra-ircd VERSION 8.3.0 LANGUAGES C)
 
 # Set C standard
 set(CMAKE_C_STANDARD 11)
@@ -141,8 +141,8 @@ string(TIMESTAMP BUILD_DATE "%Y%m%d")
 include(GNUInstallDirs)
 
 # Define package information
-set(PACKAGE_NAME "ircd-hybrid")
-set(PACKAGE_VERSION "8.2.47")
+set(PACKAGE_NAME "ultra-ircd")
+set(PACKAGE_VERSION "8.3.0")
 
 # Add definitions for installation directories
 add_definitions(-DPREFIX="${CMAKE_INSTALL_PREFIX}")
@@ -154,7 +154,7 @@ add_definitions(-DLOCALSTATEDIR="${CMAKE_INSTALL_LOCALSTATEDIR}")
 # Add package information definitions
 add_definitions(-DPACKAGE_NAME="${PACKAGE_NAME}")
 add_definitions(-DPACKAGE_VERSION="${PACKAGE_VERSION}")
-add_definitions(-DPACKAGE="ircd-hybrid")
+add_definitions(-DPACKAGE="ultra-ircd")
 
 # Configure header
 configure_file(
