@@ -6,9 +6,12 @@ add_custom_command(
     COMMENT "Generating schema header"
 )
 
+add_custom_target(schema_header DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/conf_schema.h)
+
 # Find required packages
 find_package(Python3 REQUIRED)
 find_package(LibXml2 REQUIRED)
+find_package(jansson REQUIRED)
 
 # Source files
 set(IRCD_SOURCES
@@ -124,10 +127,14 @@ set(IRCD_SOURCES
 # Create executable
 add_executable(ircd ${IRCD_SOURCES})
 
+# Make schema generation a dependency of the ircd target
+add_dependencies(ircd schema_header)
+
 # Include directories
 target_include_directories(ircd PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_SOURCE_DIR}/libio/src
 )
 
 # Link libraries
@@ -138,12 +145,8 @@ target_link_libraries(ircd PRIVATE
     ircd_headers
     crypt
     LibXml2::LibXml2
+    jansson::jansson
 )
-
-# Add Jansson library if found
-if(JANSSON_FOUND)
-    target_link_libraries(ircd PRIVATE ${JANSSON_LIBRARIES})
-endif()
 
 # Install
 install(TARGETS ircd

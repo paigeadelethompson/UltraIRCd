@@ -1352,8 +1352,7 @@ void
 conf_error_report(const char *msg)
 {
   log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR,
-            "Error in %s at line %u: %s at '%s'",
-            conf_file_name, conf_line_number, msg, conf_line_text);
+            "Error in configuration: %s", msg);
 }
 
 /* conf_match_password()
@@ -1581,4 +1580,53 @@ conf_read_files_recurse(const char *filename)
 
   conf_read(file);
   fclose(file);
+}
+
+void
+delete_conf_item(struct MaskItem *conf)
+{
+  if (!conf)
+    return;
+
+  if (conf->name)
+    io_free(conf->name);
+  if (conf->passwd)
+    io_free(conf->passwd);
+  if (conf->reason)
+    io_free(conf->reason);
+  if (conf->certfp)
+    io_free(conf->certfp);
+  if (conf->whois)
+    io_free(conf->whois);
+  if (conf->cipher_list)
+    io_free(conf->cipher_list);
+  if (conf->bind)
+    io_free(conf->bind);
+
+  /* Free lists */
+  while (conf->hub_list.head)
+  {
+    io_free(conf->hub_list.head->data);
+    list_remove(conf->hub_list.head, &conf->hub_list);
+  }
+
+  while (conf->leaf_list.head)
+  {
+    io_free(conf->leaf_list.head->data);
+    list_remove(conf->leaf_list.head, &conf->leaf_list);
+  }
+
+  io_free(conf);
+}
+
+void
+delete_address_conf(struct AddressRec *arec)
+{
+  if (!arec)
+    return;
+
+  if (arec->conf)
+    delete_conf_item(arec->conf);
+
+  io_free(arec);
 }

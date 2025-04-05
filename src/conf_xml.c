@@ -24,7 +24,20 @@
  */
 
 #include "stdinc.h"
-#include "conf_schema.h"  /* Must come first for schema data */
+#include "schema_wrapper.h"
+#include "conf_xml.h"
+#include "conf.h"
+#include "client.h"
+#include "ircd.h"
+#include "ircd_defs.h"
+#include "log.h"
+#include "list.h"
+#include "memory.h"
+#include "numeric.h"
+#include "user.h"
+#include "send.h"
+#include "res.h"
+#include "tls.h"
 #include "conf_xml.h"
 #include "conf.h"
 #include "log.h"
@@ -55,10 +68,9 @@
 #include "ircd_defs.h"
 #include "conf_db.h"
 #include "motd.h"
-
-/* The xxd-generated schema data */
-extern const unsigned char etc_ircd_xsd[];
-extern const unsigned int etc_ircd_xsd_len;
+#include "module.h"
+#include "res.h"
+#include "tls.h"
 
 /* Forward declarations */
 static void conf_clear(void);
@@ -1153,7 +1165,7 @@ conf_xml_init(void)
   xmlSetStructuredErrorFunc(NULL, NULL);
 
   /* Load schema from embedded bytes */
-  xmlSchemaParserCtxtPtr parser_ctx = xmlSchemaNewMemParserCtxt((const char *)etc_ircd_xsd, etc_ircd_xsd_len);
+  xmlSchemaParserCtxtPtr parser_ctx = xmlSchemaNewMemParserCtxt((const char *)_home_netcraveos_ircd_hybrid_etc_ircd_xsd, _home_netcraveos_ircd_hybrid_etc_ircd_xsd_len);
   if (!parser_ctx)
     return XML_PARSE_ERROR_SCHEMA_INVALID;
 
@@ -1326,4 +1338,14 @@ static void conf_validate(void)
     ConfigServerInfo.max_topic_length = 1;
   else if (ConfigServerInfo.max_topic_length > TOPICLEN)
     ConfigServerInfo.max_topic_length = TOPICLEN;
+}
+
+static size_t get_embedded_schema_len(void)
+{
+  return _home_netcraveos_ircd_hybrid_etc_ircd_xsd_len;
+}
+
+static const char *get_embedded_schema(void)
+{
+  return (const char *)_home_netcraveos_ircd_hybrid_etc_ircd_xsd;
 } 

@@ -9,9 +9,9 @@
  *  (at your option) any later version.
  */
 
-#ifndef INCLUDED_conf_schema_h
-#define INCLUDED_conf_schema_h
+#ifndef INCLUDED_SCHEMA_WRAPPER_H
+#define INCLUDED_SCHEMA_WRAPPER_H
 
-extern const char *const ircd_schema_xml;
+#include "conf_schema.h"
 
-#endif /* INCLUDED_conf_schema_h */ 
+#endif /* INCLUDED_SCHEMA_WRAPPER_H */ 
