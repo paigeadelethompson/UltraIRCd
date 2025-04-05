@@ -184,11 +184,14 @@ log_write(enum log_type type, enum log_severity severity, const char *format, ..
        1. The log is configured for DEBUG severity (shows everything)
        2. The message severity is DEBUG (always show debug messages)
        3. The log's configured severity is greater than or equal to the message severity
+       4. The message severity is ERROR or CRITICAL (always show these)
     */
     if (log->type == type && 
         (log->severity == LOG_SEVERITY_DEBUG || 
          severity == LOG_SEVERITY_DEBUG || 
-         log->severity >= severity))
+         log->severity >= severity ||
+         severity == LOG_SEVERITY_ERROR ||
+         severity == LOG_SEVERITY_CRITICAL))
     {
       if (log->file)
       {
