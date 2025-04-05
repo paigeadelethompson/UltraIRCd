@@ -76,6 +76,7 @@
 void conf_clear(void);
 void conf_set_defaults(void);
 void conf_validate(void);
+static void xml_structured_error_handler(void *userData, const struct _xmlError *error);
 
 /* Global variables */
 static xmlSchemaPtr schema = NULL;
@@ -91,6 +92,9 @@ get_node_content(xmlNodePtr node)
   return (const char *)node->children->content;
 }
 
+/* Forward declaration for dump_schema_for_debugging */
+static void dump_schema_for_debugging(void);
+
 static void
 xml_error_handler(void *ctx, const char *msg, ...)
 {
@@ -104,6 +108,8 @@ xml_error_handler(void *ctx, const char *msg, ...)
   log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "XML Error: %s", buf);
 }
 
+/* Commented out to avoid unused function warning */
+/*
 static void
 xml_warning_handler(void *ctx, const char *msg, ...)
 {
@@ -115,6 +121,22 @@ xml_warning_handler(void *ctx, const char *msg, ...)
   va_end(args);
 
   log_write(LOG_TYPE_IRCD, LOG_SEVERITY_WARN, "XML Warning: %s", buf);
+}
+*/
+
+/* Structured error handler for XML validation */
+static void
+xml_structured_error_handler(void *userData, const struct _xmlError *error)
+{
+  if (!error)
+    return;
+    
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "XML Validation Error: %s", 
+            error->message ? error->message : "Unknown error");
+            
+  if (error->line > 0)
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Error at line %d, column %d", 
+              error->line, error->int2);
 }
 
 /* Helper function to parse time specifications */
@@ -1189,30 +1211,49 @@ parse_xml_config(xmlDocPtr doc, bool cold)
 int
 conf_xml_init(void)
 {
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_DEBUG, "Initializing XML parser");
   xmlInitParser();
   xmlSetGenericErrorFunc(NULL, xml_error_handler);
   xmlSetStructuredErrorFunc(NULL, NULL);
 
   /* Load schema from embedded bytes */
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_DEBUG, "Creating schema parser context");
   xmlSchemaParserCtxtPtr parser_ctx = xmlSchemaNewMemParserCtxt((const char *)_home_netcraveos_ircd_hybrid_etc_ircd_xsd, _home_netcraveos_ircd_hybrid_etc_ircd_xsd_len);
-  if (!parser_ctx)
+  if (!parser_ctx) {
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Failed to create schema parser context");
     return XML_PARSE_ERROR_SCHEMA_INVALID;
+  }
 
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_DEBUG, "Parsing schema");
   schema = xmlSchemaParse(parser_ctx);
   xmlSchemaFreeParserCtxt(parser_ctx);
 
-  if (!schema)
+  if (!schema) {
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Failed to parse schema");
     return XML_PARSE_ERROR_SCHEMA_INVALID;
+  }
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_DEBUG, "Schema parsed successfully");
+  
+  /* Dump schema for debugging */
+  dump_schema_for_debugging();
 
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_DEBUG, "Creating schema validation context");
   schema_valid_ctx = xmlSchemaNewValidCtxt(schema);
-  if (!schema_valid_ctx)
-  {
+  if (!schema_valid_ctx) {
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Failed to create schema validation context");
     xmlSchemaFree(schema);
     schema = NULL;
     return XML_PARSE_ERROR_SCHEMA_INVALID;
   }
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_DEBUG, "Schema validation context created successfully");
 
-  xmlSchemaSetValidErrors(schema_valid_ctx, xml_error_handler, xml_warning_handler, NULL);
+  /* Set validation options to stop after first error */
+  xmlSchemaSetValidOptions(schema_valid_ctx, XML_SCHEMA_VAL_VC_I_CREATE);
+
+  /* Set up error handlers */
+  xmlSchemaSetValidStructuredErrors(schema_valid_ctx, xml_structured_error_handler, NULL);
+
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_DEBUG, "XML parser initialized successfully");
   return XML_PARSE_SUCCESS;
 }
 
@@ -1227,6 +1268,89 @@ conf_xml_cleanup(void)
   xmlCleanupParser();
 }
 
+/* Helper function to handle XML validation errors */
+static void
+handle_xml_validation_error(xmlDocPtr doc, int result)
+{
+  const struct _xmlError *error = xmlGetLastError();
+  if (error) {
+    /* Log a brief error description */
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Configuration validation failed: %s", 
+              error->message ? error->message : "Unknown validation error");
+    
+    /* Log more verbose debug information */
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_DEBUG, "Validation error details: domain=%d, line=%d, column=%d, message=%s", 
+              error->domain, error->line, error->int2, 
+              error->message ? error->message : "Unknown validation error");
+    
+    /* Try to get more errors if available */
+    int error_count = 1;
+    while ((error = xmlGetLastError()) != NULL) {
+      log_write(LOG_TYPE_IRCD, LOG_SEVERITY_DEBUG, "Additional error #%d: domain=%d, line=%d, column=%d, message=%s", 
+                error_count++, error->domain, error->line, error->int2, 
+                error->message ? error->message : "Unknown validation error");
+    }
+    
+    /* Dump the XML document for debugging */
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_DEBUG, "Dumping XML document for debugging:");
+    xmlDocPtr debug_doc = xmlCopyDoc(doc, 1);
+    if (debug_doc) {
+      xmlChar *debug_buffer;
+      int debug_size;
+      xmlDocDumpMemory(debug_doc, &debug_buffer, &debug_size);
+      if (debug_buffer) {
+        log_write(LOG_TYPE_IRCD, LOG_SEVERITY_DEBUG, "XML content: %s", debug_buffer);
+        xmlFree(debug_buffer);
+      }
+      xmlFreeDoc(debug_doc);
+    }
+  } else {
+    /* If no error details are available, try to get more information */
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Generated configuration failed validation with error code: %d", result);
+    
+    /* Check if schema is loaded */
+    if (!schema) {
+      log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Schema is not loaded, validation cannot proceed");
+    }
+    
+    /* Check if validation context is available */
+    if (!schema_valid_ctx) {
+      log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Schema validation context is not available");
+    }
+    
+    /* Dump the XML document for debugging */
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_DEBUG, "Dumping XML document for debugging (no error details available):");
+    xmlDocPtr debug_doc = xmlCopyDoc(doc, 1);
+    if (debug_doc) {
+      xmlChar *debug_buffer;
+      int debug_size;
+      xmlDocDumpMemory(debug_doc, &debug_buffer, &debug_size);
+      if (debug_buffer) {
+        log_write(LOG_TYPE_IRCD, LOG_SEVERITY_DEBUG, "XML content: %s", debug_buffer);
+        xmlFree(debug_buffer);
+      }
+      xmlFreeDoc(debug_doc);
+    }
+  }
+}
+
+/* Helper function to check schema validation status */
+static bool
+check_schema_validation_status(void)
+{
+  if (!schema) {
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Schema is not loaded, validation cannot proceed");
+    return false;
+  }
+  
+  if (!schema_valid_ctx) {
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Schema validation context is not available");
+    return false;
+  }
+  
+  return true;
+}
+
 int
 conf_xml_parse(const char *filename, bool cold)
 {
@@ -1236,24 +1360,20 @@ conf_xml_parse(const char *filename, bool cold)
 
   /* Validate against schema */
   log_write(LOG_TYPE_IRCD, LOG_SEVERITY_DEBUG, "Validating XML document against schema");
+  
+  /* Check schema validation status */
+  if (!check_schema_validation_status()) {
+    xmlFreeDoc(doc);
+    return XML_PARSE_ERROR_SCHEMA_INVALID;
+  }
+  
+  /* Set validation options to stop after first error */
+  xmlSchemaSetValidOptions(schema_valid_ctx, XML_SCHEMA_VAL_VC_I_CREATE);
+
   int result = xmlSchemaValidateDoc(schema_valid_ctx, doc);
   
   if (result != 0) {
-    /* Get the validation error details using standard libxml2 error handling */
-    const struct _xmlError *error = xmlGetLastError();
-    if (error) {
-      /* Log a brief error description */
-      log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Configuration validation failed: %s", 
-                error->message ? error->message : "Unknown validation error");
-      
-      /* Log more verbose debug information */
-      log_write(LOG_TYPE_IRCD, LOG_SEVERITY_DEBUG, "Validation error details: domain=%d, line=%d, column=%d, message=%s", 
-                error->domain, error->line, error->int2, 
-                error->message ? error->message : "Unknown validation error");
-    } else {
-      log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Generated configuration failed validation with error code: %d", result);
-    }
-    
+    handle_xml_validation_error(doc, result);
     xmlFreeDoc(doc);
     return XML_PARSE_ERROR_VALIDATION_FAILED;
   }
@@ -1293,11 +1413,228 @@ custom_read_callback(void *context, char *buffer, int len)
   return (int)bytes_read;
 }
 
+/* Helper functions for configuration generation */
+static void
+write_xml_header(FILE *fp)
+{
+  fprintf(fp, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+  fprintf(fp, "<!--\n");
+  fprintf(fp, " * ircd-hybrid configuration file\n");
+  fprintf(fp, " * Generated by conf_generate_default\n");
+  fprintf(fp, " *\n");
+  fprintf(fp, " * This file contains all configuration options for the ircd-hybrid IRC server.\n");
+  fprintf(fp, " * Edit this file to customize your server settings.\n");
+  fprintf(fp, " *\n");
+  fprintf(fp, " * For more information, see the documentation at:\n");
+  fprintf(fp, " * https://github.com/ircd-hybrid/ircd-hybrid/wiki\n");
+  fprintf(fp, " -->\n\n");
+  fprintf(fp, "<ircd xmlns=\"http://www.ultra-ircd.org/ircd\">\n\n");
+}
+
+static void
+write_module_base_path(FILE *fp)
+{
+  fprintf(fp, "  <!-- Module Base Path Configuration -->\n");
+  fprintf(fp, "  <module_base_path\n");
+  fprintf(fp, "    path=\"%s/modules\"\n", LIBPATH);
+  fprintf(fp, "  />\n\n");
+}
+
+static void
+write_serverinfo(FILE *fp)
+{
+  fprintf(fp, "  <!-- Server Information -->\n");
+  fprintf(fp, "  <serverinfo\n");
+  fprintf(fp, "    name=\"irc.example.com\"\n");
+  fprintf(fp, "    sid=\"001\"\n");
+  fprintf(fp, "    description=\"Example IRC Server\"\n");
+  fprintf(fp, "    network_name=\"Example Network\"\n");
+  fprintf(fp, "    network_description=\"A network of IRC servers\"\n");
+  fprintf(fp, "    default_max_clients=\"100\"\n");
+  fprintf(fp, "    max_nick_length=\"30\"\n");
+  fprintf(fp, "    max_topic_length=\"300\"\n");
+  fprintf(fp, "    hub=\"no\"\n");
+  fprintf(fp, "    motd_file=\"/etc/ircd-hybrid/motd\"\n");
+  fprintf(fp, "    rsa_private_key_file=\"/etc/ircd-hybrid/ircd.key\"\n");
+  fprintf(fp, "    tls_certificate_file=\"/etc/ircd-hybrid/ircd.crt\"\n");
+  fprintf(fp, "    tls_dh_param_file=\"/etc/ircd-hybrid/dh.pem\"\n");
+  fprintf(fp, "    tls_supported_groups=\"X25519:P-256:P-384\"\n");
+  fprintf(fp, "    tls_cipher_list=\"ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384\"\n");
+  fprintf(fp, "    tls_cipher_suites=\"TLS_AES_256_GCM-SHA384:TLS_CHACHA20_POLY1305_SHA256\"\n");
+  fprintf(fp, "    tls_message_digest_algorithm=\"SHA256\"\n");
+  fprintf(fp, "  />\n\n");
+}
+
+static void
+write_admin_info(FILE *fp)
+{
+  fprintf(fp, "  <!-- Admin Information -->\n");
+  fprintf(fp, "  <admin\n");
+  fprintf(fp, "    name=\"Example Admin\"\n");
+  fprintf(fp, "    description=\"Example IRC Network Administrator\"\n");
+  fprintf(fp, "    email=\"admin@example.com\"\n");
+  fprintf(fp, "  />\n\n");
+}
+
+static void
+write_class_config(FILE *fp)
+{
+  fprintf(fp, "  <!-- Class Configuration -->\n");
+  fprintf(fp, "  <class\n");
+  fprintf(fp, "    name=\"users\"\n");
+  fprintf(fp, "    ping_time=\"90 seconds\"\n");
+  fprintf(fp, "    connectfreq=\"60 seconds\"\n");
+  fprintf(fp, "    max_number=\"100\"\n");
+  fprintf(fp, "    sendq=\"1 megabyte\"\n");
+  fprintf(fp, "    recvq=\"1 megabyte\"\n");
+  fprintf(fp, "    max_channels=\"20\"\n");
+  fprintf(fp, "    max_perip_local=\"3\"\n");
+  fprintf(fp, "    max_perip_global=\"5\"\n");
+  fprintf(fp, "    min_idle=\"30 minutes\"\n");
+  fprintf(fp, "    max_idle=\"120 minutes\"\n");
+  fprintf(fp, "    cidr_bitlen_ipv4=\"24\"\n");
+  fprintf(fp, "    cidr_bitlen_ipv6=\"64\"\n");
+  fprintf(fp, "    number_per_cidr=\"3\"\n");
+  fprintf(fp, "    random_idle=\"yes\"\n");
+  fprintf(fp, "    hide_idle_from_opers=\"no\"\n");
+  fprintf(fp, "  />\n\n");
+
+  fprintf(fp, "  <class\n");
+  fprintf(fp, "    name=\"opers\"\n");
+  fprintf(fp, "    ping_time=\"90 seconds\"\n");
+  fprintf(fp, "    connectfreq=\"60 seconds\"\n");
+  fprintf(fp, "    max_number=\"20\"\n");
+  fprintf(fp, "    sendq=\"5 megabytes\"\n");
+  fprintf(fp, "    recvq=\"5 megabytes\"\n");
+  fprintf(fp, "    max_channels=\"100\"\n");
+  fprintf(fp, "    max_perip_local=\"5\"\n");
+  fprintf(fp, "    max_perip_global=\"10\"\n");
+  fprintf(fp, "    min_idle=\"30 minutes\"\n");
+  fprintf(fp, "    max_idle=\"120 minutes\"\n");
+  fprintf(fp, "    cidr_bitlen_ipv4=\"24\"\n");
+  fprintf(fp, "    cidr_bitlen_ipv6=\"64\"\n");
+  fprintf(fp, "    number_per_cidr=\"5\"\n");
+  fprintf(fp, "    random_idle=\"yes\"\n");
+  fprintf(fp, "    hide_idle_from_opers=\"no\"\n");
+  fprintf(fp, "  />\n\n");
+
+  fprintf(fp, "  <class\n");
+  fprintf(fp, "    name=\"servers\"\n");
+  fprintf(fp, "    ping_time=\"90 seconds\"\n");
+  fprintf(fp, "    connectfreq=\"60 seconds\"\n");
+  fprintf(fp, "    max_number=\"10\"\n");
+  fprintf(fp, "    sendq=\"10 megabytes\"\n");
+  fprintf(fp, "    recvq=\"10 megabytes\"\n");
+  fprintf(fp, "    max_channels=\"0\"\n");
+  fprintf(fp, "    max_perip_local=\"0\"\n");
+  fprintf(fp, "    max_perip_global=\"0\"\n");
+  fprintf(fp, "    min_idle=\"30 minutes\"\n");
+  fprintf(fp, "    max_idle=\"120 minutes\"\n");
+  fprintf(fp, "    cidr_bitlen_ipv4=\"24\"\n");
+  fprintf(fp, "    cidr_bitlen_ipv6=\"64\"\n");
+  fprintf(fp, "    number_per_cidr=\"0\"\n");
+  fprintf(fp, "    random_idle=\"yes\"\n");
+  fprintf(fp, "    hide_idle_from_opers=\"no\"\n");
+  fprintf(fp, "  />\n\n");
+}
+
+static void
+write_channel_config(FILE *fp)
+{
+  fprintf(fp, "  <!-- Channel Configuration -->\n");
+  fprintf(fp, "  <channel\n");
+  fprintf(fp, "    max_bans=\"100\"\n");
+  fprintf(fp, "    max_bans_large=\"200\"\n");
+  fprintf(fp, "    max_invites=\"100\"\n");
+  fprintf(fp, "    max_kick_length=\"200\"\n");
+  fprintf(fp, "    max_channels=\"20\"\n");
+  fprintf(fp, "    invite_client_count=\"20\"\n");
+  fprintf(fp, "    invite_client_time=\"60 seconds\"\n");
+  fprintf(fp, "    invite_delay_channel=\"30 seconds\"\n");
+  fprintf(fp, "    invite_expire_time=\"1 day\"\n");
+  fprintf(fp, "    knock_client_count=\"20\"\n");
+  fprintf(fp, "    knock_client_time=\"60 seconds\"\n");
+  fprintf(fp, "    knock_delay_channel=\"30 seconds\"\n");
+  fprintf(fp, "    default_join_flood_count=\"10\"\n");
+  fprintf(fp, "    default_join_flood_time=\"10 seconds\"\n");
+  fprintf(fp, "    disable_fake_channels=\"no\"\n");
+  fprintf(fp, "    enable_extbans=\"yes\"\n");
+  fprintf(fp, "    enable_owner=\"yes\"\n");
+  fprintf(fp, "    enable_admin=\"yes\"\n");
+  fprintf(fp, "  />\n\n");
+}
+
+static void
+write_serverhide_config(FILE *fp)
+{
+  fprintf(fp, "  <!-- Server Hiding Configuration -->\n");
+  fprintf(fp, "  <serverhide\n");
+  fprintf(fp, "    flatten_links=\"no\"\n");
+  fprintf(fp, "    flatten_links_delay=\"30 seconds\"\n");
+  fprintf(fp, "    flatten_links_file=\"/etc/ircd-hybrid/flatten_links.conf\"\n");
+  fprintf(fp, "    disable_remote_commands=\"no\"\n");
+  fprintf(fp, "    hide_servers=\"no\"\n");
+  fprintf(fp, "    hide_services=\"no\"\n");
+  fprintf(fp, "    hidden=\"no\"\n");
+  fprintf(fp, "    hidden_name=\"irc.example.com\"\n");
+  fprintf(fp, "    hide_server_ips=\"yes\"\n");
+  fprintf(fp, "  />\n\n");
+}
+
+static void
+write_logging_config(FILE *fp)
+{
+  fprintf(fp, "  <!-- Logging Configuration -->\n");
+  fprintf(fp, "  <log use_logging=\"yes\">\n");
+  fprintf(fp, "    <file\n");
+  fprintf(fp, "      name=\"stderr\"\n");
+  fprintf(fp, "      type=\"user\"\n");
+  fprintf(fp, "      severity=\"info\"\n");
+  fprintf(fp, "      size=\"10 megabytes\"\n");
+  fprintf(fp, "    />\n");
+  fprintf(fp, "    <file\n");
+  fprintf(fp, "      name=\"stderr\"\n");
+  fprintf(fp, "      type=\"operator\"\n");
+  fprintf(fp, "      severity=\"info\"\n");
+  fprintf(fp, "      size=\"10 megabytes\"\n");
+  fprintf(fp, "    />\n");
+  fprintf(fp, "    <file\n");
+  fprintf(fp, "      name=\"stderr\"\n");
+  fprintf(fp, "      type=\"debug\"\n");
+  fprintf(fp, "      severity=\"debug\"\n");
+  fprintf(fp, "      size=\"10 megabytes\"\n");
+  fprintf(fp, "    />\n");
+  fprintf(fp, "    <file\n");
+  fprintf(fp, "      name=\"stderr\"\n");
+  fprintf(fp, "      type=\"xline\"\n");
+  fprintf(fp, "      severity=\"info\"\n");
+  fprintf(fp, "      size=\"10 megabytes\"\n");
+  fprintf(fp, "    />\n");
+  fprintf(fp, "  </log>\n\n");
+}
+
+static void
+write_xml_footer(FILE *fp)
+{
+  fprintf(fp, "</ircd>\n");
+}
+
 bool
 conf_generate_default(const char *filename)
 {
   log_write(LOG_TYPE_IRCD, LOG_SEVERITY_DEBUG, "conf_generate_default: starting with filename=%s", 
             filename ? filename : "NULL (stdout)");
+  
+  /* Check if schema is loaded, if not, initialize it */
+  if (!schema || !schema_valid_ctx) {
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_DEBUG, "Schema not loaded, initializing XML parser");
+    int result = conf_xml_init();
+    if (result != XML_PARSE_SUCCESS) {
+      log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Failed to initialize XML parser: %s", 
+                conf_xml_error_str(result));
+      return false;
+    }
+  }
   
   FILE *fp = filename ? fopen(filename, "w") : stdout;
   if (!fp) {
@@ -1321,184 +1658,16 @@ conf_generate_default(const char *filename)
   log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "Generating default configuration...");
 
   /* Write configuration to the buffer */
-  fprintf(buffer_fp, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+  write_xml_header(buffer_fp);
+  write_module_base_path(buffer_fp);
+  write_serverinfo(buffer_fp);
+  write_admin_info(buffer_fp);
+  write_class_config(buffer_fp);
+  write_channel_config(buffer_fp);
+  write_serverhide_config(buffer_fp);
+  write_logging_config(buffer_fp);
+  write_xml_footer(buffer_fp);
   
-  fprintf(buffer_fp, "<!--\n");
-  fprintf(buffer_fp, " * ircd-hybrid configuration file\n");
-  fprintf(buffer_fp, " * Generated by conf_generate_default\n");
-  fprintf(buffer_fp, " *\n");
-  fprintf(buffer_fp, " * This file contains all configuration options for the ircd-hybrid IRC server.\n");
-  fprintf(buffer_fp, " * Edit this file to customize your server settings.\n");
-  fprintf(buffer_fp, " *\n");
-  fprintf(buffer_fp, " * For more information, see the documentation at:\n");
-  fprintf(buffer_fp, " * https://github.com/ircd-hybrid/ircd-hybrid/wiki\n");
-  fprintf(buffer_fp, " -->\n\n");
-  
-  fprintf(buffer_fp, "<ircd xmlns=\"http://www.ircd-hybrid.org/ircd\">\n\n");
-
-  /* Module base path configuration */
-  fprintf(buffer_fp, "  <!-- Module Base Path Configuration -->\n");
-  fprintf(buffer_fp, "  <module_base_path\n");
-  fprintf(buffer_fp, "    path=\"%s/modules\"\n", LIBPATH);
-  fprintf(buffer_fp, "  />\n\n");
-
-  /* Server information */
-  fprintf(buffer_fp, "  <!-- Server Information -->\n");
-  fprintf(buffer_fp, "  <serverinfo\n");
-  fprintf(buffer_fp, "    name=\"irc.example.com\"\n");
-  fprintf(buffer_fp, "    sid=\"001\"\n");
-  fprintf(buffer_fp, "    description=\"Example IRC Server\"\n");
-  fprintf(buffer_fp, "    network_name=\"Example Network\"\n");
-  fprintf(buffer_fp, "    network_description=\"A network of IRC servers\"\n");
-  fprintf(buffer_fp, "    default_max_clients=\"100\"\n");
-  fprintf(buffer_fp, "    max_nick_length=\"32\"\n");
-  fprintf(buffer_fp, "    max_topic_length=\"307\"\n");
-  fprintf(buffer_fp, "    hub=\"no\"\n");
-  fprintf(buffer_fp, "    motd_file=\"/etc/ircd-hybrid/motd\"\n");
-  fprintf(buffer_fp, "    rsa_private_key_file=\"/etc/ircd-hybrid/ircd.key\"\n");
-  fprintf(buffer_fp, "    tls_certificate_file=\"/etc/ircd-hybrid/ircd.crt\"\n");
-  fprintf(buffer_fp, "    tls_dh_param_file=\"/etc/ircd-hybrid/dh.pem\"\n");
-  fprintf(buffer_fp, "    tls_supported_groups=\"X25519:P-256:P-384\"\n");
-  fprintf(buffer_fp, "    tls_cipher_list=\"ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384\"\n");
-  fprintf(buffer_fp, "    tls_cipher_suites=\"TLS_AES_256_GCM-SHA384:TLS_CHACHA20_POLY1305_SHA256\"\n");
-  fprintf(buffer_fp, "    tls_message_digest_algorithm=\"SHA256\"\n");
-  fprintf(buffer_fp, "  />\n\n");
-
-  /* Admin information */
-  fprintf(buffer_fp, "  <!-- Admin Information -->\n");
-  fprintf(buffer_fp, "  <admin\n");
-  fprintf(buffer_fp, "    name=\"Example Admin\"\n");
-  fprintf(buffer_fp, "    description=\"Example IRC Network Administrator\"\n");
-  fprintf(buffer_fp, "    email=\"admin@example.com\"\n");
-  fprintf(buffer_fp, "  />\n\n");
-
-  /* Class configuration */
-  fprintf(buffer_fp, "  <!-- Class Configuration -->\n");
-  fprintf(buffer_fp, "  <class\n");
-  fprintf(buffer_fp, "    name=\"users\"\n");
-  fprintf(buffer_fp, "    ping_time=\"90 seconds\"\n");
-  fprintf(buffer_fp, "    connectfreq=\"60 seconds\"\n");
-  fprintf(buffer_fp, "    max_number=\"100\"\n");
-  fprintf(buffer_fp, "    sendq=\"1 megabyte\"\n");
-  fprintf(buffer_fp, "    recvq=\"1 megabyte\"\n");
-  fprintf(buffer_fp, "    max_channels=\"20\"\n");
-  fprintf(buffer_fp, "    max_perip_local=\"3\"\n");
-  fprintf(buffer_fp, "    max_perip_global=\"5\"\n");
-  fprintf(buffer_fp, "    min_idle=\"30 minutes\"\n");
-  fprintf(buffer_fp, "    max_idle=\"120 minutes\"\n");
-  fprintf(buffer_fp, "    cidr_bitlen_ipv4=\"24\"\n");
-  fprintf(buffer_fp, "    cidr_bitlen_ipv6=\"64\"\n");
-  fprintf(buffer_fp, "    number_per_cidr=\"3\"\n");
-  fprintf(buffer_fp, "    random_idle=\"yes\"\n");
-  fprintf(buffer_fp, "    hide_idle_from_opers=\"no\"\n");
-  fprintf(buffer_fp, "  />\n\n");
-
-  fprintf(buffer_fp, "  <class\n");
-  fprintf(buffer_fp, "    name=\"opers\"\n");
-  fprintf(buffer_fp, "    ping_time=\"90 seconds\"\n");
-  fprintf(buffer_fp, "    connectfreq=\"60 seconds\"\n");
-  fprintf(buffer_fp, "    max_number=\"20\"\n");
-  fprintf(buffer_fp, "    sendq=\"5 megabytes\"\n");
-  fprintf(buffer_fp, "    recvq=\"5 megabytes\"\n");
-  fprintf(buffer_fp, "    max_channels=\"100\"\n");
-  fprintf(buffer_fp, "    max_perip_local=\"5\"\n");
-  fprintf(buffer_fp, "    max_perip_global=\"10\"\n");
-  fprintf(buffer_fp, "    min_idle=\"30 minutes\"\n");
-  fprintf(buffer_fp, "    max_idle=\"120 minutes\"\n");
-  fprintf(buffer_fp, "    cidr_bitlen_ipv4=\"24\"\n");
-  fprintf(buffer_fp, "    cidr_bitlen_ipv6=\"64\"\n");
-  fprintf(buffer_fp, "    number_per_cidr=\"5\"\n");
-  fprintf(buffer_fp, "    random_idle=\"yes\"\n");
-  fprintf(buffer_fp, "    hide_idle_from_opers=\"no\"\n");
-  fprintf(buffer_fp, "  />\n\n");
-
-  fprintf(buffer_fp, "  <class\n");
-  fprintf(buffer_fp, "    name=\"servers\"\n");
-  fprintf(buffer_fp, "    ping_time=\"90 seconds\"\n");
-  fprintf(buffer_fp, "    connectfreq=\"60 seconds\"\n");
-  fprintf(buffer_fp, "    max_number=\"10\"\n");
-  fprintf(buffer_fp, "    sendq=\"10 megabytes\"\n");
-  fprintf(buffer_fp, "    recvq=\"10 megabytes\"\n");
-  fprintf(buffer_fp, "    max_channels=\"0\"\n");
-  fprintf(buffer_fp, "    max_perip_local=\"0\"\n");
-  fprintf(buffer_fp, "    max_perip_global=\"0\"\n");
-  fprintf(buffer_fp, "    min_idle=\"30 minutes\"\n");
-  fprintf(buffer_fp, "    max_idle=\"120 minutes\"\n");
-  fprintf(buffer_fp, "    cidr_bitlen_ipv4=\"24\"\n");
-  fprintf(buffer_fp, "    cidr_bitlen_ipv6=\"64\"\n");
-  fprintf(buffer_fp, "    number_per_cidr=\"0\"\n");
-  fprintf(buffer_fp, "    random_idle=\"yes\"\n");
-  fprintf(buffer_fp, "    hide_idle_from_opers=\"no\"\n");
-  fprintf(buffer_fp, "  />\n\n");
-
-  /* Channel configuration */
-  fprintf(buffer_fp, "  <!-- Channel Configuration -->\n");
-  fprintf(buffer_fp, "  <channel\n");
-  fprintf(buffer_fp, "    max_bans=\"100\"\n");
-  fprintf(buffer_fp, "    max_bans_large=\"200\"\n");
-  fprintf(buffer_fp, "    max_invites=\"100\"\n");
-  fprintf(buffer_fp, "    max_kick_length=\"200\"\n");
-  fprintf(buffer_fp, "    max_channels=\"20\"\n");
-  fprintf(buffer_fp, "    invite_client_count=\"20\"\n");
-  fprintf(buffer_fp, "    invite_client_time=\"60 seconds\"\n");
-  fprintf(buffer_fp, "    invite_delay_channel=\"30 seconds\"\n");
-  fprintf(buffer_fp, "    invite_expire_time=\"1 day\"\n");
-  fprintf(buffer_fp, "    knock_client_count=\"20\"\n");
-  fprintf(buffer_fp, "    knock_client_time=\"60 seconds\"\n");
-  fprintf(buffer_fp, "    knock_delay_channel=\"30 seconds\"\n");
-  fprintf(buffer_fp, "    default_join_flood_count=\"10\"\n");
-  fprintf(buffer_fp, "    default_join_flood_time=\"10 seconds\"\n");
-  fprintf(buffer_fp, "    disable_fake_channels=\"no\"\n");
-  fprintf(buffer_fp, "    enable_extbans=\"yes\"\n");
-  fprintf(buffer_fp, "    enable_owner=\"yes\"\n");
-  fprintf(buffer_fp, "    enable_admin=\"yes\"\n");
-  fprintf(buffer_fp, "  />\n\n");
-
-  /* Server hiding configuration */
-  fprintf(buffer_fp, "  <!-- Server Hiding Configuration -->\n");
-  fprintf(buffer_fp, "  <serverhide\n");
-  fprintf(buffer_fp, "    flatten_links=\"no\"\n");
-  fprintf(buffer_fp, "    flatten_links_delay=\"30 seconds\"\n");
-  fprintf(buffer_fp, "    flatten_links_file=\"/etc/ircd-hybrid/flatten_links.conf\"\n");
-  fprintf(buffer_fp, "    disable_remote_commands=\"no\"\n");
-  fprintf(buffer_fp, "    hide_servers=\"no\"\n");
-  fprintf(buffer_fp, "    hide_services=\"no\"\n");
-  fprintf(buffer_fp, "    hidden=\"no\"\n");
-  fprintf(buffer_fp, "    hidden_name=\"irc.example.com\"\n");
-  fprintf(buffer_fp, "    hide_server_ips=\"yes\"\n");
-  fprintf(buffer_fp, "  />\n\n");
-
-  /* Logging configuration */
-  fprintf(buffer_fp, "  <!-- Logging Configuration -->\n");
-  fprintf(buffer_fp, "  <log use_logging=\"yes\">\n");
-  fprintf(buffer_fp, "    <file\n");
-  fprintf(buffer_fp, "      name=\"stderr\"\n");
-  fprintf(buffer_fp, "      type=\"user\"\n");
-  fprintf(buffer_fp, "      severity=\"info\"\n");
-  fprintf(buffer_fp, "      size=\"10 megabytes\"\n");
-  fprintf(buffer_fp, "    />\n");
-  fprintf(buffer_fp, "    <file\n");
-  fprintf(buffer_fp, "      name=\"stderr\"\n");
-  fprintf(buffer_fp, "      type=\"operator\"\n");
-  fprintf(buffer_fp, "      severity=\"info\"\n");
-  fprintf(buffer_fp, "      size=\"10 megabytes\"\n");
-  fprintf(buffer_fp, "    />\n");
-  fprintf(buffer_fp, "    <file\n");
-  fprintf(buffer_fp, "      name=\"stderr\"\n");
-  fprintf(buffer_fp, "      type=\"debug\"\n");
-  fprintf(buffer_fp, "      severity=\"debug\"\n");
-  fprintf(buffer_fp, "      size=\"10 megabytes\"\n");
-  fprintf(buffer_fp, "    />\n");
-  fprintf(buffer_fp, "    <file\n");
-  fprintf(buffer_fp, "      name=\"stderr\"\n");
-  fprintf(buffer_fp, "      type=\"xline\"\n");
-  fprintf(buffer_fp, "      severity=\"info\"\n");
-  fprintf(buffer_fp, "      size=\"10 megabytes\"\n");
-  fprintf(buffer_fp, "    />\n");
-  fprintf(buffer_fp, "  </log>\n\n");
-
-  fprintf(buffer_fp, "</ircd>\n");
-
   /* Close the buffer file to finalize the string */
   fclose(buffer_fp);
   log_write(LOG_TYPE_IRCD, LOG_SEVERITY_DEBUG, "Configuration buffer generated, size: %zu bytes", buffer_size);
@@ -1533,28 +1702,28 @@ conf_generate_default(const char *filename)
       fclose(fp);
     return false;
   }
+  
   log_write(LOG_TYPE_IRCD, LOG_SEVERITY_DEBUG, "XML document parsed successfully");
   
   /* Validate against schema */
   log_write(LOG_TYPE_IRCD, LOG_SEVERITY_DEBUG, "Validating XML document against schema");
+  
+  /* Check schema validation status */
+  if (!check_schema_validation_status()) {
+    xmlFreeDoc(doc);
+    free(config_buffer);
+    if (filename)
+      fclose(fp);
+    return false;
+  }
+  
+  /* Set validation options to stop after first error */
+  xmlSchemaSetValidOptions(schema_valid_ctx, XML_SCHEMA_VAL_VC_I_CREATE);
+
   int result = xmlSchemaValidateDoc(schema_valid_ctx, doc);
   
   if (result != 0) {
-    /* Get the validation error details using standard libxml2 error handling */
-    const struct _xmlError *error = xmlGetLastError();
-    if (error) {
-      /* Log a brief error description */
-      log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Configuration validation failed: %s", 
-                error->message ? error->message : "Unknown validation error");
-      
-      /* Log more verbose debug information */
-      log_write(LOG_TYPE_IRCD, LOG_SEVERITY_DEBUG, "Validation error details: domain=%d, line=%d, column=%d, message=%s", 
-                error->domain, error->line, error->int2, 
-                error->message ? error->message : "Unknown validation error");
-    } else {
-      log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Generated configuration failed validation with error code: %d", result);
-    }
-    
+    handle_xml_validation_error(doc, result);
     xmlFreeDoc(doc);
     free(config_buffer);
     if (filename)
@@ -1587,4 +1756,22 @@ conf_generate_default(const char *filename)
             filename ? " and written to file" : " and written to stdout");
 
   return true;
+}
+
+/* Helper function to dump schema for debugging */
+static void
+dump_schema_for_debugging(void)
+{
+  if (!schema) {
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_DEBUG, "Cannot dump schema: schema is not loaded");
+    return;
+  }
+  
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_DEBUG, "Dumping schema for debugging:");
+  
+  /* Instead of trying to access the internal structure, we'll just log that the schema is loaded */
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_DEBUG, "Schema is loaded and available for validation");
+  
+  /* We can't directly access the schema document, so we'll just log that we're using the embedded schema */
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_DEBUG, "Using embedded schema from _home_netcraveos_ircd_hybrid_etc_ircd_xsd");
 } 

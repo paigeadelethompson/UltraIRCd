@@ -228,7 +228,7 @@
                 </xs:documentation>
               </xs:annotation>
             </xs:attribute>
-            <xs:attribute name="resident" type="yesNo" default="no">
+            <xs:attribute name="resident" type="ircd:yesNo" default="no">
               <xs:annotation>
                 <xs:documentation>
                   If set to "yes", the module will stay loaded even when not in use.
@@ -237,7 +237,7 @@
                 </xs:documentation>
               </xs:annotation>
             </xs:attribute>
-            <xs:attribute name="core" type="yesNo" default="no">
+            <xs:attribute name="core" type="ircd:yesNo" default="no">
               <xs:annotation>
                 <xs:documentation>
                   If set to "yes", marks the module as a core module that cannot be unloaded.
@@ -270,7 +270,7 @@
                 </xs:documentation>
               </xs:annotation>
             </xs:attribute>
-            <xs:attribute name="sid" type="sidType" use="required">
+            <xs:attribute name="sid" type="ircd:sidType" use="required">
               <xs:annotation>
                 <xs:documentation>
                   The server's unique ID in the format [0-9][A-Z0-9][A-Z0-9].
@@ -344,7 +344,7 @@
                 </xs:restriction>
               </xs:simpleType>
             </xs:attribute>
-            <xs:attribute name="hub" type="yesNo" default="no">
+            <xs:attribute name="hub" type="ircd:yesNo" default="no">
               <xs:annotation>
                 <xs:documentation>
                   If set to "yes", marks this server as a hub server.
@@ -491,7 +491,7 @@
                 </xs:documentation>
               </xs:annotation>
             </xs:attribute>
-            <xs:attribute name="ping_time" type="timeSpec" use="required">
+            <xs:attribute name="ping_time" type="ircd:timeSpec" use="required">
               <xs:annotation>
                 <xs:documentation>
                   Frequency of pings to check connection status.
@@ -500,7 +500,7 @@
                 </xs:documentation>
               </xs:annotation>
             </xs:attribute>
-            <xs:attribute name="connectfreq" type="timeSpec" use="required">
+            <xs:attribute name="connectfreq" type="ircd:timeSpec" use="required">
               <xs:annotation>
                 <xs:documentation>
                   Minimum time between connection attempts from the same IP.
@@ -519,7 +519,7 @@
                 </xs:documentation>
               </xs:annotation>
             </xs:attribute>
-            <xs:attribute name="sendq" type="sizeSpec" use="required">
+            <xs:attribute name="sendq" type="ircd:sizeSpec" use="required">
               <xs:annotation>
                 <xs:documentation>
                   Maximum size of the send queue for connections in this class.
@@ -529,7 +529,7 @@
                 </xs:documentation>
               </xs:annotation>
             </xs:attribute>
-            <xs:attribute name="recvq" type="sizeSpec" use="required">
+            <xs:attribute name="recvq" type="ircd:sizeSpec" use="required">
               <xs:annotation>
                 <xs:documentation>
                   Maximum size of the receive queue for connections in this class.
@@ -566,7 +566,7 @@
                 </xs:documentation>
               </xs:annotation>
             </xs:attribute>
-            <xs:attribute name="min_idle" type="timeSpec">
+            <xs:attribute name="min_idle" type="ircd:timeSpec">
               <xs:annotation>
                 <xs:documentation>
                   Minimum idle time before a connection is considered idle.
@@ -576,7 +576,7 @@
                 </xs:documentation>
               </xs:annotation>
             </xs:attribute>
-            <xs:attribute name="max_idle" type="timeSpec">
+            <xs:attribute name="max_idle" type="ircd:timeSpec">
               <xs:annotation>
                 <xs:documentation>
                   Maximum idle time before a connection is disconnected.
@@ -619,8 +619,8 @@
               </xs:simpleType>
             </xs:attribute>
             <xs:attribute name="number_per_cidr" type="xs:nonNegativeInteger"/>
-            <xs:attribute name="random_idle" type="yesNo" default="no"/>
-            <xs:attribute name="hide_idle_from_opers" type="yesNo" default="no"/>
+            <xs:attribute name="random_idle" type="ircd:yesNo" default="no"/>
+            <xs:attribute name="hide_idle_from_opers" type="ircd:yesNo" default="no"/>
           </xs:complexType>
         </xs:element>
 
@@ -690,7 +690,7 @@
                 </xs:documentation>
               </xs:annotation>
             </xs:attribute>
-            <xs:attribute name="invite_client_time" type="timeSpec" use="required">
+            <xs:attribute name="invite_client_time" type="ircd:timeSpec" use="required">
               <xs:annotation>
                 <xs:documentation>
                   Time period for invite_client_count.
@@ -700,7 +700,7 @@
                 </xs:documentation>
               </xs:annotation>
             </xs:attribute>
-            <xs:attribute name="invite_delay_channel" type="timeSpec" use="required">
+            <xs:attribute name="invite_delay_channel" type="ircd:timeSpec" use="required">
               <xs:annotation>
                 <xs:documentation>
                   Minimum time between invites to the same channel.
@@ -710,7 +710,7 @@
                 </xs:documentation>
               </xs:annotation>
             </xs:attribute>
-            <xs:attribute name="invite_expire_time" type="timeSpec" use="required">
+            <xs:attribute name="invite_expire_time" type="ircd:timeSpec" use="required">
               <xs:annotation>
                 <xs:documentation>
                   Time after which unused invites expire.
@@ -729,11 +729,11 @@
                 </xs:documentation>
               </xs:annotation>
             </xs:attribute>
-            <xs:attribute name="knock_client_time" type="timeSpec" use="required"/>
-            <xs:attribute name="knock_delay_channel" type="timeSpec" use="required"/>
+            <xs:attribute name="knock_client_time" type="ircd:timeSpec" use="required"/>
+            <xs:attribute name="knock_delay_channel" type="ircd:timeSpec" use="required"/>
             <xs:attribute name="default_join_flood_count" type="xs:positiveInteger" use="required"/>
-            <xs:attribute name="default_join_flood_time" type="timeSpec" use="required"/>
-            <xs:attribute name="disable_fake_channels" type="yesNo" default="no">
+            <xs:attribute name="default_join_flood_time" type="ircd:timeSpec" use="required"/>
+            <xs:attribute name="disable_fake_channels" type="ircd:yesNo" default="no">
               <xs:annotation>
                 <xs:documentation>
                   Whether to disable creation of channels with non-standard characters.
@@ -742,7 +742,7 @@
                 </xs:documentation>
               </xs:annotation>
             </xs:attribute>
-            <xs:attribute name="enable_extbans" type="yesNo" default="no">
+            <xs:attribute name="enable_extbans" type="ircd:yesNo" default="no">
               <xs:annotation>
                 <xs:documentation>
                   Whether to enable extended ban types.
@@ -751,7 +751,7 @@
                 </xs:documentation>
               </xs:annotation>
             </xs:attribute>
-            <xs:attribute name="enable_owner" type="yesNo" default="no">
+            <xs:attribute name="enable_owner" type="ircd:yesNo" default="no">
               <xs:annotation>
                 <xs:documentation>
                   Whether to enable channel owner status (~).
@@ -760,10 +760,10 @@
                 </xs:documentation>
               </xs:annotation>
             </xs:attribute>
-            <xs:attribute name="enable_admin" type="yesNo" default="no">
+            <xs:attribute name="enable_admin" type="ircd:yesNo" default="no">
               <xs:annotation>
                 <xs:documentation>
-                  Whether to enable channel admin status (&).
+                  Whether to enable channel admin status (&amp;).
                   Default is "no". Set to "yes" to allow channel admins.
                   Adds an additional level of channel hierarchy.
                 </xs:documentation>
@@ -784,7 +784,7 @@
             </xs:documentation>
           </xs:annotation>
           <xs:complexType>
-            <xs:attribute name="flatten_links" type="yesNo" default="no">
+            <xs:attribute name="flatten_links" type="ircd:yesNo" default="no">
               <xs:annotation>
                 <xs:documentation>
                   Whether to flatten the server links tree in /links output.
@@ -793,7 +793,7 @@
                 </xs:documentation>
               </xs:annotation>
             </xs:attribute>
-            <xs:attribute name="flatten_links_delay" type="timeSpec">
+            <xs:attribute name="flatten_links_delay" type="ircd:timeSpec">
               <xs:annotation>
                 <xs:documentation>
                   Delay before showing flattened links to users after connection.
@@ -812,7 +812,7 @@
                 </xs:documentation>
               </xs:annotation>
             </xs:attribute>
-            <xs:attribute name="disable_remote_commands" type="yesNo" default="no">
+            <xs:attribute name="disable_remote_commands" type="ircd:yesNo" default="no">
               <xs:annotation>
                 <xs:documentation>
                   Whether to disable remote server commands for regular users.
@@ -821,7 +821,7 @@
                 </xs:documentation>
               </xs:annotation>
             </xs:attribute>
-            <xs:attribute name="hide_servers" type="yesNo" default="no">
+            <xs:attribute name="hide_servers" type="ircd:yesNo" default="no">
               <xs:annotation>
                 <xs:documentation>
                   Whether to hide server names from regular users.
@@ -830,7 +830,7 @@
                 </xs:documentation>
               </xs:annotation>
             </xs:attribute>
-            <xs:attribute name="hide_services" type="yesNo" default="no">
+            <xs:attribute name="hide_services" type="ircd:yesNo" default="no">
               <xs:annotation>
                 <xs:documentation>
                   Whether to hide services servers from regular users.
@@ -839,7 +839,7 @@
                 </xs:documentation>
               </xs:annotation>
             </xs:attribute>
-            <xs:attribute name="hidden" type="yesNo" default="no">
+            <xs:attribute name="hidden" type="ircd:yesNo" default="no">
               <xs:annotation>
                 <xs:documentation>
                   Whether this server should be hidden from /links output.
@@ -857,7 +857,7 @@
                 </xs:documentation>
               </xs:annotation>
             </xs:attribute>
-            <xs:attribute name="hide_server_ips" type="yesNo" default="no">
+            <xs:attribute name="hide_server_ips" type="ircd:yesNo" default="no">
               <xs:annotation>
                 <xs:documentation>
                   Whether to hide server IP addresses from regular users.
@@ -893,7 +893,7 @@
                   </xs:documentation>
                 </xs:annotation>
                 <xs:complexType>
-                  <xs:attribute name="name" type="logFileName" use="required">
+                  <xs:attribute name="name" type="ircd:logFileName" use="required">
                     <xs:annotation>
                       <xs:documentation>
                         Path to the log file or "stdout" for console output.
@@ -901,7 +901,7 @@
                       </xs:documentation>
                     </xs:annotation>
                   </xs:attribute>
-                  <xs:attribute name="type" type="logType" use="required">
+                  <xs:attribute name="type" type="ircd:logType" use="required">
                     <xs:annotation>
                       <xs:documentation>
                         Type of events to log to this file.
@@ -910,7 +910,7 @@
                       </xs:documentation>
                     </xs:annotation>
                   </xs:attribute>
-                  <xs:attribute name="severity" type="logSeverity" use="required">
+                  <xs:attribute name="severity" type="ircd:logSeverity" use="required">
                     <xs:annotation>
                       <xs:documentation>
                         Minimum severity level of events to log.
@@ -919,7 +919,7 @@
                       </xs:documentation>
                     </xs:annotation>
                   </xs:attribute>
-                  <xs:attribute name="size" type="sizeSpec">
+                  <xs:attribute name="size" type="ircd:sizeSpec">
                     <xs:annotation>
                       <xs:documentation>
                         Maximum size of the log file before rotation.
@@ -931,7 +931,7 @@
                 </xs:complexType>
               </xs:element>
             </xs:sequence>
-            <xs:attribute name="use_logging" type="yesNo" use="required">
+            <xs:attribute name="use_logging" type="ircd:yesNo" use="required">
               <xs:annotation>
                 <xs:documentation>
                   Whether to enable logging for this log section.
@@ -1010,7 +1010,7 @@
                 </xs:documentation>
               </xs:annotation>
             </xs:attribute>
-            <xs:attribute name="encrypted" type="yesNo" default="no">
+            <xs:attribute name="encrypted" type="ircd:yesNo" default="no">
               <xs:annotation>
                 <xs:documentation>
                   Whether the password is encrypted.
@@ -1028,7 +1028,7 @@
                 </xs:documentation>
               </xs:annotation>
             </xs:attribute>
-            <xs:attribute name="tls_connection_required" type="yesNo" default="no">
+            <xs:attribute name="tls_connection_required" type="ircd:yesNo" default="no">
               <xs:annotation>
                 <xs:documentation>
                   Whether a TLS connection is required for this operator.
@@ -1037,7 +1037,7 @@
                 </xs:documentation>
               </xs:annotation>
             </xs:attribute>
-            <xs:attribute name="flags" type="operFlags" use="required">
+            <xs:attribute name="flags" type="ircd:operFlags" use="required">
               <xs:annotation>
                 <xs:documentation>
                   Operator privilege flags.
@@ -1091,7 +1091,7 @@
                 </xs:documentation>
               </xs:annotation>
             </xs:attribute>
-            <xs:attribute name="flags" type="listenFlags" use="required">
+            <xs:attribute name="flags" type="ircd:listenFlags" use="required">
               <xs:annotation>
                 <xs:documentation>
                   Flags controlling the behavior of this listen block.
@@ -1144,7 +1144,7 @@
                 </xs:documentation>
               </xs:annotation>
             </xs:attribute>
-            <xs:attribute name="flags" type="authFlags" use="required">
+            <xs:attribute name="flags" type="ircd:authFlags" use="required">
               <xs:annotation>
                 <xs:documentation>
                   Flags controlling authentication behavior.
@@ -1182,7 +1182,7 @@
                 </xs:documentation>
               </xs:annotation>
             </xs:attribute>
-            <xs:attribute name="encrypted" type="yesNo" default="no">
+            <xs:attribute name="encrypted" type="ircd:yesNo" default="no">
               <xs:annotation>
                 <xs:documentation>
                   Whether the password is encrypted.
@@ -1224,7 +1224,7 @@
                 </xs:documentation>
               </xs:annotation>
             </xs:attribute>
-            <xs:attribute name="timeout" type="timeSpec" use="required">
+            <xs:attribute name="timeout" type="ircd:timeSpec" use="required">
               <xs:annotation>
                 <xs:documentation>
                   Connection timeout period.
@@ -1302,7 +1302,7 @@
                 </xs:documentation>
               </xs:annotation>
             </xs:attribute>
-            <xs:attribute name="flags" type="connectFlags" use="required">
+            <xs:attribute name="flags" type="ircd:connectFlags" use="required">
               <xs:annotation>
                 <xs:documentation>
                   Flags controlling connection behavior.
@@ -1338,7 +1338,7 @@
                 </xs:documentation>
               </xs:annotation>
             </xs:attribute>
-            <xs:attribute name="encrypted" type="yesNo" default="no">
+            <xs:attribute name="encrypted" type="ircd:yesNo" default="no">
               <xs:annotation>
                 <xs:documentation>
                   Whether the passwords are encrypted.
