@@ -53,41 +53,35 @@ enum log_type
 };
 
 /**
- * @enum log_severity
- * @brief Enumerates different severity levels for log entries.
+ * @brief Enumeration of log severity levels.
  */
 enum log_severity
 {
-  LOG_SEVERITY_DEBUG,  /**< Debug level messages. */
-  LOG_SEVERITY_INFO,   /**< Informational messages. */
-  LOG_SEVERITY_WARN,   /**< Warning messages. */
-  LOG_SEVERITY_ERROR,  /**< Error messages. */
-  LOG_SEVERITY_FATAL,  /**< Fatal error messages. */
+  LOG_SEVERITY_DEBUG,     /**< Debug messages */
+  LOG_SEVERITY_INFO,      /**< Informational messages */
+  LOG_SEVERITY_NOTICE,    /**< Notice messages */
+  LOG_SEVERITY_WARN,      /**< Warning messages */
+  LOG_SEVERITY_ERROR,     /**< Error messages */
+  LOG_SEVERITY_CRITICAL,  /**< Critical messages */
 };
 
 /**
- * @struct Log
- * @brief Represents a log structure, holding information about log configuration.
- *
- * The Log structure includes details such as the log type, file name,
- * associated file pointer, maximum file size, whether it is the main log,
- * flush behavior, and a time provider function. This structure is part of
- * a doubly linked list of loggers (log_list).
+ * @brief Structure representing a log configuration.
  */
 struct Log
 {
-  list_node_t node;  /**< Doubly linked list node for log management. */
-  enum log_type type;  /**< Type categorizing the log entries. */
-  char *file_name;  /**< File name associated with the log. */
-  FILE *file;  /**< File pointer for the log file. */
-  size_t max_file_size;  /**< Maximum size allowed for the log file. */
-  bool main;  /**< Indicates if the log is the main log. */
-  bool flush_immediately;  /**< Flag to flush log entries immediately. */
-  const char *(*time_provider)(uintmax_t);  /**< Time provider function for log timestamp. */
+  enum log_type type;           /**< Type of log */
+  enum log_severity severity;   /**< Severity level for log entries */
+  bool main;                    /**< Whether this is the main log */
+  char *file_name;             /**< Name of the log file */
+  FILE *file;                  /**< File pointer for the log */
+  size_t max_file_size;        /**< Maximum size of the log file */
+  bool flush_immediately;      /**< Whether to flush after each write */
+  const char *(*time_provider)(uintmax_t); /**< Function to provide timestamp */
 };
 
 extern void log_destroy(struct Log *);
 extern void log_clear(void);
 extern void log_write(enum log_type, enum log_severity, const char *, ...) IO_AFP(3,4);
-extern struct Log *log_add(enum log_type, bool, size_t, const char *);
+extern struct Log *log_add(enum log_type, enum log_severity, bool, size_t, const char *);
 #endif  /* INCLUDED_log_h */

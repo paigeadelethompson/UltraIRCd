@@ -463,7 +463,7 @@ main(int argc, char *argv[])
 
   /* We need this to initialise the fd array before anything else */
   fdlist_init();
-  log_add(LOG_TYPE_IRCD, true, 0, logFileName);
+  log_add(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, true, 0, logFileName);
 
   comm_select_init();  /* This needs to be setup early ! -- adrian */
   tls_init();
@@ -486,9 +486,9 @@ main(int argc, char *argv[])
   initialize_global_set_options();  /* Has to be called after conf_read_files() */
   flatten_links_init();
 
-  if (string_is_empty(ConfigServerInfo.name))
+  if (!ConfigServerInfo.name)
   {
-    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_FATAL, "No server name specified in serverinfo block.");
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_CRITICAL, "No server name specified in serverinfo block.");
     exit(EXIT_FAILURE);
   }
 
@@ -497,7 +497,7 @@ main(int argc, char *argv[])
   /* serverinfo {} description must exist.  If not, error out.*/
   if (string_is_empty(ConfigServerInfo.description))
   {
-    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_FATAL, "No server description specified in serverinfo block.");
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_CRITICAL, "No server description specified in serverinfo block.");
     exit(EXIT_FAILURE);
   }
 

@@ -43,9 +43,10 @@
 static const char *severity_colors[] = {
   "\033[38;2;128;128;128m",  /* DEBUG - Gray */
   "\033[38;2;0;255;0m",      /* INFO - Green */
+  "\033[38;2;0;191;255m",    /* NOTICE - Deep Sky Blue */
   "\033[38;2;255;165;0m",    /* WARN - Orange */
   "\033[38;2;255;0;0m",      /* ERROR - Red */
-  "\033[38;2;128;0;128m",    /* FATAL - Purple */
+  "\033[38;2;128;0;128m",    /* CRITICAL - Purple */
 };
 
 /* Log type colors */
@@ -65,9 +66,10 @@ static const char *type_colors[] = {
 static const char *severity_strings[] = {
   "DEBUG",
   "INFO",
+  "NOTICE",
   "WARN",
   "ERROR",
-  "FATAL",
+  "CRITICAL",
 };
 
 /* Log type strings */
@@ -113,27 +115,48 @@ enum { LOG_MAX_LENGTH = 512 };
 enum { LOG_ROTATION_ATTEMPTS = 1000 };
 
 /**
- * @brief Initializes the logging system with a specific log type, file name, maximum file size, flush behavior, and log level.
+ * @brief Initializes the logging system with a specific log type, severity, file name, maximum file size, and flush behavior.
  *
  * This function creates and initializes a new log, setting its attributes, opening the log file, and adding it to the log list.
  * In case of failure, it prints an error message and exits if it's the main log; otherwise, it returns NULL.
  *
  * @param type The type of the log entry.
+ * @param severity The severity level for the log entries.
  * @param main Flag indicating if it's the primary log.
  * @param max_file_size Maximum size for the log file.
  * @param file_name Name of the log file.
  * @return A pointer to the initialized Log structure, or NULL on failure.
  */
 struct Log *
-log_add(enum log_type type, bool main, size_t max_file_size, const char *file_name)
+log_add(enum log_type type, enum log_severity severity, bool main, size_t max_file_size, const char *file_name)
 {
-  return NULL;
+  struct Log *log = io_calloc(sizeof(struct Log));
+  if (!log)
+    return NULL;
+
+  log->type = type;
+  log->severity = severity;
+  log->main = main;
+  log->max_file_size = max_file_size;
+  log->flush_immediately = true;
+  log->time_provider = date_iso8601_usec;
+
+  if (file_name)
+  {
+    log->file_name = io_strdup(file_name);
+    if (strcmp(file_name, "stdout") == 0)
+      log->file = stdout;
+    else
+      log->file = fopen(file_name, "a");
+  }
+
+  return log;
 }
 
 /**
- * @brief Writes a log entry with a variable argument list to stderr.
+ * @brief Writes a log entry with a variable argument list to the appropriate output.
  *
- * This function writes a log entry to stderr with color-coded severity and type.
+ * This function writes a log entry to the configured output (file or stdout) with color-coded severity and type.
  * It formats the message with timestamp, severity, type, and the actual message.
  *
  * @param type The type of the log entry.
@@ -157,9 +180,9 @@ log_write(enum log_type type, enum log_severity severity, const char *format, ..
   if (length >= sizeof(buffer))
     strlcpy(buffer + LOG_MAX_LENGTH - sizeof(TRUNCATED_STRING), TRUNCATED_STRING, sizeof(TRUNCATED_STRING));
 
-  /* Remove "ERROR: " prefix if present and severity is ERROR or FATAL */
+  /* Remove "ERROR: " prefix if present and severity is ERROR or CRITICAL */
   char *message = buffer;
-  if ((severity == LOG_SEVERITY_ERROR || severity == LOG_SEVERITY_FATAL) && 
+  if ((severity == LOG_SEVERITY_ERROR || severity == LOG_SEVERITY_CRITICAL) && 
       strncmp(message, "ERROR: ", 7) == 0)
     message += 7;
 
