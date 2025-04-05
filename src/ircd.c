@@ -67,6 +67,9 @@
 #include "ircd_exit.h"
 #include "ircd_hook.h"
 #include "flatten_links.h"
+#include <getopt.h>
+#include "misc.h"
+#include <signal.h>
 
 /**
  * @struct SetOptions
@@ -95,7 +98,7 @@ struct Counter Count;
  * run in the background. The flag is set based on the command line parameter
  * '-fork' when launching the ircd process.
  */
-struct ServerState_t server_state;
+struct ServerState_t server_state = { .foreground = true, .debug = false };
 
 /**
  * @struct ServerStatistics
@@ -145,36 +148,56 @@ const char *logFileName = LPATH;
 const char *pidFileName = PPATH;
 
 /**
- * @var bool printVersion
- * @brief Flag indicating whether to print the version and exit.
- */
-static bool printVersion;
-
-/**
  * @var const char *generateConfigFile
  * @brief Pointer to the filename for the generated configuration file.
  */
 static const char *generateConfigFile;
 
 /**
- * @var struct io_getopt myopts[]
- * @brief Array of command-line options and their descriptions.
+ * @var struct option long_options[]
+ * @brief Array of long options for getopt_long.
  */
-static struct io_getopt myopts[] =
-{
-  { "configfile", 'c', &ConfigGeneral.configfile, STRING, "File to use for ircd.conf" },
-  { "klinefile", 'k', &ConfigGeneral.klinefile, STRING, "File to use for kline database" },
-  { "dlinefile", 'd', &ConfigGeneral.dlinefile, STRING, "File to use for dline database" },
-  { "xlinefile", 'x', &ConfigGeneral.xlinefile, STRING, "File to use for xline database" },
-  { "resvfile", 'r', &ConfigGeneral.resvfile, STRING, "File to use for resv database" },
-  { "logfile", 'l', &logFileName, STRING, "File to use for ircd.log" },
-  { "pidfile", 'p', &pidFileName, STRING, "File to use for process ID" },
-  { "fork", 'f', &server_state.foreground, BOOLEAN, "Run in background (fork)" },
-  { "version", 'v', &printVersion, BOOLEAN, "Print version and exit" },
-  { "generate-config", 'g', &generateConfigFile, OPTIONAL_STRING, "Generate a new configuration file and write to specified path (or stdout if no path given)" },
-  { "help", 'h', NULL, USAGE, "Print this text" },
-  { NULL, 0, NULL, STRING, NULL }
+static struct option long_options[] = {
+  {"configfile", required_argument, 0, 'c'},
+  {"klinefile", required_argument, 0, 'k'},
+  {"dlinefile", required_argument, 0, 'd'},
+  {"xlinefile", required_argument, 0, 'x'},
+  {"resvfile", required_argument, 0, 'r'},
+  {"logfile", required_argument, 0, 'l'},
+  {"pidfile", required_argument, 0, 'p'},
+  {"fork", no_argument, 0, 'f'},
+  {"version", no_argument, 0, 'v'},
+  {"generate-config", optional_argument, 0, 'g'},
+  {"debug", no_argument, 0, 'D'},
+  {"help", no_argument, 0, 'h'},
+  {0, 0, 0, 0}
 };
+
+/**
+ * @brief Display usage information for the program.
+ *
+ * Displays the program's usage information, including valid options and their descriptions.
+ *
+ * @param name The name of the program.
+ */
+static void
+print_usage(const char *name)
+{
+  fprintf(stderr, "Usage: %s [options]\n", name);
+  fprintf(stderr, "Where valid options are:\n");
+  fprintf(stderr, "  -c, --configfile FILE    File to use for ircd.conf\n");
+  fprintf(stderr, "  -k, --klinefile FILE     File to use for kline database\n");
+  fprintf(stderr, "  -d, --dlinefile FILE     File to use for dline database\n");
+  fprintf(stderr, "  -x, --xlinefile FILE     File to use for xline database\n");
+  fprintf(stderr, "  -r, --resvfile FILE      File to use for resv database\n");
+  fprintf(stderr, "  -l, --logfile FILE       File to use for ircd.log\n");
+  fprintf(stderr, "  -p, --pidfile FILE       File to use for process ID\n");
+  fprintf(stderr, "  -f, --fork               Run in background (fork)\n");
+  fprintf(stderr, "  -v, --version            Print version and exit\n");
+  fprintf(stderr, "  -g, --generate-config [FILE] Generate a new configuration file\n");
+  fprintf(stderr, "  -D, --debug              Enable debug logging\n");
+  fprintf(stderr, "  -h, --help               Print this text\n");
+}
 
 static struct event event_cleanup_tklines =
 {
@@ -315,10 +338,11 @@ print_startup(int pid)
     strlcpy(cwd, "unknown", sizeof(cwd));
   }
   
-  fprintf(stderr, "ircd: version %s\n", IRCD_VERSION);
-  fprintf(stderr, "ircd: pid %d\n", pid);
-  fprintf(stderr, "ircd: running in %s mode from %s\n",
-         server_state.foreground ? "background": "foreground", cwd);
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "ircd: version %s", IRCD_VERSION);
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "ircd: pid %d", pid);
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "ircd: running in %s mode from %s",
+           server_state.foreground ? "foreground" : "background", cwd);
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "ircd: started at %s", date_iso8601_usec(0));
 }
 
 /**
@@ -366,6 +390,26 @@ make_daemon(void)
     close(fd);
 }
 
+static void
+signal_handler(int sig)
+{
+  const char *signal_name;
+  
+  switch (sig) {
+    case SIGSEGV: signal_name = "SIGSEGV"; break;
+    case SIGABRT: signal_name = "SIGABRT"; break;
+    case SIGFPE:  signal_name = "SIGFPE"; break;
+    case SIGILL:  signal_name = "SIGILL"; break;
+    case SIGBUS:  signal_name = "SIGBUS"; break;
+    case SIGTERM: signal_name = "SIGTERM"; break;
+    case SIGINT:  signal_name = "SIGINT"; break;
+    default:      signal_name = "UNKNOWN"; break;
+  }
+  
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Received signal %s (%d), exiting", signal_name, sig);
+  exit(EXIT_FAILURE);
+}
+
 /**
  * @brief Main function to initialize and run the IRC server.
  *
@@ -380,6 +424,11 @@ make_daemon(void)
 int
 main(int argc, char *argv[])
 {
+  
+  int opt;
+  int option_index = 0;
+  const char *short_options = "c:k:d:x:r:l:p:fvgDh";
+
   /* Check to see if the user is running us as root, which is a nono */
   if (geteuid() == 0)
   {
@@ -433,28 +482,92 @@ main(int argc, char *argv[])
   myargv = argv;
   umask(077);  /* umask 077: u=rwx,g=,o= */
 
-  io_getopt(&argc, &argv, myopts);
+  /* By default, run in foreground mode and debug off */
+  server_state.foreground = true;
+  server_state.debug = false;
 
-  if (printVersion)
-  {
-    printf("ircd: version %s\n", IRCD_VERSION);
-    exit(EXIT_SUCCESS);
+  /* Parse command line options using getopt_long */
+  while ((opt = getopt_long(argc, argv, short_options, long_options, &option_index)) != -1) {
+    switch (opt) {
+      case 'c':
+        ConfigGeneral.configfile = io_strdup(optarg);
+        break;
+      case 'k':
+        ConfigGeneral.klinefile = io_strdup(optarg);
+        break;
+      case 'd':
+        ConfigGeneral.dlinefile = io_strdup(optarg);
+        break;
+      case 'x':
+        ConfigGeneral.xlinefile = io_strdup(optarg);
+        break;
+      case 'r':
+        ConfigGeneral.resvfile = io_strdup(optarg);
+        break;
+      case 'l':
+        logFileName = io_strdup(optarg);
+        break;
+      case 'p':
+        pidFileName = io_strdup(optarg);
+        break;
+      case 'f':
+        server_state.foreground = false;  /* -f means run in background */
+        break;
+      case 'v':
+        printf("ircd: version %s\n", IRCD_VERSION);
+        exit(EXIT_SUCCESS);
+      case 'g':
+        generateConfigFile = optarg ? io_strdup(optarg) : NULL;
+        break;
+      case 'D':
+        server_state.debug = true;  /* Enable debug logging */
+        log_add(LOG_TYPE_IRCD, LOG_SEVERITY_DEBUG, true, 0, "stderr");
+        log_add(LOG_TYPE_KILL, LOG_SEVERITY_DEBUG, false, 0, "stderr");
+        log_add(LOG_TYPE_KLINE, LOG_SEVERITY_DEBUG, false, 0, "stderr");
+        log_add(LOG_TYPE_DLINE, LOG_SEVERITY_DEBUG, false, 0, "stderr");
+        log_add(LOG_TYPE_XLINE, LOG_SEVERITY_DEBUG, false, 0, "stderr");
+        log_add(LOG_TYPE_RESV, LOG_SEVERITY_DEBUG, false, 0, "stderr");
+        log_add(LOG_TYPE_OPER, LOG_SEVERITY_DEBUG, false, 0, "stderr");
+        log_add(LOG_TYPE_USER, LOG_SEVERITY_DEBUG, false, 0, "stderr");
+        log_write(LOG_TYPE_IRCD, LOG_SEVERITY_DEBUG, "Debug mode enabled");
+        break;
+      case 'h':
+        print_usage(argv[0]);
+        exit(EXIT_SUCCESS);
+      default:
+        print_usage(argv[0]);
+        exit(EXIT_FAILURE);
+    }
   }
 
-  /* Handle the -g option with an argument */
-  if (generateConfigFile != NULL)
+  if (!server_state.debug)
   {
-    conf_generate_default(generateConfigFile);
-    exit(EXIT_SUCCESS);
+        log_add(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, true, 0, "stderr");
+        log_add(LOG_TYPE_KILL, LOG_SEVERITY_INFO, false, 0, "stderr");
+        log_add(LOG_TYPE_KLINE, LOG_SEVERITY_INFO, false, 0, "stderr");
+        log_add(LOG_TYPE_DLINE, LOG_SEVERITY_INFO, false, 0, "stderr");
+        log_add(LOG_TYPE_XLINE, LOG_SEVERITY_INFO, false, 0, "stderr");
+        log_add(LOG_TYPE_RESV, LOG_SEVERITY_INFO, false, 0, "stderr");
+        log_add(LOG_TYPE_OPER, LOG_SEVERITY_INFO, false, 0, "stderr");
+        log_add(LOG_TYPE_USER, LOG_SEVERITY_INFO, false, 0, "stderr");
+    
   }
 
-  if (chdir(ConfigGeneral.dpath))
-  {
-    perror("chdir");
+  /* Change to the working directory */
+  char cwd[PATH_MAX];
+  if (getcwd(cwd, sizeof(cwd)) == NULL) {
+    fprintf(stderr, "ircd: unable to get current working directory: %s\n", strerror(errno));
     exit(EXIT_FAILURE);
   }
 
-  if (server_state.foreground)
+  ConfigGeneral.dpath = io_strdup(cwd);
+  
+ /* Initialize the configuration */
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "Initializing configuration...");
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "Configuration file path: %s", ConfigGeneral.configfile);
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "Data directory: %s", ConfigGeneral.dpath);
+  
+  if (!server_state.foreground)
     make_daemon();
   else
     print_startup(getpid());
@@ -463,29 +576,132 @@ main(int argc, char *argv[])
 
   /* We need this to initialise the fd array before anything else */
   fdlist_init();
-  log_add(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, true, 0, logFileName);
+  
+  /* Initialize cloak configuration before loading config */
+  cloak_init();
 
-  comm_select_init();  /* This needs to be setup early ! -- adrian */
-  tls_init();
+  /* Check if configuration file exists */
+  FILE *config_file = fopen(ConfigGeneral.configfile, "r");
+  if (config_file == NULL) {
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Configuration file not found: %s", ConfigGeneral.configfile);
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Error: %s", strerror(errno));
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Exiting due to missing configuration file");
+    exit(EXIT_FAILURE);
+  }
+
+  /* Check if we can read the configuration file */
+  char test_buffer[1];
+  if (fread(test_buffer, 1, 1, config_file) != 1 && !feof(config_file)) {
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Cannot read configuration file: %s", ConfigGeneral.configfile);
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Error: %s", strerror(errno));
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Exiting due to unreadable configuration file");
+    fclose(config_file);
+    exit(EXIT_FAILURE);
+  }
+  fclose(config_file);
+  
+  conf_set_defaults();
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "Reading configuration files...");
+  
+  /* Read configuration files */
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "Attempting to read configuration file...");
+  conf_read_files(true);  /* true for cold start */
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "Configuration file read attempt completed");
+  
+  /* Add debug logging to see if we get past this point */
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_DEBUG, "DEBUG: Checking server name after config read");
+  
+  /* Check if configuration was loaded successfully by verifying required fields */
+  if (string_is_empty(ConfigServerInfo.name)) {
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Failed to read configuration files");
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Please check your configuration file: %s", ConfigGeneral.configfile);
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Make sure the file exists and is readable");
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Exiting due to configuration error");
+    exit(EXIT_FAILURE);
+  }
+  
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_DEBUG, "DEBUG: Server name check passed");
+  
+  /* Check other critical configuration fields */
+  if (string_is_empty(ConfigServerInfo.description)) {
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "No server description specified in serverinfo block");
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Exiting due to missing server description");
+    exit(EXIT_FAILURE);
+  }
+  
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_DEBUG, "DEBUG: Server description check passed");
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "Configuration loaded successfully");
+
+  if (generateConfigFile != NULL)
+  {
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "Generating default configuration file...");
+    if (conf_generate_default(generateConfigFile))
+    {
+      log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "Configuration file %s generated successfully.",
+                generateConfigFile ? generateConfigFile : "written to stdout");
+      exit(EXIT_SUCCESS);
+    }
+    else
+    {
+      log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Failed to generate configuration file.");
+      exit(EXIT_FAILURE);
+    }
+  }
 
   /* Check if there is pidfile and daemon already running */
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "Creating PID file...");
   if (io_pidfile_create(pidFileName))
+  {
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_ERROR, "Failed to create PID file. Is another instance running?");
     exit(EXIT_FAILURE);
+  }
 
+  /* Initialize all subsystems */
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "Initializing subsystems...");
+
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "- Communication subsystem");
+  comm_select_init();
+
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "- TLS");
+  tls_init();
+
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "- Hooks");
   ircd_hook_init();
+
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "- IP cache");
   ipcache_init();
+
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "- Client subsystem");
   client_init();
+
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "- Class subsystem");
   class_init();
+
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "- Cloak subsystem");
   cloak_init();
-  resolver_init();      /* Needs to be setup before the io loop */
+
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "- Resolver");
+  resolver_init();
+
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "- Modules");
   module_init();
-  conf_read_files(true);   /* cold start init conf files */
+
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "- Channel modes");
   channel_mode_init();
+
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "- Extended bans");
   extban_init();
-  capab_init();  /* Set up default_server_capabs */
-  initialize_global_set_options();  /* Has to be called after conf_read_files() */
+
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "- Server capabilities");
+  capab_init();
+
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "- Global options");
+  initialize_global_set_options();
+
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "- Link flattening");
   flatten_links_init();
 
+  /* Check required configuration */
   if (!ConfigServerInfo.name)
   {
     log_write(LOG_TYPE_IRCD, LOG_SEVERITY_CRITICAL, "No server name specified in serverinfo block.");
@@ -494,7 +710,6 @@ main(int argc, char *argv[])
 
   strlcpy(me.name, ConfigServerInfo.name, sizeof(me.name));
 
-  /* serverinfo {} description must exist.  If not, error out.*/
   if (string_is_empty(ConfigServerInfo.description))
   {
     log_write(LOG_TYPE_IRCD, LOG_SEVERITY_CRITICAL, "No server description specified in serverinfo block.");
@@ -507,6 +722,7 @@ main(int argc, char *argv[])
   strlcpy(ConfigServerInfo.sid, "10X", sizeof(ConfigServerInfo.sid));
   strlcpy(me.id, ConfigServerInfo.sid, sizeof(me.id));
 
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "Initializing UID system...");
   init_uid();
 
   me.from = &me;
@@ -514,33 +730,45 @@ main(int argc, char *argv[])
   me.connection->created_real = io_time_get(IO_TIME_REALTIME_SEC);
   me.connection->created_monotonic = io_time_get(IO_TIME_MONOTONIC_SEC);
 
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "Setting up server identity...");
   SetMe(&me);
   server_make(&me);
 
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "Adding server to hash tables...");
   hash_add_id(&me);
   hash_add_client(&me);
 
   list_add(&me, &me.node, &global_server_list);
 
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "Loading databases...");
   load_kline_database(ConfigGeneral.klinefile);
   load_dline_database(ConfigGeneral.dlinefile);
   load_xline_database(ConfigGeneral.xlinefile);
   load_resv_database(ConfigGeneral.resvfile);
 
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "Loading all modules...");
   module_load_all(NULL);
 
+  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "Setting up events...");
   event_addish(&event_cleanup_tklines, NULL);
-
-  /* We want server_connect_auto to be called as soon as possible now! -- adrian */
-  /* No, 'cause after a restart it would cause all sorts of nick collides */
   event_addish(&event_server_connect_auto, NULL);
-
-  /* Setup the timeout check. I'll shift it later :)  -- adrian */
   event_add(&event_comm_checktimeouts, NULL);
-
   event_addish(&event_save_all_databases, NULL);
 
-  log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "Server ready. Running version: %s", IRCD_VERSION);
+  /* Only switch to configured logging if we have a valid configuration */
+  if (server_state.foreground)
+  {
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "Server ready. Running version: %s", IRCD_VERSION);
+    log_write(LOG_TYPE_IRCD, LOG_SEVERITY_INFO, "Entering main event loop...");
+  }
+
+  /* Set up signal handlers */
+  signal(SIGSEGV, signal_handler);
+  signal(SIGABRT, signal_handler);
+  signal(SIGFPE, signal_handler);
+  signal(SIGILL, signal_handler);
+  signal(SIGBUS, signal_handler);
+
   io_loop();
 
   return 0;

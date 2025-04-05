@@ -34,31 +34,33 @@
 #include "conf.h"
 #include "misc.h"
 #include "memory.h"
+#include "io_time.h"
 
 /* ANSI color codes for 24-bit color support */
 #define COLOR_RESET "\033[0m"
 #define COLOR_BOLD "\033[1m"
+#define COLOR_MESSAGE "\033[38;2;220;220;220m"  /* Light gray for messages */
 
 /* Severity level colors */
 static const char *severity_colors[] = {
   "\033[38;2;128;128;128m",  /* DEBUG - Gray */
-  "\033[38;2;0;255;0m",      /* INFO - Green */
-  "\033[38;2;0;191;255m",    /* NOTICE - Deep Sky Blue */
+  "\033[38;2;72;209;204m",   /* INFO - Turquoise */
+  "\033[38;2;100;149;237m",  /* NOTICE - Cornflower Blue */
   "\033[38;2;255;165;0m",    /* WARN - Orange */
-  "\033[38;2;255;0;0m",      /* ERROR - Red */
-  "\033[38;2;128;0;128m",    /* CRITICAL - Purple */
+  "\033[38;2;255;69;0m",     /* ERROR - Red-Orange */
+  "\033[38;2;255;0;0m",      /* CRITICAL - Red */
 };
 
 /* Log type colors */
 static const char *type_colors[] = {
-  "\033[38;2;0;191;255m",    /* IRCD - Deep Sky Blue */
-  "\033[38;2;255;0;0m",      /* KILL - Red */
-  "\033[38;2;255;165;0m",    /* KLINE - Orange */
-  "\033[38;2;255;0;0m",      /* DLINE - Red */
-  "\033[38;2;255;0;0m",      /* XLINE - Red */
-  "\033[38;2;255;165;0m",    /* RESV - Orange */
-  "\033[38;2;0;255;0m",      /* OPER - Green */
-  "\033[38;2;0;191;255m",    /* USER - Deep Sky Blue */
+  "\033[38;2;147;112;219m",  /* IRCD - Medium Purple */
+  "\033[38;2;255;69;0m",     /* KILL - Red-Orange */
+  "\033[38;2;255;140;0m",    /* KLINE - Dark Orange */
+  "\033[38;2;255;69;0m",     /* DLINE - Red-Orange */
+  "\033[38;2;255;69;0m",     /* XLINE - Red-Orange */
+  "\033[38;2;255;140;0m",    /* RESV - Dark Orange */
+  "\033[38;2;50;205;50m",    /* OPER - Lime Green */
+  "\033[38;2;100;149;237m",  /* USER - Cornflower Blue */
   "\033[38;2;128;128;128m",  /* DEBUG - Gray */
 };
 
@@ -82,7 +84,6 @@ static const char *type_strings[] = {
   "RESV",
   "OPER",
   "USER",
-  "DEBUG",
 };
 
 /**
@@ -114,6 +115,91 @@ enum { LOG_MAX_LENGTH = 512 };
  */
 enum { LOG_ROTATION_ATTEMPTS = 1000 };
 
+static list_t log_entries;
+
+/**
+ * @brief Writes a log entry with a variable argument list to the appropriate output.
+ *
+ * This function writes a log entry to the configured output (file or stdout) with color-coded severity and type.
+ * It formats the message with timestamp, severity, type, and the actual message.
+ *
+ * @param type The type of the log entry.
+ * @param severity The severity level of the log entry.
+ * @param format The format string for the log entry.
+ * @param ... Variable argument list for the log entry.
+ */
+void
+log_write(enum log_type type, enum log_severity severity, const char *format, ...)
+{
+  char buffer[LOG_MAX_LENGTH + 1];  /* +1 for the null terminator ('\0'). */
+  va_list args;
+  va_start(args, format);
+  size_t length = vsnprintf(buffer, sizeof(buffer), format, args);
+  va_end(args);
+
+  /* Check if log message was truncated. */
+  if (length >= sizeof(buffer))
+    strlcpy(buffer + LOG_MAX_LENGTH - sizeof(TRUNCATED_STRING), TRUNCATED_STRING, sizeof(TRUNCATED_STRING));
+
+  /* Remove "ERROR: " prefix if present and severity is ERROR or CRITICAL */
+  char *message = buffer;
+  if ((severity == LOG_SEVERITY_ERROR || severity == LOG_SEVERITY_CRITICAL) && 
+      strncmp(message, "ERROR: ", 7) == 0)
+    message += 7;
+
+  /* Get current microtime */
+  const io_time_t *const iotime = io_time_set();
+  uintmax_t microtime = (iotime->sec_real * 1000000) + (iotime->nsec_real / 1000);
+
+  /* Format the log message */
+  char formatted[LOG_MAX_LENGTH * 2];  /* Double size to account for color codes */
+  snprintf(formatted, sizeof(formatted), "%s[%ju]%s %s%s%s %s%s%s %s%s%s\n",
+          COLOR_BOLD,
+          microtime,
+          COLOR_RESET,
+          severity_colors[severity],
+          severity_strings[severity],
+          COLOR_RESET,
+          type_colors[type],
+          type_strings[type],
+          COLOR_RESET,
+          COLOR_MESSAGE,  /* Use light gray for the actual message */
+          message,
+          COLOR_RESET);
+
+  /* If logging is disabled, write to stderr for all severities */
+  if (ConfigLog.use_logging == 0)
+  {
+    fprintf(stderr, "%s", formatted);
+    fflush(stderr);
+    return;
+  }
+
+  /* Write to all matching log entries */
+  list_node_t *node;
+  LIST_FOREACH(node, log_entries.head)
+  {
+    struct Log *log = node->data;
+    /* Show all messages if log type matches and either:
+       1. The log is configured for DEBUG severity (shows everything)
+       2. The message severity is DEBUG (always show debug messages)
+       3. The log's configured severity is greater than or equal to the message severity
+    */
+    if (log->type == type && 
+        (log->severity == LOG_SEVERITY_DEBUG || 
+         severity == LOG_SEVERITY_DEBUG || 
+         log->severity >= severity))
+    {
+      if (log->file)
+      {
+        fprintf(log->file, "%s", formatted);
+        /* Always flush the output to ensure messages are displayed */
+        fflush(log->file);
+      }
+    }
+  }
+}
+
 /**
  * @brief Initializes the logging system with a specific log type, severity, file name, maximum file size, and flush behavior.
  *
@@ -138,7 +224,7 @@ log_add(enum log_type type, enum log_severity severity, bool main, size_t max_fi
   log->severity = severity;
   log->main = main;
   log->max_file_size = max_file_size;
-  log->flush_immediately = true;
+  log->flush_immediately = true;  /* Always flush immediately */
   log->time_provider = date_iso8601_usec;
 
   if (file_name)
@@ -146,61 +232,14 @@ log_add(enum log_type type, enum log_severity severity, bool main, size_t max_fi
     log->file_name = io_strdup(file_name);
     if (strcmp(file_name, "stdout") == 0)
       log->file = stdout;
+    else if (strcmp(file_name, "stderr") == 0)
+      log->file = stderr;
     else
       log->file = fopen(file_name, "a");
   }
 
+  list_add(log, list_make_node(), &log_entries);
   return log;
-}
-
-/**
- * @brief Writes a log entry with a variable argument list to the appropriate output.
- *
- * This function writes a log entry to the configured output (file or stdout) with color-coded severity and type.
- * It formats the message with timestamp, severity, type, and the actual message.
- *
- * @param type The type of the log entry.
- * @param severity The severity level of the log entry.
- * @param format The format string for the log entry.
- * @param ... Variable argument list for the log entry.
- */
-void
-log_write(enum log_type type, enum log_severity severity, const char *format, ...)
-{
-  if (ConfigLog.use_logging == 0)
-    return;
-
-  char buffer[LOG_MAX_LENGTH + 1];  /* +1 for the null terminator ('\0'). */
-  va_list args;
-  va_start(args, format);
-  size_t length = vsnprintf(buffer, sizeof(buffer), format, args);
-  va_end(args);
-
-  /* Check if log message was truncated. */
-  if (length >= sizeof(buffer))
-    strlcpy(buffer + LOG_MAX_LENGTH - sizeof(TRUNCATED_STRING), TRUNCATED_STRING, sizeof(TRUNCATED_STRING));
-
-  /* Remove "ERROR: " prefix if present and severity is ERROR or CRITICAL */
-  char *message = buffer;
-  if ((severity == LOG_SEVERITY_ERROR || severity == LOG_SEVERITY_CRITICAL) && 
-      strncmp(message, "ERROR: ", 7) == 0)
-    message += 7;
-
-  /* Write to stderr with color coding */
-  fprintf(stderr, "%s[%s]%s %s%s%s %s%s%s %s%s%s\n",
-          COLOR_BOLD,
-          date_iso8601_usec(0),
-          COLOR_RESET,
-          severity_colors[severity],
-          severity_strings[severity],
-          COLOR_RESET,
-          type_colors[type],
-          type_strings[type],
-          COLOR_RESET,
-          severity_colors[severity],
-          message,
-          COLOR_RESET);
-  fflush(stderr);
 }
 
 /**
@@ -211,6 +250,13 @@ log_write(enum log_type type, enum log_severity severity, const char *format, ..
 void
 log_destroy(struct Log *log)
 {
+  if (!log)
+    return;
+
+  if (log->file && log->file != stdout && log->file != stderr)
+    fclose(log->file);
+  io_free(log->file_name);
+  io_free(log);
 }
 
 /**
@@ -221,4 +267,12 @@ log_destroy(struct Log *log)
 void
 log_clear(void)
 {
+  while (log_entries.head)
+  {
+    list_node_t *node = log_entries.head;
+    struct Log *log = node->data;
+    log_destroy(log);
+    list_remove(node, &log_entries);
+    list_free_node(node);
+  }
 }

@@ -122,6 +122,7 @@ struct Counter
 struct ServerState_t
 {
   bool foreground;  /**< Flag indicating whether the server should run in the background. */
+  bool debug;      /**< Flag indicating whether debug logging is enabled. */
 };
 
 /**

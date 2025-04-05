@@ -124,7 +124,43 @@ set(IRCD_SOURCES
     whowas.h
 )
 
-# Create executable
+# Create a shared library with the symbols needed by modules
+add_library(ircd_shared SHARED ${IRCD_SOURCES})
+
+# Set position independent code for the shared library
+set_target_properties(ircd_shared PROPERTIES
+    POSITION_INDEPENDENT_CODE ON
+    C_VISIBILITY_PRESET default
+)
+
+# Add -fPIC flag to the compilation of source files for the shared library
+target_compile_options(ircd_shared PRIVATE 
+    -fPIC
+    -fvisibility=default
+)
+
+# Make schema generation a dependency of the shared library target
+add_dependencies(ircd_shared schema_header)
+
+# Include directories for the shared library
+target_include_directories(ircd_shared PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_SOURCE_DIR}/libio/src
+)
+
+# Link libraries for the shared library
+target_link_libraries(ircd_shared PUBLIC
+    ${OPENSSL_LIBRARIES}
+    io
+    ltdl
+    ircd_headers
+    crypt
+    LibXml2::LibXml2
+    jansson::jansson
+)
+
+# Create the IRCd executable
 add_executable(ircd ${IRCD_SOURCES})
 
 # Make schema generation a dependency of the ircd target

@@ -32,6 +32,10 @@ option(ENABLE_RELRO "Enable RELRO" ON)
 option(ENABLE_CFI "Enable Control Flow Integrity" ON)
 option(ENABLE_ASAN "Enable Address Sanitizer" ON)
 option(ENABLE_UBSAN "Enable Undefined Behavior Sanitizer" ON)
+option(ENABLE_SECURE_ALLOCATOR "Use a secure memory allocator" ON)
+option(ENABLE_SECURE_RANDOM "Use a secure random number generator" ON)
+option(ENABLE_SECURE_STRING "Use secure string functions" ON)
+option(ENABLE_SECURE_MATH "Use secure math functions" ON)
 
 # I/O polling mechanism selection
 option(ENABLE_KQUEUE "Force kqueue usage" OFF)
@@ -152,12 +156,90 @@ if(ENABLE_SECURITY_HARDENING)
     # Integer overflow protection
     add_compile_options(-fwrapv)
     
+    # Additional compiler flags
+    add_compile_options(
+        -D_FORTIFY_SOURCE=3
+        -fstack-clash-protection
+        -fstack-check
+        -fcf-protection=branch
+        -fno-common
+        -fno-ident
+        -fno-stack-check
+        -fno-strict-aliasing
+        -fno-builtin
+        -fno-omit-frame-pointer
+        -fno-optimize-sibling-calls
+    )
+    
+    # Additional linker flags
+    add_link_options(
+        -Wl,-z,noexecstack
+        -Wl,-z,separate-code
+        -Wl,-z,defs
+        -Wl,-z,text
+        -Wl,-z,nodlopen
+        -Wl,-z,nodump
+    )
+    
+    # Check for sanitizer support
+    include(CheckCCompilerFlag)
+    set(SANITIZER_FLAGS "")
+    
+    # Check for address sanitizer
+    check_c_compiler_flag("-fsanitize=address" HAVE_ASAN)
+    if(HAVE_ASAN)
+        list(APPEND SANITIZER_FLAGS "address")
+    endif()
+    
+    # Check for leak sanitizer
+    check_c_compiler_flag("-fsanitize=leak" HAVE_LSAN)
+    if(HAVE_LSAN)
+        list(APPEND SANITIZER_FLAGS "leak")
+    endif()
+    
+    # Check for thread sanitizer
+    check_c_compiler_flag("-fsanitize=thread" HAVE_TSAN)
+    if(HAVE_TSAN)
+        list(APPEND SANITIZER_FLAGS "thread")
+    endif()
+    
+    # Check for memory sanitizer
+    check_c_compiler_flag("-fsanitize=memory" HAVE_MSAN)
+    if(HAVE_MSAN)
+        list(APPEND SANITIZER_FLAGS "memory")
+    endif()
+    
+    # Check for safe stack sanitizer
+    check_c_compiler_flag("-fsanitize=safe-stack" HAVE_SAFE_STACK)
+    if(HAVE_SAFE_STACK)
+        list(APPEND SANITIZER_FLAGS "safe-stack")
+    endif()
+    
+    # Apply supported sanitizers
+    if(ENABLE_ASAN AND NOT "${SANITIZER_FLAGS}" STREQUAL "")
+        string(REPLACE ";" "," SANITIZER_STRING "${SANITIZER_FLAGS}")
+        add_compile_options(-fsanitize=${SANITIZER_STRING})
+        add_link_options(-fsanitize=${SANITIZER_STRING})
+    endif()
+    
+    # Build options
+    add_compile_definitions(
+        _GLIBCXX_ASSERTIONS
+        _GLIBCXX_SANITIZE_VECTOR
+        _GLIBCXX_DEBUG
+    )
+    
+    # Runtime options
+    set(ENV{MALLOC_CHECK_} 3)
+    set(ENV{MALLOC_TRACE} 1)
+    set(ENV{GLIBC_TUNABLES} "glibc.malloc.trim_threshold=131072:glibc.malloc.mmap_threshold=131072")
+    
     if(ENABLE_STACK_PROTECTOR)
         add_compile_options(-fstack-protector-strong)
     endif()
     
     if(ENABLE_FORTIFY_SOURCE)
-        add_compile_definitions(_FORTIFY_SOURCE=2)
+        add_compile_definitions(_FORTIFY_SOURCE=3)
     endif()
     
     if(ENABLE_PIE)
@@ -173,14 +255,26 @@ if(ENABLE_SECURITY_HARDENING)
         add_compile_options(-fcf-protection=full)
     endif()
     
-    if(ENABLE_ASAN)
-        add_compile_options(-fsanitize=address)
-        add_link_options(-fsanitize=address)
-    endif()
-    
     if(ENABLE_UBSAN)
         add_compile_options(-fsanitize=undefined)
         add_link_options(-fsanitize=undefined)
+    endif()
+    
+    # Secure features
+    if(ENABLE_SECURE_ALLOCATOR)
+        add_compile_definitions(USE_SECURE_ALLOCATOR)
+    endif()
+    
+    if(ENABLE_SECURE_RANDOM)
+        add_compile_definitions(USE_SECURE_RANDOM)
+    endif()
+    
+    if(ENABLE_SECURE_STRING)
+        add_compile_definitions(USE_SECURE_STRING)
+    endif()
+    
+    if(ENABLE_SECURE_MATH)
+        add_compile_definitions(USE_SECURE_MATH)
     endif()
 endif()
 
@@ -225,6 +319,9 @@ target_include_directories(ircd_headers INTERFACE
 add_subdirectory(libio)
 add_subdirectory(src)
 add_subdirectory(modules)
+
+# Set ENABLE_EXPORTS property for the ircd executable
+set_target_properties(ircd PROPERTIES ENABLE_EXPORTS ON)
 
 # Install documentation
 install(FILES

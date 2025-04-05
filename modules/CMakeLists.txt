@@ -1,3 +1,8 @@
+# Find required packages
+find_package(OpenSSL REQUIRED)
+find_package(LibXml2 REQUIRED)
+find_package(jansson REQUIRED)
+
 # Source files
 set(MODULE_SOURCES
     umode_flood.c
@@ -105,13 +110,13 @@ set(MODULE_SOURCES
 # Create modules directory
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/modules)
 
-# Add position-independent code flag for module compilation
+# Set position independent code for all modules
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-# Build each module as a shared library
-foreach(MODULE ${MODULE_SOURCES})
-    get_filename_component(MODULE_NAME ${MODULE} NAME_WE)
-    add_library(${MODULE_NAME} SHARED ${MODULE})
+# Build each module
+foreach(MODULE_SOURCE ${MODULE_SOURCES})
+    get_filename_component(MODULE_NAME ${MODULE_SOURCE} NAME_WE)
+    add_library(${MODULE_NAME} SHARED ${MODULE_SOURCE})
     target_include_directories(${MODULE_NAME} PRIVATE
         ${CMAKE_SOURCE_DIR}/src
         ${CMAKE_SOURCE_DIR}/libio/src
@@ -119,16 +124,30 @@ foreach(MODULE ${MODULE_SOURCES})
     target_link_libraries(${MODULE_NAME} PRIVATE
         io
         ltdl
+        ircd_shared
     )
-    
-    # Apply -fPIC flag to all modules since they're all shared libraries
-    target_compile_options(${MODULE_NAME} PRIVATE -fPIC)
-    
     set_target_properties(${MODULE_NAME} PROPERTIES
         PREFIX ""
-        OUTPUT_NAME ${MODULE_NAME}
+        OUTPUT_NAME "${MODULE_NAME}"
     )
     install(TARGETS ${MODULE_NAME}
-        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/ircd-hybrid/modules
+        LIBRARY DESTINATION modules
+    )
+    set_target_properties(${MODULE_NAME} PROPERTIES
+        POSITION_INDEPENDENT_CODE ON
+        C_VISIBILITY_PRESET default
+    )
+    target_compile_options(${MODULE_NAME} PRIVATE
+        -fPIC
+        -fvisibility=default
+    )
+    target_link_libraries(${MODULE_NAME} PRIVATE
+        ircd_shared
+        io
+        ltdl
+        ${OPENSSL_LIBRARIES}
+        crypt
+        ${LIBXML2_LIBRARIES}
+        ${JANSSON_LIBRARIES}
     )
 endforeach() 

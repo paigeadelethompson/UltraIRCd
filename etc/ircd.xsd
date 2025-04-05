@@ -189,10 +189,21 @@
           <xs:annotation>
             <xs:documentation>
               Specifies the base path for loading modules.
+              
+              This is the root directory where the server will look for modules.
+              All module paths specified in loadmodule elements are relative to this path.
+              If not specified, the server will use a default path.
             </xs:documentation>
           </xs:annotation>
           <xs:complexType>
-            <xs:attribute name="path" type="xs:string" use="required"/>
+            <xs:attribute name="path" type="xs:string" use="required">
+              <xs:annotation>
+                <xs:documentation>
+                  The absolute or relative path to the modules directory.
+                  Example: "/usr/local/ircd/modules" or "modules"
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
           </xs:complexType>
         </xs:element>
 
@@ -200,12 +211,41 @@
           <xs:annotation>
             <xs:documentation>
               Specifies a module to load at startup.
+              
+              Modules can be loaded with different attributes to control their behavior:
+              - resident: Keeps the module loaded even if it's not actively used
+              - core: Marks the module as a core module that cannot be unloaded
+              
+              The path is relative to the module_base_path if specified, otherwise absolute.
             </xs:documentation>
           </xs:annotation>
           <xs:complexType>
-            <xs:attribute name="path" type="xs:string" use="required"/>
-            <xs:attribute name="resident" type="yesNo" default="no"/>
-            <xs:attribute name="core" type="yesNo" default="no"/>
+            <xs:attribute name="path" type="xs:string" use="required">
+              <xs:annotation>
+                <xs:documentation>
+                  Path to the module file, relative to module_base_path or absolute.
+                  Example: "core/m_commands.so" or "/usr/local/ircd/modules/core/m_commands.so"
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="resident" type="yesNo" default="no">
+              <xs:annotation>
+                <xs:documentation>
+                  If set to "yes", the module will stay loaded even when not in use.
+                  Useful for frequently used modules to avoid reload overhead.
+                  Default is "no".
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="core" type="yesNo" default="no">
+              <xs:annotation>
+                <xs:documentation>
+                  If set to "yes", marks the module as a core module that cannot be unloaded.
+                  Core modules are essential for server operation.
+                  Default is "no".
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
           </xs:complexType>
         </xs:element>
 
@@ -214,16 +254,74 @@
           <xs:annotation>
             <xs:documentation>
               Contains basic server information such as name, description, and network details.
+              
+              This section is required and defines the core identity and behavior of the server.
+              It includes settings for server name, network configuration, client limits,
+              and TLS/SSL settings for secure connections.
             </xs:documentation>
           </xs:annotation>
           <xs:complexType>
-            <xs:attribute name="name" type="xs:string" use="required"/>
-            <xs:attribute name="sid" type="sidType" use="required"/>
-            <xs:attribute name="description" type="xs:string" use="required"/>
-            <xs:attribute name="network_name" type="xs:string" use="required"/>
-            <xs:attribute name="network_description" type="xs:string" use="required"/>
-            <xs:attribute name="default_max_clients" type="xs:positiveInteger" use="required"/>
+            <xs:attribute name="name" type="xs:string" use="required">
+              <xs:annotation>
+                <xs:documentation>
+                  The server's name as it appears to users and other servers.
+                  Must be unique across the network.
+                  Example: "irc.example.com"
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="sid" type="sidType" use="required">
+              <xs:annotation>
+                <xs:documentation>
+                  The server's unique ID in the format [0-9][A-Z0-9][A-Z0-9].
+                  Must be unique across the network.
+                  Example: "001", "02A", "10B"
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="description" type="xs:string" use="required">
+              <xs:annotation>
+                <xs:documentation>
+                  A descriptive text about the server.
+                  Shown in server information queries.
+                  Example: "Main IRC server for Example Network"
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="network_name" type="xs:string" use="required">
+              <xs:annotation>
+                <xs:documentation>
+                  The name of the IRC network this server belongs to.
+                  Example: "ExampleNet"
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="network_description" type="xs:string" use="required">
+              <xs:annotation>
+                <xs:documentation>
+                  A description of the IRC network.
+                  Shown in network information queries.
+                  Example: "A friendly IRC network for example.com users"
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="default_max_clients" type="xs:positiveInteger" use="required">
+              <xs:annotation>
+                <xs:documentation>
+                  The default maximum number of clients allowed to connect.
+                  Can be overridden by class settings.
+                  Example: "1000"
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
             <xs:attribute name="max_nick_length">
+              <xs:annotation>
+                <xs:documentation>
+                  Maximum length allowed for nicknames.
+                  Must be between 9 and 30 characters.
+                  Default is typically 30.
+                </xs:documentation>
+              </xs:annotation>
               <xs:simpleType>
                 <xs:restriction base="xs:integer">
                   <xs:minInclusive value="9"/>
@@ -232,6 +330,13 @@
               </xs:simpleType>
             </xs:attribute>
             <xs:attribute name="max_topic_length">
+              <xs:annotation>
+                <xs:documentation>
+                  Maximum length allowed for channel topics.
+                  Must be between 1 and 300 characters.
+                  Default is typically 300.
+                </xs:documentation>
+              </xs:annotation>
               <xs:simpleType>
                 <xs:restriction base="xs:integer">
                   <xs:minInclusive value="1"/>
@@ -239,15 +344,84 @@
                 </xs:restriction>
               </xs:simpleType>
             </xs:attribute>
-            <xs:attribute name="hub" type="yesNo" default="no"/>
-            <xs:attribute name="motd_file" type="xs:string" use="required"/>
-            <xs:attribute name="rsa_private_key_file" type="xs:string"/>
-            <xs:attribute name="tls_certificate_file" type="xs:string"/>
-            <xs:attribute name="tls_dh_param_file" type="xs:string"/>
-            <xs:attribute name="tls_supported_groups" type="xs:string"/>
-            <xs:attribute name="tls_cipher_list" type="xs:string"/>
-            <xs:attribute name="tls_cipher_suites" type="xs:string"/>
-            <xs:attribute name="tls_message_digest_algorithm" type="xs:string"/>
+            <xs:attribute name="hub" type="yesNo" default="no">
+              <xs:annotation>
+                <xs:documentation>
+                  If set to "yes", marks this server as a hub server.
+                  Hub servers can connect to multiple other servers and act as routing centers.
+                  Default is "no".
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="motd_file" type="xs:string" use="required">
+              <xs:annotation>
+                <xs:documentation>
+                  Path to the Message of the Day file.
+                  Shown to users when they connect.
+                  Example: "/etc/ircd/motd.txt"
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="rsa_private_key_file" type="xs:string">
+              <xs:annotation>
+                <xs:documentation>
+                  Path to the RSA private key file for server-to-server authentication.
+                  Required for secure server links.
+                  Example: "/etc/ircd/private.key"
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="tls_certificate_file" type="xs:string">
+              <xs:annotation>
+                <xs:documentation>
+                  Path to the TLS/SSL certificate file.
+                  Required for secure client and server connections.
+                  Example: "/etc/ircd/cert.pem"
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="tls_dh_param_file" type="xs:string">
+              <xs:annotation>
+                <xs:documentation>
+                  Path to the Diffie-Hellman parameters file.
+                  Used for TLS key exchange.
+                  Example: "/etc/ircd/dh.pem"
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="tls_supported_groups" type="xs:string">
+              <xs:annotation>
+                <xs:documentation>
+                  List of supported TLS groups for key exchange.
+                  Example: "X25519:P-256:P-384"
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="tls_cipher_list" type="xs:string">
+              <xs:annotation>
+                <xs:documentation>
+                  Custom TLS cipher list for this connection.
+                  Example: "HIGH:!aNULL:!MD5:!RC4"
+                  Overrides global TLS cipher settings.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="tls_cipher_suites" type="xs:string">
+              <xs:annotation>
+                <xs:documentation>
+                  List of allowed TLS 1.3 cipher suites.
+                  Example: "TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256"
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="tls_message_digest_algorithm" type="xs:string">
+              <xs:annotation>
+                <xs:documentation>
+                  Message digest algorithm for TLS.
+                  Example: "sha256"
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
           </xs:complexType>
         </xs:element>
 
@@ -256,12 +430,36 @@
           <xs:annotation>
             <xs:documentation>
               Contains administrator contact information.
+              
+              This section provides contact details for the server administrators.
+              The information is used in server information queries and error messages.
             </xs:documentation>
           </xs:annotation>
           <xs:complexType>
-            <xs:attribute name="name" type="xs:string" use="required"/>
-            <xs:attribute name="description" type="xs:string" use="required"/>
-            <xs:attribute name="email" type="xs:string" use="required"/>
+            <xs:attribute name="name" type="xs:string" use="required">
+              <xs:annotation>
+                <xs:documentation>
+                  The name of the administrator or administrative team.
+                  Example: "IRC Network Administrators"
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="description" type="xs:string" use="required">
+              <xs:annotation>
+                <xs:documentation>
+                  A description of the administrator's role or responsibilities.
+                  Example: "Main network administrators for ExampleNet"
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="email" type="xs:string" use="required">
+              <xs:annotation>
+                <xs:documentation>
+                  Contact email address for the administrators.
+                  Example: "admin@example.com"
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
           </xs:complexType>
         </xs:element>
 
@@ -271,21 +469,132 @@
             <xs:documentation>
               Defines connection classes for clients and servers.
               Classes control limits such as maximum connections, send/recv queue sizes, etc.
+              
+              Classes are used to group similar types of connections and apply consistent
+              limits and settings to them. Different classes can be used for clients,
+              servers, or other types of connections.
+              
+              Each class can have its own settings for:
+              - Connection limits (max_number, max_perip_local, max_perip_global)
+              - Queue sizes (sendq, recvq)
+              - Channel limits (max_channels)
+              - Timing settings (ping_time, connectfreq, min_idle, max_idle)
+              - Network settings (cidr_bitlen_ipv4, cidr_bitlen_ipv6)
             </xs:documentation>
           </xs:annotation>
           <xs:complexType>
-            <xs:attribute name="name" type="xs:string" use="required"/>
-            <xs:attribute name="ping_time" type="timeSpec" use="required"/>
-            <xs:attribute name="connectfreq" type="timeSpec" use="required"/>
-            <xs:attribute name="max_number" type="xs:nonNegativeInteger" use="required"/>
-            <xs:attribute name="sendq" type="sizeSpec" use="required"/>
-            <xs:attribute name="recvq" type="sizeSpec" use="required"/>
-            <xs:attribute name="max_channels" type="xs:nonNegativeInteger" use="required"/>
-            <xs:attribute name="max_perip_local" type="xs:nonNegativeInteger" use="required"/>
-            <xs:attribute name="max_perip_global" type="xs:nonNegativeInteger" use="required"/>
-            <xs:attribute name="min_idle" type="timeSpec"/>
-            <xs:attribute name="max_idle" type="timeSpec"/>
+            <xs:attribute name="name" type="xs:string" use="required">
+              <xs:annotation>
+                <xs:documentation>
+                  The name of this connection class.
+                  Example: "clients", "servers", "opers"
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="ping_time" type="timeSpec" use="required">
+              <xs:annotation>
+                <xs:documentation>
+                  Frequency of pings to check connection status.
+                  Format: number followed by unit (s=seconds, m=minutes, h=hours).
+                  Example: "90s" for 90 seconds, "2m" for 2 minutes.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="connectfreq" type="timeSpec" use="required">
+              <xs:annotation>
+                <xs:documentation>
+                  Minimum time between connection attempts from the same IP.
+                  Format: number followed by unit (s=seconds, m=minutes, h=hours).
+                  Example: "10s" for 10 seconds, "1m" for 1 minute.
+                  This helps prevent connection flooding and abuse.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="max_number" type="xs:nonNegativeInteger" use="required">
+              <xs:annotation>
+                <xs:documentation>
+                  Maximum number of connections allowed in this class.
+                  Example: "1000" for a class that allows up to 1000 connections.
+                  This helps control server load and resource usage.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="sendq" type="sizeSpec" use="required">
+              <xs:annotation>
+                <xs:documentation>
+                  Maximum size of the send queue for connections in this class.
+                  Format: number followed by unit (kb=kilobytes, mb=megabytes).
+                  Example: "1mb" for 1 megabyte, "2mb" for 2 megabytes.
+                  This limits memory usage for queued outgoing messages.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="recvq" type="sizeSpec" use="required">
+              <xs:annotation>
+                <xs:documentation>
+                  Maximum size of the receive queue for connections in this class.
+                  Format: number followed by unit (kb=kilobytes, mb=megabytes).
+                  Example: "1mb" for 1 megabyte, "2mb" for 2 megabytes.
+                  This limits memory usage for queued incoming messages.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="max_channels" type="xs:nonNegativeInteger" use="required">
+              <xs:annotation>
+                <xs:documentation>
+                  Maximum number of channels a client in this class can join.
+                  Example: "20" for a class that allows joining up to 20 channels.
+                  This helps prevent channel flooding and resource abuse.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="max_perip_local" type="xs:nonNegativeInteger" use="required">
+              <xs:annotation>
+                <xs:documentation>
+                  Maximum number of connections allowed from the same IP on this server.
+                  Example: "3" for a class that allows up to 3 connections per IP locally.
+                  This helps prevent connection flooding from a single IP on this server.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="max_perip_global" type="xs:nonNegativeInteger" use="required">
+              <xs:annotation>
+                <xs:documentation>
+                  Maximum number of connections allowed from the same IP across the network.
+                  Example: "5" for a class that allows up to 5 connections per IP globally.
+                  This helps prevent connection flooding from a single IP across all servers.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="min_idle" type="timeSpec">
+              <xs:annotation>
+                <xs:documentation>
+                  Minimum idle time before a connection is considered idle.
+                  Format: number followed by unit (s=seconds, m=minutes, h=hours).
+                  Example: "10m" for 10 minutes, "30m" for 30 minutes.
+                  This helps prevent premature disconnection of active users.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="max_idle" type="timeSpec">
+              <xs:annotation>
+                <xs:documentation>
+                  Maximum idle time before a connection is disconnected.
+                  Format: number followed by unit (s=seconds, m=minutes, h=hours).
+                  Example: "2h" for 2 hours, "1d" for 1 day.
+                  This helps clean up inactive connections and free resources.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
             <xs:attribute name="cidr_bitlen_ipv4">
+              <xs:annotation>
+                <xs:documentation>
+                  CIDR bit length for IPv4 connections (0-32).
+                  Used for connection limiting based on network ranges.
+                  Example: "24" for a /24 network (256 addresses).
+                  This helps control connection limits at the network level.
+                </xs:documentation>
+              </xs:annotation>
               <xs:simpleType>
                 <xs:restriction base="xs:integer">
                   <xs:minInclusive value="0"/>
@@ -294,6 +603,14 @@
               </xs:simpleType>
             </xs:attribute>
             <xs:attribute name="cidr_bitlen_ipv6">
+              <xs:annotation>
+                <xs:documentation>
+                  CIDR bit length for IPv6 connections (0-128).
+                  Used for connection limiting based on network ranges.
+                  Example: "64" for a /64 network.
+                  This helps control connection limits at the network level.
+                </xs:documentation>
+              </xs:annotation>
               <xs:simpleType>
                 <xs:restriction base="xs:integer">
                   <xs:minInclusive value="0"/>
@@ -312,27 +629,146 @@
           <xs:annotation>
             <xs:documentation>
               Contains channel-related configuration options.
+              
+              This section defines global limits and settings that apply to all channels
+              on the server. It controls various aspects like ban lists, invites,
+              channel creation, and special features.
             </xs:documentation>
           </xs:annotation>
           <xs:complexType>
-            <xs:attribute name="max_bans" type="xs:positiveInteger" use="required"/>
-            <xs:attribute name="max_bans_large" type="xs:positiveInteger" use="required"/>
-            <xs:attribute name="max_invites" type="xs:positiveInteger" use="required"/>
-            <xs:attribute name="max_kick_length" type="xs:positiveInteger" use="required"/>
-            <xs:attribute name="max_channels" type="xs:positiveInteger" use="required"/>
-            <xs:attribute name="invite_client_count" type="xs:positiveInteger" use="required"/>
-            <xs:attribute name="invite_client_time" type="timeSpec" use="required"/>
-            <xs:attribute name="invite_delay_channel" type="timeSpec" use="required"/>
-            <xs:attribute name="invite_expire_time" type="timeSpec" use="required"/>
-            <xs:attribute name="knock_client_count" type="xs:positiveInteger" use="required"/>
+            <xs:attribute name="max_bans" type="xs:positiveInteger" use="required">
+              <xs:annotation>
+                <xs:documentation>
+                  Maximum number of bans allowed in a regular channel.
+                  Example: "100" for up to 100 bans per channel.
+                  This helps prevent ban list abuse.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="max_bans_large" type="xs:positiveInteger" use="required">
+              <xs:annotation>
+                <xs:documentation>
+                  Maximum number of bans allowed in a large channel.
+                  Example: "500" for up to 500 bans in busy channels.
+                  Large channels may need more bans for effective moderation.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="max_invites" type="xs:positiveInteger" use="required">
+              <xs:annotation>
+                <xs:documentation>
+                  Maximum number of stored invites per channel.
+                  Example: "20" for up to 20 pending invites.
+                  Controls invite spam and resource usage.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="max_kick_length" type="xs:positiveInteger" use="required">
+              <xs:annotation>
+                <xs:documentation>
+                  Maximum length of kick messages in characters.
+                  Example: "255" for up to 255 characters.
+                  Prevents abuse of kick message length.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="max_channels" type="xs:positiveInteger" use="required">
+              <xs:annotation>
+                <xs:documentation>
+                  Global maximum number of channels allowed on the server.
+                  Example: "10000" for up to 10,000 channels.
+                  Prevents excessive channel creation.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="invite_client_count" type="xs:positiveInteger" use="required">
+              <xs:annotation>
+                <xs:documentation>
+                  Number of invites a client can send in invite_client_time.
+                  Example: "10" for 10 invites per time period.
+                  Part of invite flood control.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="invite_client_time" type="timeSpec" use="required">
+              <xs:annotation>
+                <xs:documentation>
+                  Time period for invite_client_count.
+                  Format: number followed by unit (s=seconds, m=minutes).
+                  Example: "5m" for 5 minutes.
+                  Works with invite_client_count for flood control.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="invite_delay_channel" type="timeSpec" use="required">
+              <xs:annotation>
+                <xs:documentation>
+                  Minimum time between invites to the same channel.
+                  Format: number followed by unit (s=seconds, m=minutes).
+                  Example: "1m" for 1 minute delay.
+                  Prevents invite flooding to a channel.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="invite_expire_time" type="timeSpec" use="required">
+              <xs:annotation>
+                <xs:documentation>
+                  Time after which unused invites expire.
+                  Format: number followed by unit (s=seconds, m=minutes, h=hours).
+                  Example: "1h" for 1 hour expiry.
+                  Helps clean up stale invites.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="knock_client_count" type="xs:positiveInteger" use="required">
+              <xs:annotation>
+                <xs:documentation>
+                  Number of knocks a client can send in knock_client_time.
+                  Example: "5" for 5 knocks per time period.
+                  Part of knock flood control.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
             <xs:attribute name="knock_client_time" type="timeSpec" use="required"/>
             <xs:attribute name="knock_delay_channel" type="timeSpec" use="required"/>
             <xs:attribute name="default_join_flood_count" type="xs:positiveInteger" use="required"/>
             <xs:attribute name="default_join_flood_time" type="timeSpec" use="required"/>
-            <xs:attribute name="disable_fake_channels" type="yesNo" default="no"/>
-            <xs:attribute name="enable_extbans" type="yesNo" default="no"/>
-            <xs:attribute name="enable_owner" type="yesNo" default="no"/>
-            <xs:attribute name="enable_admin" type="yesNo" default="no"/>
+            <xs:attribute name="disable_fake_channels" type="yesNo" default="no">
+              <xs:annotation>
+                <xs:documentation>
+                  Whether to disable creation of channels with non-standard characters.
+                  Default is "no". Set to "yes" to only allow standard channel names.
+                  Helps prevent confusing or malicious channel names.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="enable_extbans" type="yesNo" default="no">
+              <xs:annotation>
+                <xs:documentation>
+                  Whether to enable extended ban types.
+                  Default is "no". Set to "yes" to allow advanced ban matching.
+                  Provides more flexible channel ban options.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="enable_owner" type="yesNo" default="no">
+              <xs:annotation>
+                <xs:documentation>
+                  Whether to enable channel owner status (~).
+                  Default is "no". Set to "yes" to allow channel owners.
+                  Adds an additional level of channel hierarchy.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="enable_admin" type="yesNo" default="no">
+              <xs:annotation>
+                <xs:documentation>
+                  Whether to enable channel admin status (&).
+                  Default is "no". Set to "yes" to allow channel admins.
+                  Adds an additional level of channel hierarchy.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
           </xs:complexType>
         </xs:element>
 
@@ -341,18 +777,95 @@
           <xs:annotation>
             <xs:documentation>
               Controls server hiding and link flattening options.
+              
+              This section configures how server information is presented to users
+              and how server links are displayed. It provides options for hiding
+              server details and controlling information visibility.
             </xs:documentation>
           </xs:annotation>
           <xs:complexType>
-            <xs:attribute name="flatten_links" type="yesNo" default="no"/>
-            <xs:attribute name="flatten_links_delay" type="timeSpec"/>
-            <xs:attribute name="flatten_links_file" type="xs:string"/>
-            <xs:attribute name="disable_remote_commands" type="yesNo" default="no"/>
-            <xs:attribute name="hide_servers" type="yesNo" default="no"/>
-            <xs:attribute name="hide_services" type="yesNo" default="no"/>
-            <xs:attribute name="hidden" type="yesNo" default="no"/>
-            <xs:attribute name="hidden_name" type="xs:string"/>
-            <xs:attribute name="hide_server_ips" type="yesNo" default="no"/>
+            <xs:attribute name="flatten_links" type="yesNo" default="no">
+              <xs:annotation>
+                <xs:documentation>
+                  Whether to flatten the server links tree in /links output.
+                  Default is "no". Set to "yes" to hide the actual network topology.
+                  Makes all servers appear to be directly connected to the local server.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="flatten_links_delay" type="timeSpec">
+              <xs:annotation>
+                <xs:documentation>
+                  Delay before showing flattened links to users after connection.
+                  Format: number followed by unit (s=seconds, m=minutes).
+                  Example: "60s" for 60 seconds delay.
+                  Helps prevent timing-based topology discovery.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="flatten_links_file" type="xs:string">
+              <xs:annotation>
+                <xs:documentation>
+                  File containing the flattened links display configuration.
+                  Example: "/etc/ircd/links.txt"
+                  Used to customize how flattened links are displayed.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="disable_remote_commands" type="yesNo" default="no">
+              <xs:annotation>
+                <xs:documentation>
+                  Whether to disable remote server commands for regular users.
+                  Default is "no". Set to "yes" to restrict remote server queries.
+                  Helps prevent information gathering about remote servers.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="hide_servers" type="yesNo" default="no">
+              <xs:annotation>
+                <xs:documentation>
+                  Whether to hide server names from regular users.
+                  Default is "no". Set to "yes" to show only the local server.
+                  Users will only see their connected server name.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="hide_services" type="yesNo" default="no">
+              <xs:annotation>
+                <xs:documentation>
+                  Whether to hide services servers from regular users.
+                  Default is "no". Set to "yes" to hide services server names.
+                  Makes services appear to be on the local server.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="hidden" type="yesNo" default="no">
+              <xs:annotation>
+                <xs:documentation>
+                  Whether this server should be hidden from /links output.
+                  Default is "no". Set to "yes" to hide this server.
+                  Server will not appear in network topology queries.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="hidden_name" type="xs:string">
+              <xs:annotation>
+                <xs:documentation>
+                  Alternate name to show for this server when hidden.
+                  Example: "*.hidden.net"
+                  Used when server hiding is enabled to mask real hostname.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="hide_server_ips" type="yesNo" default="no">
+              <xs:annotation>
+                <xs:documentation>
+                  Whether to hide server IP addresses from regular users.
+                  Default is "no". Set to "yes" to hide IP addresses.
+                  Helps protect server infrastructure information.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
           </xs:complexType>
         </xs:element>
 
@@ -361,6 +874,10 @@
           <xs:annotation>
             <xs:documentation>
               Configures logging options for the server.
+              
+              This section defines what events should be logged, where they should
+              be logged to, and at what severity level. Multiple log sections can
+              be defined to send different types of events to different files.
             </xs:documentation>
           </xs:annotation>
           <xs:complexType>
@@ -369,17 +886,60 @@
                 <xs:annotation>
                   <xs:documentation>
                     Defines a log file with its type and severity level.
+                    
+                    Each file element specifies where to log certain types of events
+                    and what severity level of events should be logged. The file can
+                    be a path or "stdout" for console output.
                   </xs:documentation>
                 </xs:annotation>
                 <xs:complexType>
-                  <xs:attribute name="name" type="logFileName" use="required"/>
-                  <xs:attribute name="type" type="logType" use="required"/>
-                  <xs:attribute name="severity" type="logSeverity" use="required"/>
-                  <xs:attribute name="size" type="sizeSpec"/>
+                  <xs:attribute name="name" type="logFileName" use="required">
+                    <xs:annotation>
+                      <xs:documentation>
+                        Path to the log file or "stdout" for console output.
+                        Example: "/var/log/ircd/user.log" or "stdout"
+                      </xs:documentation>
+                    </xs:annotation>
+                  </xs:attribute>
+                  <xs:attribute name="type" type="logType" use="required">
+                    <xs:annotation>
+                      <xs:documentation>
+                        Type of events to log to this file.
+                        Available types: user, operator, xline, resv, dline, kline, kill, debug
+                        Example: "user" for user-related events
+                      </xs:documentation>
+                    </xs:annotation>
+                  </xs:attribute>
+                  <xs:attribute name="severity" type="logSeverity" use="required">
+                    <xs:annotation>
+                      <xs:documentation>
+                        Minimum severity level of events to log.
+                        Available levels: debug, info, notice, warn, error, critical
+                        Example: "warn" to log warnings and more severe events
+                      </xs:documentation>
+                    </xs:annotation>
+                  </xs:attribute>
+                  <xs:attribute name="size" type="sizeSpec">
+                    <xs:annotation>
+                      <xs:documentation>
+                        Maximum size of the log file before rotation.
+                        Format: number followed by unit (kb=kilobytes, mb=megabytes).
+                        Example: "10mb" for 10 megabyte maximum size
+                      </xs:documentation>
+                    </xs:annotation>
+                  </xs:attribute>
                 </xs:complexType>
               </xs:element>
             </xs:sequence>
-            <xs:attribute name="use_logging" type="yesNo" use="required"/>
+            <xs:attribute name="use_logging" type="yesNo" use="required">
+              <xs:annotation>
+                <xs:documentation>
+                  Whether to enable logging for this log section.
+                  Set to "yes" to enable logging, "no" to disable.
+                  Must be "yes" for any logging to occur.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
           </xs:complexType>
         </xs:element>
 
@@ -388,19 +948,106 @@
           <xs:annotation>
             <xs:documentation>
               Defines IRC operators and their privileges.
+              
+              This section configures operator accounts that have special privileges
+              on the server. Each operator can have different flags that control
+              what actions they can perform, such as killing users, connecting
+              servers, or managing network bans.
             </xs:documentation>
           </xs:annotation>
           <xs:complexType>
-            <xs:attribute name="name" type="xs:string" use="required"/>
-            <xs:attribute name="user" type="xs:string" use="required"/>
-            <xs:attribute name="password" type="xs:string" use="required"/>
-            <xs:attribute name="class" type="xs:string" use="required"/>
-            <xs:attribute name="whois" type="xs:string"/>
-            <xs:attribute name="umodes" type="xs:string"/>
-            <xs:attribute name="encrypted" type="yesNo" default="no"/>
-            <xs:attribute name="tls_certificate_fingerprint" type="xs:string"/>
-            <xs:attribute name="tls_connection_required" type="yesNo" default="no"/>
-            <xs:attribute name="flags" type="operFlags" use="required"/>
+            <xs:attribute name="name" type="xs:string" use="required">
+              <xs:annotation>
+                <xs:documentation>
+                  The name of this operator block.
+                  Example: "netadmin", "serverop"
+                  Used to identify different operator types.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="user" type="xs:string" use="required">
+              <xs:annotation>
+                <xs:documentation>
+                  The username or mask that can use this operator block.
+                  Example: "admin@example.com", "*@trusted.host"
+                  Can include wildcards for host-based matching.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="password" type="xs:string" use="required">
+              <xs:annotation>
+                <xs:documentation>
+                  The password required to gain operator status.
+                  Can be plaintext or encrypted (see encrypted attribute).
+                  Should be a strong password to prevent unauthorized access.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="class" type="xs:string" use="required">
+              <xs:annotation>
+                <xs:documentation>
+                  The connection class for this operator.
+                  Must match a defined class name.
+                  Example: "opers" for the operators connection class.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="whois" type="xs:string">
+              <xs:annotation>
+                <xs:documentation>
+                  Custom text to show in WHOIS for this operator.
+                  Example: "Network Administrator"
+                  Appears in the operator's WHOIS information.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="umodes" type="xs:string">
+              <xs:annotation>
+                <xs:documentation>
+                  User modes to set when operator status is gained.
+                  Example: "+wisg" for wallops, invisible, server notices, debug
+                  These modes are automatically set on /OPER.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="encrypted" type="yesNo" default="no">
+              <xs:annotation>
+                <xs:documentation>
+                  Whether the password is encrypted.
+                  Default is "no". Set to "yes" if using an encrypted password.
+                  Recommended to use encrypted passwords for security.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="tls_certificate_fingerprint" type="xs:string">
+              <xs:annotation>
+                <xs:documentation>
+                  TLS certificate fingerprint required for this operator.
+                  Example: "SHA256:..." (full SHA256 fingerprint)
+                  Adds certificate-based authentication requirement.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="tls_connection_required" type="yesNo" default="no">
+              <xs:annotation>
+                <xs:documentation>
+                  Whether a TLS connection is required for this operator.
+                  Default is "no". Set to "yes" to require secure connection.
+                  Recommended for security of operator credentials.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="flags" type="operFlags" use="required">
+              <xs:annotation>
+                <xs:documentation>
+                  Operator privilege flags.
+                  Available flags: kill(:remote), connect(:remote), die, globops,
+                  module, rehash(:remote), admin, locops, remoteban, set, opme,
+                  nick:resv, join:resv, resv, unresv, close, message:mass
+                  Example: "kill,connect,globops,admin"
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
           </xs:complexType>
         </xs:element>
 
@@ -409,13 +1056,51 @@
           <xs:annotation>
             <xs:documentation>
               Defines ports and addresses the server should listen on.
+              
+              This section configures which network interfaces and ports the server
+              should accept connections on. Multiple listen blocks can be defined
+              to handle different types of connections (client, server) or to use
+              different settings (TLS, IPv4/IPv6).
             </xs:documentation>
           </xs:annotation>
           <xs:complexType>
-            <xs:attribute name="port" type="xs:string" use="required"/>
-            <xs:attribute name="ip" type="xs:string"/>
-            <xs:attribute name="host" type="xs:string"/>
-            <xs:attribute name="flags" type="listenFlags" use="required"/>
+            <xs:attribute name="port" type="xs:string" use="required">
+              <xs:annotation>
+                <xs:documentation>
+                  Port number or range to listen on.
+                  Examples: "6667" for standard IRC, "6697" for TLS
+                  Can be a range like "6660-6669" for multiple ports.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="ip" type="xs:string">
+              <xs:annotation>
+                <xs:documentation>
+                  IP address to bind to.
+                  Example: "192.168.1.1" for IPv4, "::1" for IPv6
+                  If not specified, listens on all available addresses.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="host" type="xs:string">
+              <xs:annotation>
+                <xs:documentation>
+                  Hostname to bind to instead of IP address.
+                  Example: "irc.example.com"
+                  Alternative to using IP address for binding.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="flags" type="listenFlags" use="required">
+              <xs:annotation>
+                <xs:documentation>
+                  Flags controlling the behavior of this listen block.
+                  Available flags: tls, hidden, server, client, defer
+                  Example: "tls,client" for TLS client connections
+                  Multiple flags can be combined with commas.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
           </xs:complexType>
         </xs:element>
 
@@ -424,17 +1109,88 @@
           <xs:annotation>
             <xs:documentation>
               Defines authentication rules for connecting clients.
+              
+              This section configures how clients are authenticated and what
+              privileges or restrictions they have. Multiple auth blocks can
+              be defined to handle different types of clients or to apply
+              different rules based on hostname/IP patterns.
             </xs:documentation>
           </xs:annotation>
           <xs:complexType>
-            <xs:attribute name="user" type="xs:string" use="required"/>
-            <xs:attribute name="password" type="xs:string"/>
-            <xs:attribute name="class" type="xs:string" use="required"/>
-            <xs:attribute name="flags" type="authFlags" use="required"/>
-            <xs:attribute name="spoof" type="xs:string"/>
-            <xs:attribute name="redirserv" type="xs:string"/>
-            <xs:attribute name="redirport" type="xs:positiveInteger"/>
-            <xs:attribute name="encrypted" type="yesNo" default="no"/>
+            <xs:attribute name="user" type="xs:string" use="required">
+              <xs:annotation>
+                <xs:documentation>
+                  Username or mask to match against connecting clients.
+                  Example: "*@*.example.com", "user@192.168.1.*"
+                  Supports wildcards for flexible matching.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="password" type="xs:string">
+              <xs:annotation>
+                <xs:documentation>
+                  Password required for this auth block.
+                  Can be plaintext or encrypted (see encrypted attribute).
+                  Optional unless need_password flag is set.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="class" type="xs:string" use="required">
+              <xs:annotation>
+                <xs:documentation>
+                  The connection class for matching clients.
+                  Must match a defined class name.
+                  Example: "users" for regular client connections.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="flags" type="authFlags" use="required">
+              <xs:annotation>
+                <xs:documentation>
+                  Flags controlling authentication behavior.
+                  Available flags: exceed_limit, kline_exempt, xline_exempt,
+                  need_ident, can_flood, no_tilde, resv_exempt, webirc,
+                  need_password
+                  Example: "need_ident,no_tilde"
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="spoof" type="xs:string">
+              <xs:annotation>
+                <xs:documentation>
+                  Hostname to display instead of real host.
+                  Example: "hidden.example.com"
+                  Used to hide client's real hostname.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="redirserv" type="xs:string">
+              <xs:annotation>
+                <xs:documentation>
+                  Server to redirect matching clients to.
+                  Example: "irc2.example.com"
+                  Used for load balancing or maintenance.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="redirport" type="xs:positiveInteger">
+              <xs:annotation>
+                <xs:documentation>
+                  Port to use when redirecting clients.
+                  Example: "6667"
+                  Used with redirserv for client redirection.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="encrypted" type="yesNo" default="no">
+              <xs:annotation>
+                <xs:documentation>
+                  Whether the password is encrypted.
+                  Default is "no". Set to "yes" if using encrypted password.
+                  Recommended when password is required.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
           </xs:complexType>
         </xs:element>
 
@@ -443,18 +1199,93 @@
           <xs:annotation>
             <xs:documentation>
               Defines server connections for linking to other IRC servers.
+              
+              This section configures server-to-server links, including connection
+              details, authentication, and link behavior. Multiple connect blocks
+              can be defined to link with different servers in the network.
             </xs:documentation>
           </xs:annotation>
           <xs:complexType>
-            <xs:attribute name="name" type="xs:string" use="required"/>
-            <xs:attribute name="host" type="xs:string" use="required"/>
-            <xs:attribute name="timeout" type="timeSpec" use="required"/>
-            <xs:attribute name="bind" type="xs:string"/>
-            <xs:attribute name="send_password" type="xs:string" use="required"/>
-            <xs:attribute name="accept_password" type="xs:string" use="required"/>
-            <xs:attribute name="tls_certificate_fingerprint" type="xs:string"/>
-            <xs:attribute name="port" type="xs:positiveInteger" use="required"/>
+            <xs:attribute name="name" type="xs:string" use="required">
+              <xs:annotation>
+                <xs:documentation>
+                  Name of the remote server to connect to.
+                  Example: "irc2.example.com"
+                  Must match the remote server's configured name.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="host" type="xs:string" use="required">
+              <xs:annotation>
+                <xs:documentation>
+                  Hostname or IP address of the remote server.
+                  Example: "192.168.1.2" or "irc2.example.com"
+                  Used to establish the actual connection.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="timeout" type="timeSpec" use="required">
+              <xs:annotation>
+                <xs:documentation>
+                  Connection timeout period.
+                  Format: number followed by unit (s=seconds, m=minutes).
+                  Example: "30s" for 30 seconds timeout.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="bind" type="xs:string">
+              <xs:annotation>
+                <xs:documentation>
+                  Local IP address to bind outgoing connection to.
+                  Example: "192.168.1.1"
+                  Optional, useful for multi-homed hosts.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="send_password" type="xs:string" use="required">
+              <xs:annotation>
+                <xs:documentation>
+                  Password to send to the remote server.
+                  Can be plaintext or encrypted (see encrypted attribute).
+                  Must match remote server's accept_password.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="accept_password" type="xs:string" use="required">
+              <xs:annotation>
+                <xs:documentation>
+                  Password to expect from the remote server.
+                  Can be plaintext or encrypted (see encrypted attribute).
+                  Must match remote server's send_password.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="tls_certificate_fingerprint" type="xs:string">
+              <xs:annotation>
+                <xs:documentation>
+                  Expected TLS certificate fingerprint of remote server.
+                  Example: "SHA256:..." (full SHA256 fingerprint)
+                  Used for certificate pinning in TLS connections.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="port" type="xs:positiveInteger" use="required">
+              <xs:annotation>
+                <xs:documentation>
+                  Port number on the remote server.
+                  Example: "6667" for standard, "6697" for TLS
+                  Must match remote server's listening port.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
             <xs:attribute name="aftype">
+              <xs:annotation>
+                <xs:documentation>
+                  Address family type for the connection.
+                  Values: "ipv4" or "ipv6"
+                  Specifies which IP version to use.
+                </xs:documentation>
+              </xs:annotation>
               <xs:simpleType>
                 <xs:restriction base="xs:string">
                   <xs:enumeration value="ipv4"/>
@@ -462,12 +1293,60 @@
                 </xs:restriction>
               </xs:simpleType>
             </xs:attribute>
-            <xs:attribute name="tls_cipher_list" type="xs:string"/>
-            <xs:attribute name="flags" type="connectFlags" use="required"/>
-            <xs:attribute name="hub_mask" type="xs:string"/>
-            <xs:attribute name="leaf_mask" type="xs:string"/>
-            <xs:attribute name="class" type="xs:string" use="required"/>
-            <xs:attribute name="encrypted" type="yesNo" default="no"/>
+            <xs:attribute name="tls_cipher_list" type="xs:string">
+              <xs:annotation>
+                <xs:documentation>
+                  Custom TLS cipher list for this connection.
+                  Example: "HIGH:!aNULL:!MD5:!RC4"
+                  Overrides global TLS cipher settings.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="flags" type="connectFlags" use="required">
+              <xs:annotation>
+                <xs:documentation>
+                  Flags controlling connection behavior.
+                  Available flags: autoconn, tls
+                  Example: "autoconn,tls" for automatic TLS connection
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="hub_mask" type="xs:string">
+              <xs:annotation>
+                <xs:documentation>
+                  Server mask for hub connections.
+                  Example: "*.hub.example.com"
+                  Used in hub-and-leaf server configurations.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="leaf_mask" type="xs:string">
+              <xs:annotation>
+                <xs:documentation>
+                  Server mask for leaf connections.
+                  Example: "*.leaf.example.com"
+                  Used in hub-and-leaf server configurations.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="class" type="xs:string" use="required">
+              <xs:annotation>
+                <xs:documentation>
+                  The connection class for this server link.
+                  Must match a defined class name.
+                  Example: "servers" for server connections.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="encrypted" type="yesNo" default="no">
+              <xs:annotation>
+                <xs:documentation>
+                  Whether the passwords are encrypted.
+                  Default is "no". Set to "yes" if using encrypted passwords.
+                  Recommended for security of server links.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
           </xs:complexType>
         </xs:element>
 
@@ -476,11 +1355,31 @@
           <xs:annotation>
             <xs:documentation>
               Defines cluster configurations for server grouping.
+              
+              This section configures how servers are grouped into clusters
+              for sharing certain types of network-wide information like
+              bans, kills, and other administrative actions.
             </xs:documentation>
           </xs:annotation>
           <xs:complexType>
-            <xs:attribute name="name" type="xs:string" use="required"/>
-            <xs:attribute name="type" type="xs:string" use="required"/>
+            <xs:attribute name="name" type="xs:string" use="required">
+              <xs:annotation>
+                <xs:documentation>
+                  Name of the server to share information with.
+                  Example: "irc2.example.com"
+                  Must match a configured server name.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="type" type="xs:string" use="required">
+              <xs:annotation>
+                <xs:documentation>
+                  Type of information to share with this server.
+                  Example: "kline" for sharing K-lines
+                  Available types: kline, dline, xline, resv
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
           </xs:complexType>
         </xs:element>
 

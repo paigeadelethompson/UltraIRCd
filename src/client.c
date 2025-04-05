@@ -57,7 +57,7 @@
 uint64_t UMODE_BOT;
 uint64_t UMODE_DEAF;
 uint64_t UMODE_FARCONNECT;
-uint64_t UMODE_SOFTCALLERID;
+__attribute__((visibility("default"))) uint64_t UMODE_SOFTCALLERID;
 uint64_t UMODE_HIDDEN;
 uint64_t UMODE_EXPIRATION;
 uint64_t UMODE_REGONLY;
@@ -67,7 +67,7 @@ uint64_t UMODE_SECUREONLY;
 uint64_t UMODE_ADMIN;
 uint64_t UMODE_CCONN;
 uint64_t UMODE_EXTERNAL;
-uint64_t UMODE_FLOOD;
+__attribute__((visibility("default"))) uint64_t UMODE_FLOOD;
 uint64_t UMODE_CALLERID;
 uint64_t UMODE_INVISIBLE;
 uint64_t UMODE_REJ;

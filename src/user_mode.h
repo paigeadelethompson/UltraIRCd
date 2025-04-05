@@ -24,6 +24,29 @@
 
 struct Client;
 
+/* External user mode symbols */
+extern uint64_t UMODE_FLOOD;
+extern uint64_t UMODE_SOFTCALLERID;
+extern uint64_t UMODE_HIDDEN;
+extern uint64_t UMODE_EXPIRATION;
+extern uint64_t UMODE_REGONLY;
+extern uint64_t UMODE_SECURE;
+extern uint64_t UMODE_WEBIRC;
+extern uint64_t UMODE_SECUREONLY;
+extern uint64_t UMODE_ADMIN;
+extern uint64_t UMODE_CCONN;
+extern uint64_t UMODE_EXTERNAL;
+extern uint64_t UMODE_CALLERID;
+extern uint64_t UMODE_INVISIBLE;
+extern uint64_t UMODE_REJ;
+extern uint64_t UMODE_SKILL;
+extern uint64_t UMODE_LOCOPS;
+extern uint64_t UMODE_NCHANGE;
+extern uint64_t UMODE_OPER;
+extern uint64_t UMODE_HIDECHANS;
+extern uint64_t UMODE_HIDEIDLE;
+extern uint64_t UMODE_REGISTERED;
+
 typedef enum
 {
   USER_MODE_SUCCESS = 0,
